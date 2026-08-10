@@ -897,7 +897,17 @@ function stView(v){
 function renderStMoi(){
   const sel=document.getElementById('ag-sel');
   const agents=TEAMS[MY_TEAM]?TEAMS[MY_TEAM].agents.filter((a,i,arr)=>arr.findIndex(x=>x.n===a.n)===i):[];
-  if(agents.length>1){sel.style.display='flex';sel.innerHTML=agents.map(a=>'<div class="ag-chip'+(a.n===stAgent?' on':'')+'" onclick="selStAgent(''+a.n+'')">'+a.n.split(' ')[0]+'</div>').join('');}
+  if(agents.length>1){
+    sel.style.display='flex';
+    sel.innerHTML='';
+    agents.forEach(function(a){
+      var chip=document.createElement('div');
+      chip.className='ag-chip'+(a.n===stAgent?' on':'');
+      chip.textContent=a.n.split(' ')[0];
+      chip.onclick=(function(name){return function(){selStAgent(name);};})(a.n);
+      sel.appendChild(chip);
+    });
+  }
   else sel.style.display='none';
   const agent=stAgent||ME,reps=getMonthReps(agent);
   const mn=now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
