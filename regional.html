@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0a">
+<title>Ritmo Regional</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f7f7f5;--w:#fff;--b:#0a0a0a;--g1:#f0f0ee;--g2:#e5e5e2;--g3:#c8c8c4;--g4:#888;--g5:#555;--acc:#E8FF3A;--green:#1a5c38;--gbg:#d4f0e0;--red:#7a1a1a;--rbg:#ffd6d6;--rborder:#ffb3b3;--orange:#92400e;--obg:#fef3c7;--blue:#1e3a8a;--bbg:#dbeafe;--f:'Inter',sans-serif;--r:10px;--rl:14px;--jean:#3b82f6;--romeo:#ec4899;--quentin:#10b981;--cem:#f59e0b}
+html,body{height:100%;background:var(--bg);font-family:var(--f);color:var(--b);overflow:hidden}
+body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
+
+#lock{position:fixed;inset:0;background:var(--b);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+#lock.h{display:none}
+.lock-logo{width:52px;height:52px;background:var(--acc);border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.lock-logo svg{width:28px;height:28px}
+.lock-t{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:4px}
+.lock-s{font-size:13px;color:rgba(255,255,255,.35);margin-bottom:28px}
+.rm-grid{display:flex;flex-direction:column;gap:8px;width:100%;max-width:300px}
+.rm-row{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.rm-row:active{background:rgba(255,255,255,.12)}
+.rm-av{width:40px;height:40px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--b);flex-shrink:0}
+.rm-nm{font-size:14px;font-weight:700;color:#fff}
+.rm-tm{font-size:11px;color:rgba(255,255,255,.35)}
+.pin-wrap{display:none;flex-direction:column;align-items:center;width:100%;max-width:300px}
+.pin-wrap.show{display:flex}
+.pin-back{background:none;border:none;color:rgba(255,255,255,.35);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f);margin-bottom:14px;align-self:flex-start}
+.pin-inp{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;color:#fff;font-size:24px;width:100%;outline:none;font-family:var(--f);text-align:center;letter-spacing:10px;margin-bottom:10px}
+.pin-btn{width:100%;padding:14px;background:var(--acc);color:var(--b);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--f)}
+.pin-err{color:#f87171;font-size:12px;margin-top:6px;display:none}
+
+#app{display:none;flex-direction:column;height:100%}
+#app.v{display:flex}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;background:var(--bg);flex-shrink:0}
+.pg-date{font-size:22px;font-weight:800;letter-spacing:-.6px;line-height:1.1}
+.pg-sub{font-size:12px;color:var(--g4);margin-top:2px}
+.top-right{display:flex;align-items:center;gap:8px}
+.sd{width:7px;height:7px;border-radius:50%;background:var(--g3)}
+.sd.ok{background:#22c55e}.sd.err{background:var(--red)}.sd.ld{background:#fb923c;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.top-av{width:30px;height:30px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--b);cursor:pointer}
+.slide-tabs{display:flex;background:var(--w);border:.5px solid var(--g2);border-radius:30px;padding:4px;margin:0 18px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.slide-tabs::-webkit-scrollbar{display:none}
+.slide-tab{flex-shrink:0;text-align:center;padding:9px 14px;font-size:13px;font-weight:600;color:var(--g4);border-radius:26px;cursor:pointer;transition:all .2s}
+.slide-tab.on{background:var(--b);color:#fff;font-weight:700}
+.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-top:12px}
+.scr{display:none;padding:0 18px 24px}.scr.on{display:block}
+
+.sec-lbl{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px}
+.pill{display:inline-flex;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
+.pill.ok{background:var(--gbg);color:var(--green)}.pill.er{background:var(--rbg);color:var(--red)}.pill.wn{background:var(--obg);color:var(--orange)}.pill.nu{background:var(--g1);color:var(--g4)}.pill.bl{background:var(--bbg);color:var(--blue)}
+.rf{background:var(--g1);border:1px solid var(--g2);border-radius:var(--r);padding:8px 14px;font-size:12px;font-weight:600;color:var(--g5);cursor:pointer;font-family:var(--f);display:inline-flex;align-items:center;gap:6px;margin-bottom:14px}
+
+/* TEAM HEADERS */
+.team-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:var(--rl);margin-bottom:6px}
+.team-hd.jean{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2)}
+.team-hd.romeo{background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.2)}
+.team-hd.quentin{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)}
+.team-hd.cem{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)}
+.team-nm{font-size:13px;font-weight:700}
+.team-sc{font-size:22px;font-weight:800}
+.team-sc.jean{color:var(--jean)}.team-sc.romeo{color:var(--romeo)}.team-sc.quentin{color:var(--quentin)}.team-sc.cem{color:var(--cem)}
+
+/* AGENT CARDS */
+.agc{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);margin-bottom:6px;overflow:hidden}
+.agc.ms{border-color:var(--rborder);background:#fffaf8}
+.agh{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer}
+.aga{width:36px;height:36px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.aga.ms{background:var(--rbg);color:var(--red)}
+.agi{flex:1;min-width:0}
+.agn{font-size:13px;font-weight:700}
+.agm{font-size:11px;color:var(--g4)}
+.ags{font-size:24px;font-weight:800}
+.ags.red{color:var(--red)}.ags.ora{color:#ea580c}.ags.grn{color:var(--green)}
+.agb{padding:0 14px 14px;border-top:1px solid var(--g2);display:none}
+.agb.op{display:block}
+.chev{font-size:14px;color:var(--g3);transition:transform .2s}
+.mgd{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px}
+.mce{background:var(--g1);border-radius:var(--r);padding:7px 9px}
+.mcl{font-size:9px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.mcv{font-size:16px;font-weight:800}
+.mcv.g{color:var(--green)}
+.ni{background:var(--g1);border-radius:var(--r);padding:7px 10px;margin-bottom:5px;font-size:12px;color:var(--g5)}
+.nil{font-size:9px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.rch{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.rc{padding:4px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.rc.ok{background:var(--gbg);color:var(--green)}.rc.ko{background:var(--rbg);color:var(--red)}
+.mj{font-size:12px;color:var(--g4);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--g2)}
+
+/* VENTES */
+.vi{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:11px 13px;margin-bottom:6px}
+.vit{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.vin{font-size:13px;font-weight:700}
+.via{font-size:11px;color:var(--g4);margin-bottom:6px}
+.vig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.vc{background:var(--g1);border-radius:6px;padding:6px 8px}
+.vcl{font-size:9px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.3px}
+.vcv{font-size:13px;font-weight:700}
+.vk{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:12px}
+.vkl{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.vkv{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.vks{font-size:11px;color:var(--g4);margin-top:2px}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.kc{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:12px}
+.kl{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.kv{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1}
+.kv.g{color:var(--green)}.ks{font-size:11px;color:var(--g4);margin-top:2px}
+.filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.fb{padding:6px 13px;border-radius:20px;border:1px solid var(--g2);background:var(--w);font-size:12px;font-weight:700;color:var(--g4);cursor:pointer;font-family:var(--f)}
+.fb.on{background:var(--b);color:#fff;border-color:var(--b)}
+
+/* CLASSEMENT */
+.rk{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);overflow:hidden;margin-bottom:14px}
+.rr{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--g1)}
+.rr:last-child{border-bottom:0}
+.rn{font-size:14px;font-weight:800;color:var(--g3);min-width:18px}
+.rn.gd{color:#b8860b}
+.ra{width:32px;height:32px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.rf2{flex:1;min-width:0}
+.rnm{font-size:13px;font-weight:700}
+.rsb{font-size:11px;color:var(--g4)}
+.rbb{background:var(--g1);border-radius:3px;height:4px;margin-top:4px}
+.rbf{height:100%;border-radius:3px}
+.rs{font-size:20px;font-weight:800}
+.rs.red{color:var(--red)}.rs.ora{color:#ea580c}.rs.grn{color:var(--green)}
+
+/* MUR */
+.mur-item{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:14px;margin-bottom:8px}
+.mur-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mur-av{width:34px;height:34px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.mur-name{font-size:13px;font-weight:700}
+.mur-meta{font-size:11px;color:var(--g4)}
+.mur-score{font-size:22px;font-weight:800}
+.mur-score.red{color:var(--red)}.mur-score.ora{color:#ea580c}.mur-score.grn{color:var(--green)}
+.mur-text{font-size:14px;color:var(--b);line-height:1.5;padding:10px;background:var(--g1);border-radius:var(--r);font-style:italic}
+
+/* CHARTS */
+.chart-card{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:16px;margin-bottom:12px}
+.chart-title{font-size:13px;font-weight:700;margin-bottom:12px}
+.chart-wrap{position:relative;height:200px}
+
+/* STATS INLINE */
+.stat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--g1)}
+.stat-row:last-child{border-bottom:0}
+.stat-label{font-size:13px;font-weight:500;flex:1;color:var(--g5)}
+.stat-bar-bg{flex:0 0 100px;background:var(--g1);border-radius:4px;height:7px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:4px}
+.stat-val{font-size:13px;font-weight:700;flex:0 0 40px;text-align:right}
+
+.empty{text-align:center;padding:40px 0;font-size:13px;font-weight:600;color:var(--g3)}
+.team-chip{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.tc-jean{background:rgba(59,130,246,.15);color:var(--jean)}
+.tc-romeo{background:rgba(236,72,153,.15);color:var(--romeo)}
+.tc-quentin{background:rgba(16,185,129,.15);color:var(--quentin)}
+.tc-cem{background:rgba(245,158,11,.15);color:var(--cem)}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <div class="lock-logo"><svg viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="10" height="10" rx="2" fill="#0a0a0a"/><rect x="16" y="2" width="10" height="10" rx="2" fill="#0a0a0a"/><rect x="2" y="16" width="10" height="10" rx="2" fill="#0a0a0a"/><rect x="16" y="16" width="10" height="10" rx="2" fill="#0a0a0a" opacity=".3"/></svg></div>
+  <div class="lock-t">Ritmo Regional</div>
+  <div class="lock-s">Acces manager regional</div>
+  <div class="rm-grid" id="rm-grid"></div>
+  <div class="pin-wrap" id="pin-wrap">
+    <button class="pin-back" onclick="backSel()">Retour</button>
+    <input class="pin-inp" type="password" id="pin-inp" placeholder="****" maxlength="4" onkeydown="if(event.key==='Enter')chkPin()">
+    <button class="pin-btn" onclick="chkPin()">Acceder</button>
+    <div class="pin-err" id="pin-err">Code incorrect</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div>
+      <div class="pg-date" id="pg-date"></div>
+      <div class="pg-sub" id="pg-sub"></div>
+    </div>
+    <div class="top-right">
+      <div class="sd ld" id="sd"></div>
+      <div class="top-av" id="top-av" onclick="logout()"></div>
+    </div>
+  </div>
+  <div class="slide-tabs">
+    <div class="slide-tab on" id="t-today" onclick="sw('today')">Aujourd hui</div>
+    <div class="slide-tab" id="t-managers" onclick="sw('managers')">Managers</div>
+    <div class="slide-tab" id="t-stats" onclick="sw('stats')">Stats</div>
+    <div class="slide-tab" id="t-ventes" onclick="sw('ventes')">Ventes</div>
+    <div class="slide-tab" id="t-mur" onclick="sw('mur')">Mur</div>
+  </div>
+  <div class="screens">
+
+    <!-- AUJOURD HUI -->
+    <div id="s-today" class="scr on">
+      <button class="rf" onclick="loadData()"><i class="ti ti-refresh" style="font-size:13px"></i> Actualiser</button>
+      <div class="kgrid" id="today-kpi"></div>
+      <div id="teams-today"></div>
+    </div>
+
+    <!-- MANAGERS -->
+    <div id="s-managers" class="scr">
+      <div class="filter-row" id="mgr-filter"></div>
+      <div id="mgr-content"></div>
+    </div>
+
+    <!-- STATS -->
+    <div id="s-stats" class="scr">
+      <div class="chart-card">
+        <div class="chart-title">Routine par equipe - Juillet</div>
+        <div class="chart-wrap"><canvas id="chart-routine"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Top performers - Score mensuel</div>
+        <div class="chart-wrap"><canvas id="chart-top"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Stats cles - Juillet</div>
+        <div class="chart-wrap"><canvas id="chart-stats"></canvas></div>
+      </div>
+      <div class="sec-lbl">Classement global</div>
+      <div class="rk" id="rank-global"></div>
+      <div class="sec-lbl">RDV IH vs OG par equipe</div>
+      <div class="kgrid" id="rdv-stats"></div>
+      <div class="sec-lbl">Follow-up en cours</div>
+      <div class="kgrid" id="fu-stats"></div>
+    </div>
+
+    <!-- VENTES -->
+    <div id="s-ventes" class="scr">
+      <div class="filter-row" id="team-filter-v"></div>
+      <div class="filter-row" id="type-filter">
+        <button class="fb on" onclick="setTypeFilter('all')">Toutes</button>
+        <button class="fb" onclick="setTypeFilter('POS')">POS</button>
+        <button class="fb" onclick="setTypeFilter('TPE')">TPE</button>
+      </div>
+      <div class="kgrid" id="ventes-kpi"></div>
+      <div id="ventes-list"></div>
+    </div>
+
+    <!-- MUR -->
+    <div id="s-mur" class="scr">
+      <div style="font-size:18px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px">Bonnes nouvelles</div>
+      <div style="font-size:13px;color:var(--g4);margin-bottom:14px">Toutes les equipes - ce mois-ci</div>
+      <div id="mur-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- EOD MODAL -->
+<div id="eod-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;overflow-y:auto;padding:20px 16px">
+  <div style="background:var(--w);border-radius:var(--rl);max-width:400px;margin:0 auto;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--g2)">
+      <div id="modal-agent" style="font-size:14px;font-weight:700"></div>
+      <button onclick="closeModal()" style="background:var(--g1);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;color:var(--g4)">x</button>
+    </div>
+    <div id="modal-content" style="padding:16px"></div>
+  </div>
+</div>
+
+<script>
+var REGIONAL_MANAGERS = {
+  baptiste: {name:'Baptiste', initials:'BA', pin:'3001', teams:['jean','romeo','quentin'], label:'Region Marseille'},
+  mohamed:  {name:'Mohamed SATA', initials:'MS', pin:'3002', teams:['cem'], label:'Region Cem'}
+};
+
+var MANAGERS = {
+  jean:    {name:'Jean',    initials:'JE', team:'jean',    label:'Equipe Jean',    color:'jean'},
+  romeo:   {name:'Romeo',  initials:'RO', team:'romeo',   label:'Equipe Romeo',   color:'romeo'},
+  quentin: {name:'Quentin',initials:'QU', team:'quentin', label:'Equipe Quentin', color:'quentin'},
+  cem:     {name:'Cem',    initials:'CE', team:'cem',     label:'Equipe Cem',     color:'cem'}
+};
+
+var TEAMS = {
+  jean:    [{n:'Manon LAURENT',i:'ML'},{n:'Jonathan KHAROUBI',i:'JK'},{n:'Aurelie QUINCHARD',i:'AQ'},{n:'Mathias AZZOPARDI',i:'MA'},{n:'Menelik KETCHAM',i:'MK'}],
+  romeo:   [{n:'Kelly HOCHET',i:'KH'},{n:'Bastien GEIGER',i:'BG'},{n:'Lea RECORDIER',i:'LR'},{n:'Hugo LAUGIER',i:'HL'},{n:'Raphael BOUTEILLE',i:'RB'}],
+  quentin: [{n:'Anisse CAPUTO',i:'AC'},{n:'Ilyas LARABA',i:'IL'},{n:'Adam KANDILL',i:'AK'},{n:'Matis DEROIN',i:'MD'},{n:'Nicolas YAKDI',i:'NY'}],
+  cem:     [{n:'Sam PIOGE',i:'SP'},{n:'Gregory BAICHEV',i:'GB'},{n:'Zoe LE KHAL',i:'ZL'},{n:'William VANDENBUSSCHE',i:'WV'},{n:'Robin HINGRAND',i:'RH'}]
+};
+
+var TEAM_COLORS = {jean:'#3b82f6',romeo:'#ec4899',quentin:'#10b981',cem:'#f59e0b'};
+var ALL_AGENTS = Object.values(TEAMS).flat().filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
+
+var SB='https://twjtdrggjvhvlkhhybgq.supabase.co';
+var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3anRkcmdnanZodmxraGh5YmdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMjAyMjMsImV4cCI6MjA5Njc5NjIyM30.I-E8aPS5VEH02jpu-XyuAaJWis_y7zv7ef3-udoNmOs';
+
+var now=new Date(),ME=null,MY_TEAMS=[],REPORTS=[],PENDING=null;
+var mgrFilter='jean',teamFilterV='all',typeFilter='all';
+var charts={};
+
+function spk(k,v){try{localStorage.setItem(k,v);}catch(e){}document.cookie=k+'='+encodeURIComponent(v)+';path=/;max-age=31536000';}
+function gpk(k){try{var v=localStorage.getItem(k);if(v)return v;}catch(e){}var m=document.cookie.match('(?:^|;)\\s*'+k+'=([^;]*)');return m?decodeURIComponent(m[1]):null;}
+function rpk(k){try{localStorage.removeItem(k);}catch(e){}document.cookie=k+'=;path=/;max-age=0';}
+
+function init(){
+  var saved=gpk('ritmo_rm');
+  if(saved&&REGIONAL_MANAGERS[saved]){ME=saved;MY_TEAMS=REGIONAL_MANAGERS[saved].teams;bootApp();return;}
+  buildSel();
+}
+
+function buildSel(){
+  var g=document.getElementById('rm-grid');g.innerHTML='';
+  Object.keys(REGIONAL_MANAGERS).forEach(function(k){
+    var rm=REGIONAL_MANAGERS[k];
+    var d=document.createElement('div');d.className='rm-row';
+    var av=document.createElement('div');av.className='rm-av';av.textContent=rm.initials;
+    var info=document.createElement('div');
+    var nm=document.createElement('div');nm.className='rm-nm';nm.textContent=rm.name;
+    var tm=document.createElement('div');tm.className='rm-tm';tm.textContent=rm.label;
+    info.appendChild(nm);info.appendChild(tm);d.appendChild(av);d.appendChild(info);
+    d.onclick=(function(key){return function(){showPin(key);};})(k);
+    g.appendChild(d);
+  });
+}
+
+function showPin(key){
+  PENDING=key;
+  document.getElementById('rm-grid').style.display='none';
+  document.getElementById('pin-inp').value='';
+  document.getElementById('pin-err').style.display='none';
+  document.getElementById('pin-wrap').classList.add('show');
+}
+function backSel(){PENDING=null;document.getElementById('pin-wrap').classList.remove('show');document.getElementById('rm-grid').style.display='flex';}
+function chkPin(){
+  var val=document.getElementById('pin-inp').value;
+  if(val===REGIONAL_MANAGERS[PENDING].pin){
+    spk('ritmo_rm',PENDING);ME=PENDING;MY_TEAMS=REGIONAL_MANAGERS[PENDING].teams;
+    document.getElementById('pin-wrap').classList.remove('show');bootApp();
+  } else {document.getElementById('pin-err').style.display='block';document.getElementById('pin-inp').value='';}
+}
+function logout(){if(!confirm('Changer de compte ?'))return;rpk('ritmo_rm');location.reload();}
+
+function bootApp(){
+  document.getElementById('lock').classList.add('h');
+  document.getElementById('app').style.display='flex';document.getElementById('app').classList.add('v');
+  var rm=REGIONAL_MANAGERS[ME];
+  document.getElementById('top-av').textContent=rm.initials;
+  var mn=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('pg-date').textContent=mn.charAt(0).toUpperCase()+mn.slice(1);
+  document.getElementById('pg-sub').textContent=rm.label+' - donnees en temps reel';
+  mgrFilter=MY_TEAMS[0];
+  buildMgrFilter();
+  buildTeamFilterV();
+  loadData();
+  setInterval(loadData,60000);
+}
+
+function buildMgrFilter(){
+  var f=document.getElementById('mgr-filter');f.innerHTML='';
+  MY_TEAMS.forEach(function(tk){
+    var b=document.createElement('button');b.className='fb'+(tk===mgrFilter?' on':'');
+    b.textContent=MANAGERS[tk]?MANAGERS[tk].label:tk;
+    b.onclick=(function(t){return function(){mgrFilter=t;buildMgrFilter();renderMgrView();};})(tk);
+    f.appendChild(b);
+  });
+}
+
+function buildTeamFilterV(){
+  var f=document.getElementById('team-filter-v');f.innerHTML='';
+  var opts=[{k:'all',l:'Toutes'}];
+  MY_TEAMS.forEach(function(tk){opts.push({k:tk,l:MANAGERS[tk]?MANAGERS[tk].label:tk});});
+  opts.forEach(function(o){
+    var b=document.createElement('button');b.className='fb'+(o.k===teamFilterV?' on':'');
+    b.textContent=o.l;
+    b.onclick=(function(t){return function(){teamFilterV=t;buildTeamFilterV();renderVentes();};})(o.k);
+    f.appendChild(b);
+  });
+}
+
+function setSd(s){document.getElementById('sd').className='sd '+s;}
+function scC(s){return s===0?'red':s<=2?'ora':'grn';}
+
+async function loadData(){
+  setSd('ld');
+  try{
+    var res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
+    REPORTS=await res.json();
+    setSd('ok');
+  }catch(e){setSd('err');}
+  renderAll();
+}
+
+function getMyAgents(){
+  var ag=[];MY_TEAMS.forEach(function(tk){ag=ag.concat(TEAMS[tk]||[]);});
+  return ag.filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
+}
+
+function getToday(name){
+  return REPORTS.find(function(r){
+    var d=new Date(r.timestamp);
+    return r.agent===name&&d.getDate()===now.getDate()&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  })||null;
+}
+function getMonth(name,month){
+  var m=month||now.toISOString().slice(0,7);
+  return REPORTS.filter(function(r){return r.agent===name&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===m;});
+}
+
+function renderAll(){renderToday();renderMgrView();renderMur();}
+
+function renderToday(){
+  var agents=getMyAgents();
+  var reps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
+  var miss=agents.length-reps.length;
+  var tv=reps.reduce(function(s,r){return s+(r.total_vente||0);},0);
+  var ti=reps.reduce(function(s,r){return s+(r.instal||0);},0);
+  var sc=reps.reduce(function(s,r){return s+(r.score||0);},0);
+  var trdvIh=reps.reduce(function(s,r){return s+(r.rdv_ih||0);},0);
+  var trdvOg=reps.reduce(function(s,r){return s+(r.rdv_og||0);},0);
+  var tpos=reps.reduce(function(s,r){return s+(r.total_pos||0);},0);
+  var posShare=tv>0?Math.round(tpos/tv*100):0;
+  var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
+  [['Rapports',reps.length+'/'+agents.length,miss>0?(miss+' manquant'+(miss>1?'s':'')):'Complet'],
+   ['Ventes',tv,'IH + OG'],['Instals',ti,'Aujourd hui'],['Score',sc,'Toutes equipes'],
+   ['RDV IH',trdvIh,''],['RDV OG',trdvOg,''],['AC total',reps.reduce(function(s,r){return s+(r.ac||0);},0),''],['POS share',posShare+'%',tpos+' POS']].forEach(function(item){
+    var kc=document.createElement('div');kc.className='kc';
+    var kl=document.createElement('div');kl.className='kl';kl.textContent=item[0];
+    var kv=document.createElement('div');kv.className='kv'+(item[1]>0?' g':'');kv.textContent=item[1];
+    var ks=document.createElement('div');ks.className='ks';ks.textContent=item[2];
+    kc.appendChild(kl);kc.appendChild(kv);kc.appendChild(ks);kpi.appendChild(kc);
+  });
+
+  var cont=document.getElementById('teams-today');cont.innerHTML='';
+  MY_TEAMS.forEach(function(tk){
+    var mgr=MANAGERS[tk];var tAgents=TEAMS[tk]||[];
+    var tReps=tAgents.map(function(a){return getToday(a.n);}).filter(Boolean);
+    var tMiss=tAgents.length-tReps.length;
+    var tSc=tReps.reduce(function(s,r){return s+(r.score||0);},0);
+    var tV=tReps.reduce(function(s,r){return s+(r.total_vente||0);},0);
+
+    var hd=document.createElement('div');hd.className='team-hd '+mgr.color;
+    var lf=document.createElement('div');
+    var tn=document.createElement('div');tn.className='team-nm';tn.textContent=mgr.label;
+    var ts=document.createElement('div');ts.style.cssText='font-size:11px;color:var(--g4);margin-top:2px';ts.textContent=tReps.length+'/'+tAgents.length+' EOD'+(tMiss>0?' - '+tMiss+' manquant'+(tMiss>1?'s':''):'');
+    lf.appendChild(tn);lf.appendChild(ts);
+    var sc2=document.createElement('div');sc2.className='team-sc '+mgr.color;sc2.textContent=tSc;
+    hd.appendChild(lf);hd.appendChild(sc2);
+    cont.appendChild(hd);
+
+    var wr=tAgents.filter(function(a){return getToday(a.n);});
+    var wo=tAgents.filter(function(a){return !getToday(a.n);});
+    wr.concat(wo).forEach(function(ag){
+      var rep=getToday(ag.n);
+      var card=document.createElement('div');card.className='agc'+(rep?'':' ms');
+      var gh=document.createElement('div');gh.className='agh';
+      if(rep){
+        var s=rep.score||0,cls=scC(s),tv2=rep.total_vente||0;
+        var mSc=getMonth(ag.n).reduce(function(x,r){return x+(r.score||0);},0);
+        var av=document.createElement('div');av.className='aga';av.textContent=ag.i;
+        var inf=document.createElement('div');inf.className='agi';
+        var nm=document.createElement('div');nm.className='agn';nm.textContent=ag.n;
+        var mt=document.createElement('div');mt.className='agm';mt.textContent=tv2+' vente'+(tv2!==1?'s':'')+' - '+(rep.instal||0)+' instal - mois: '+mSc+'pts';
+        inf.appendChild(nm);inf.appendChild(mt);
+        var right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:8px';
+        var as=document.createElement('div');as.className='ags '+cls;as.textContent=s;
+        var ch=document.createElement('i');ch.className='ti ti-chevron-down chev';
+        var key=ag.n.replace(/[^a-z0-9]/gi,'_')+'_t';ch.id='ch-'+key;
+        right.appendChild(as);right.appendChild(ch);
+        gh.appendChild(av);gh.appendChild(inf);gh.appendChild(right);
+        gh.onclick=(function(k,r2){return function(){togAgent(k,r2);};})(key,rep);
+        var body=document.createElement('div');body.className='agb';body.id='bd-'+key;
+        var mg=document.createElement('div');mg.className='mgd';
+        var pos=rep.total_pos||0,posS=tv2>0?Math.round(pos/tv2*100):0;
+        [['RDV IH',rep.rdv_ih||0,false],['RDV OG',rep.rdv_og||0,false],['Ventes',tv2,true],
+         ['IH',rep.vente_ih||0,false],['OG',rep.vente_og||0,false],['POS share',posS+'%',posS>=50],
+         ['AC',rep.ac||0,false],['INSTAL',rep.instal||0,true],['FU',rep.leads_fu||0,false]].forEach(function(c){
+          var mc=document.createElement('div');mc.className='mce';
+          var ml=document.createElement('div');ml.className='mcl';ml.textContent=c[0];
+          var mv=document.createElement('div');mv.className='mcv'+(c[2]?' g':'');mv.textContent=c[1];
+          mc.appendChild(ml);mc.appendChild(mv);mg.appendChild(mc);
+        });
+        body.appendChild(mg);
+        var ni=rep.notes_ih||{},no=rep.notes_og||{};
+        var hasN=Object.keys(ni).length||Object.keys(no).length;
+        if(hasN){var nd=document.createElement('div');nd.style.cssText='margin-top:10px;padding-top:10px;border-top:.5px solid var(--g2)';Object.entries(ni).forEach(function(e){if(e[1]){var ne=document.createElement('div');ne.className='ni';var nl=document.createElement('div');nl.className='nil';nl.textContent='RDV '+e[0]+' IH';var nt=document.createElement('div');nt.textContent=e[1];ne.appendChild(nl);ne.appendChild(nt);nd.appendChild(ne);}});Object.entries(no).forEach(function(e){if(e[1]){var ne=document.createElement('div');ne.className='ni';var nl=document.createElement('div');nl.className='nil';nl.textContent='RDV '+e[0]+' OG';var nt=document.createElement('div');nt.textContent=e[1];ne.appendChild(nl);ne.appendChild(nt);nd.appendChild(ne);}});body.appendChild(nd);}
+        (rep.ventes_detail||[]).filter(function(v){return v&&v.nom;}).forEach(function(v){
+          var tp=parseInt(v.tpv)||0,up=parseInt(v.upfront)||0,ty=v.type||'POS';
+          var vi=document.createElement('div');vi.className='vi';vi.style.marginTop='6px';
+          var vit=document.createElement('div');vit.className='vit';
+          var vin=document.createElement('span');vin.className='vin';vin.textContent=v.nom;
+          var vip=document.createElement('span');vip.className='pill '+(ty==='POS'?'ok':'bl');vip.textContent=ty;
+          vit.appendChild(vin);vit.appendChild(vip);
+          var vg=document.createElement('div');vg.className='vig';
+          [['TPV',tp?formatK(tp)+' EUR':'---'],['Taux',v.taux?v.taux+'%':'---'],['Upfront',up?formatK(up)+' EUR':'0']].forEach(function(c){var vc=document.createElement('div');vc.className='vc';var vcl=document.createElement('div');vcl.className='vcl';vcl.textContent=c[0];var vcv=document.createElement('div');vcv.className='vcv';vcv.textContent=c[1];vc.appendChild(vcl);vc.appendChild(vcv);vg.appendChild(vc);});
+          vi.appendChild(vit);vi.appendChild(vg);body.appendChild(vi);
+        });
+        var rch=document.createElement('div');rch.className='rch';
+        var ro=document.createElement('div');ro.className='rc '+(rep.outlook?'ok':'ko');ro.innerHTML=(rep.outlook?'<i class="ti ti-check" style="font-size:11px"></i>':'<i class="ti ti-x" style="font-size:11px"></i>')+' Outlook';
+        var rc=document.createElement('div');rc.className='rc '+(rep.crm?'ok':'ko');rc.innerHTML=(rep.crm?'<i class="ti ti-check" style="font-size:11px"></i>':'<i class="ti ti-x" style="font-size:11px"></i>')+' CRM';
+        rch.appendChild(ro);rch.appendChild(rc);body.appendChild(rch);
+        if(rep.mot_jour){var mj=document.createElement('div');mj.className='mj';mj.textContent='"'+rep.mot_jour+'"';body.appendChild(mj);}
+        card.appendChild(gh);card.appendChild(body);
+      } else {
+        var av2=document.createElement('div');av2.className='aga ms';av2.textContent=ag.i;
+        var inf2=document.createElement('div');inf2.className='agi';
+        var nm2=document.createElement('div');nm2.className='agn';nm2.textContent=ag.n;
+        var mt2=document.createElement('div');mt2.className='agm';mt2.style.color='var(--red)';mt2.textContent='EOD non envoyee';
+        inf2.appendChild(nm2);inf2.appendChild(mt2);
+        var sp=document.createElement('span');sp.className='pill er';sp.textContent='Manquant';
+        gh.appendChild(av2);gh.appendChild(inf2);gh.appendChild(sp);card.appendChild(gh);
+      }
+      cont.appendChild(card);
+    });
+  });
+}
+
+function togAgent(key,rep){
+  var b=document.getElementById('bd-'+key),c=document.getElementById('ch-'+key);
+  if(!b)return;var op=b.classList.contains('op');b.classList.toggle('op');
+  if(c)c.style.transform=op?'':'rotate(180deg)';
+}
+
+function renderMgrView(){
+  var tk=mgrFilter,agents=TEAMS[tk]||[];
+  var month=now.toISOString().slice(0,7);
+  var stats=agents.map(function(ag){
+    var r=getMonth(ag.n,month);
+    return{ag:ag,s:r.reduce(function(x,y){return x+(y.score||0);},0),v:r.reduce(function(x,y){return x+(y.total_vente||0);},0),ins:r.reduce(function(x,y){return x+(y.instal||0);},0),pos:r.reduce(function(x,y){return x+(y.total_pos||0);},0),rdvIh:r.reduce(function(x,y){return x+(y.rdv_ih||0);},0),rdvOg:r.reduce(function(x,y){return x+(y.rdv_og||0);},0),n:r.length};
+  });
+  var cont=document.getElementById('mgr-content');cont.innerHTML='';
+  var ts=stats.reduce(function(x,a){return x+a.s;},0);
+  var tv=stats.reduce(function(x,a){return x+a.v;},0);
+  var ti=stats.reduce(function(x,a){return x+a.ins;},0);
+  var tp=stats.reduce(function(x,a){return x+a.pos;},0);
+  var pp=tv>0?Math.round(tp/tv*100):0;
+  var mn=now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  var hero=document.createElement('div');
+  hero.style.cssText='background:var(--b);border-radius:var(--rl);padding:16px;margin-bottom:14px';
+  var heroTop=document.createElement('div');heroTop.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px';
+  var hl=document.createElement('div');hl.innerHTML='<div style="font-size:13px;font-weight:600;color:#fff">'+MANAGERS[tk].label+'</div><div style="font-size:11px;color:rgba(255,255,255,.3)">'+mn.charAt(0).toUpperCase()+mn.slice(1)+'</div>';
+  var hr=document.createElement('div');hr.style.textAlign='right';hr.innerHTML='<div style="font-size:44px;font-weight:900;letter-spacing:-2px;color:#4ade80;line-height:1">'+ts+'</div><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.6px">Score equipe</div>';
+  heroTop.appendChild(hl);heroTop.appendChild(hr);
+  var hg=document.createElement('div');hg.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px';
+  [['Ventes',tv,true],['Instals',ti,true],['POS share',pp+'%',pp>=50]].forEach(function(c){
+    var mc=document.createElement('div');mc.style.cssText='background:rgba(255,255,255,.07);border-radius:8px;padding:9px';
+    mc.innerHTML='<div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">'+c[0]+'</div><div style="font-size:20px;font-weight:800;color:'+(c[2]?'#4ade80':'#fff')+'">'+c[1]+'</div>';
+    hg.appendChild(mc);
+  });
+  hero.appendChild(heroTop);hero.appendChild(hg);cont.appendChild(hero);
+  var lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Classement - '+mn.charAt(0).toUpperCase()+mn.slice(1);cont.appendChild(lbl);
+  var rk=document.createElement('div');rk.className='rk';
+  var sorted=stats.slice().sort(function(a,b){return b.s-a.s;});
+  var mx=Math.max(sorted[0]?sorted[0].s:1,1);
+  sorted.forEach(function(a,i){
+    var cls=scC(a.s===0?0:a.s<=3?1:2);
+    var row=document.createElement('div');row.className='rr';
+    var rn=document.createElement('div');rn.className='rn'+(i===0?' gd':'');rn.textContent=(i+1);
+    var ra=document.createElement('div');ra.className='ra';ra.textContent=a.ag.i;
+    var rf=document.createElement('div');rf.className='rf2';
+    var rnm=document.createElement('div');rnm.className='rnm';rnm.textContent=a.ag.n;
+    var rsb=document.createElement('div');rsb.className='rsb';rsb.textContent=a.v+' V - '+a.ins+' I - '+a.rdvIh+' IH - '+a.rdvOg+' OG';
+    var rbb=document.createElement('div');rbb.className='rbb';var rbf=document.createElement('div');rbf.className='rbf';rbf.style.cssText='height:100%;border-radius:3px;background:'+TEAM_COLORS[tk]+';width:'+Math.round(a.s/mx*100)+'%';rbb.appendChild(rbf);
+    rf.appendChild(rnm);rf.appendChild(rsb);rf.appendChild(rbb);
+    var rs=document.createElement('div');rs.className='rs '+cls;rs.textContent=a.s;
+    row.appendChild(rn);row.appendChild(ra);row.appendChild(rf);row.appendChild(rs);rk.appendChild(row);
+  });
+  cont.appendChild(rk);
+}
+
+function renderStats(){
+  var month=now.toISOString().slice(0,7);
+  var myTeams=MY_TEAMS;
+
+  // Chart 1 : Routine par equipe
+  if(charts.routine){charts.routine.destroy();}
+  var routineData=myTeams.map(function(tk){
+    var agents=TEAMS[tk]||[];
+    var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
+    return reps.length?Math.round(reps.reduce(function(s,r){return s+(r.outlook?1:0)+(r.crm?1:0);},0)/(reps.length*2)*100):0;
+  });
+  var ctx1=document.getElementById('chart-routine');
+  if(ctx1){
+    charts.routine=new Chart(ctx1,{
+      type:'bar',
+      data:{labels:myTeams.map(function(tk){return MANAGERS[tk]?MANAGERS[tk].label:tk;}),
+        datasets:[{label:'Routine %',data:routineData,backgroundColor:myTeams.map(function(tk){return TEAM_COLORS[tk];}),borderRadius:8}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:100,ticks:{callback:function(v){return v+'%';}}}}}
+    });
+  }
+
+  // Chart 2 : Top performers
+  if(charts.top){charts.top.destroy();}
+  var allStats=getMyAgents().map(function(ag){
+    var r=getMonth(ag.n,month);
+    var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
+    return{n:ag.n.split(' ')[0],i:ag.i,s:r.reduce(function(x,y){return x+(y.score||0);},0),color:TEAM_COLORS[tk]};
+  }).sort(function(a,b){return b.s-a.s;}).slice(0,8);
+  var ctx2=document.getElementById('chart-top');
+  if(ctx2){
+    charts.top=new Chart(ctx2,{
+      type:'bar',
+      data:{labels:allStats.map(function(a){return a.n;}),
+        datasets:[{data:allStats.map(function(a){return a.s;}),backgroundColor:allStats.map(function(a){return a.color;}),borderRadius:6}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true},x:{ticks:{font:{size:11}}}}}
+    });
+  }
+
+  // Chart 3 : Stats cles radar-like (barres horizontales)
+  if(charts.statsc){charts.statsc.destroy();}
+  var allReps=getMyAgents().flatMap(function(ag){return getMonth(ag.n,month);});
+  var statsData=[
+    allReps.reduce(function(s,r){return s+(r.total_vente||0);},0),
+    allReps.reduce(function(s,r){return s+(r.instal||0);},0),
+    allReps.reduce(function(s,r){return s+(r.rdv_ih||0);},0),
+    allReps.reduce(function(s,r){return s+(r.rdv_og||0);},0),
+    allReps.reduce(function(s,r){return s+(r.ac||0);},0),
+    allReps.reduce(function(s,r){return s+(r.leads_fu||0);},0)
+  ];
+  var ctx3=document.getElementById('chart-stats');
+  if(ctx3){
+    charts.statsc=new Chart(ctx3,{
+      type:'bar',
+      data:{
+        labels:['Ventes','Instals','RDV IH','RDV OG','AC','FU leads'],
+        datasets:[{data:statsData,backgroundColor:['#4ade80','#4ade80','#60a5fa','#60a5fa','#f59e0b','#a78bfa'],borderRadius:6}]
+      },
+      options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}
+    });
+  }
+
+  // Classement global
+  var rg=document.getElementById('rank-global');rg.innerHTML='';
+  var globalStats=getMyAgents().map(function(ag){
+    var r=getMonth(ag.n,month);
+    var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
+    return{ag:ag,s:r.reduce(function(x,y){return x+(y.score||0);},0),v:r.reduce(function(x,y){return x+(y.total_vente||0);},0),ins:r.reduce(function(x,y){return x+(y.instal||0);},0),tk:tk};
+  }).sort(function(a,b){return b.s-a.s;});
+  var mxG=Math.max(globalStats[0]?globalStats[0].s:1,1);
+  globalStats.forEach(function(a,i){
+    var cls=scC(a.s===0?0:a.s<=3?1:2);
+    var row=document.createElement('div');row.className='rr';
+    var rn=document.createElement('div');rn.className='rn'+(i===0?' gd':'');rn.textContent=(i+1);
+    var ra=document.createElement('div');ra.className='ra';ra.textContent=a.ag.i;
+    var rf=document.createElement('div');rf.className='rf2';
+    var rnm=document.createElement('div');rnm.className='rnm';
+    var chip=document.createElement('span');chip.className='team-chip tc-'+a.tk;chip.textContent=MANAGERS[a.tk]?MANAGERS[a.tk].name:a.tk;
+    rnm.textContent=a.ag.n.split(' ')[0]+' ';rnm.appendChild(chip);
+    var rsb=document.createElement('div');rsb.className='rsb';rsb.textContent=a.v+' ventes - '+a.ins+' instals';
+    var rbb=document.createElement('div');rbb.className='rbb';var rbf=document.createElement('div');rbf.className='rbf';rbf.style.cssText='height:100%;border-radius:3px;background:'+TEAM_COLORS[a.tk]+';width:'+Math.round(a.s/mxG*100)+'%';rbb.appendChild(rbf);
+    rf.appendChild(rnm);rf.appendChild(rsb);rf.appendChild(rbb);
+    var rs=document.createElement('div');rs.className='rs '+cls;rs.textContent=a.s;
+    row.appendChild(rn);row.appendChild(ra);row.appendChild(rf);row.appendChild(rs);rg.appendChild(row);
+  });
+
+  // RDV IH vs OG par equipe
+  var rdvEl=document.getElementById('rdv-stats');rdvEl.innerHTML='';
+  myTeams.forEach(function(tk){
+    var agents=TEAMS[tk]||[];
+    var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
+    var ih=reps.reduce(function(s,r){return s+(r.rdv_ih||0);},0);
+    var og=reps.reduce(function(s,r){return s+(r.rdv_og||0);},0);
+    var kc=document.createElement('div');kc.className='kc';
+    kc.innerHTML='<div class="kl">'+MANAGERS[tk].label+'</div><div class="kv" style="font-size:18px;letter-spacing:0">'+(ih+og)+' RDV</div><div class="ks">'+ih+' IH - '+og+' OG</div>';
+    rdvEl.appendChild(kc);
+  });
+
+  // FU stats
+  var fuEl=document.getElementById('fu-stats');fuEl.innerHTML='';
+  myTeams.forEach(function(tk){
+    var agents=TEAMS[tk]||[];
+    var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
+    var fu=reps.reduce(function(s,r){return s+(r.leads_fu||0);},0);
+    var kc=document.createElement('div');kc.className='kc';
+    kc.innerHTML='<div class="kl">'+MANAGERS[tk].label+'</div><div class="kv g" style="font-size:22px">'+fu+'</div><div class="ks">leads FU</div>';
+    fuEl.appendChild(kc);
+  });
+}
+
+function renderVentes(){
+  var month=now.toISOString().slice(0,7);
+  var agents=teamFilterV==='all'?getMyAgents():(TEAMS[teamFilterV]||[]);
+  var reps=REPORTS.filter(function(r){return agents.some(function(a){return a.n===r.agent;})&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month;});
+  var allV=reps.reduce(function(acc,r){return acc.concat((r.ventes_detail||[]).filter(function(v){return v&&v.nom;}).map(function(v){return Object.assign({},v,{date:r.date,agent:r.agent});}));},  []);
+  var filtered=typeFilter==='all'?allV:allV.filter(function(v){return (v.type||v.ty||'POS')===typeFilter;});
+  var totalTPV=filtered.reduce(function(s,v){return s+(parseInt(v.tpv)||0);},0);
+  var avgTaux=filtered.length?filtered.reduce(function(s,v){return s+(parseFloat(v.taux)||0);},0)/filtered.length:0;
+  var totalUp=filtered.reduce(function(s,v){return s+(parseInt(v.upfront)||0);},0);
+  var posV=filtered.filter(function(v){return (v.type||v.ty||'POS')==='POS';});
+  var avgUpPos=posV.length?posV.reduce(function(s,v){return s+(parseInt(v.upfront)||0);},0)/posV.length:0;
+  var kpi=document.getElementById('ventes-kpi');kpi.innerHTML='';
+  [['TPV total',formatK(totalTPV)+' EUR',''],['Taux moyen',avgTaux?avgTaux.toFixed(2)+'%':'---','Sur '+filtered.length+' ventes'],
+   ['Upfront total',formatK(totalUp)+' EUR',''],['Upfront moy. POS',avgUpPos?formatK(avgUpPos)+' EUR':'0','Par vente POS']].forEach(function(c){
+    var vk=document.createElement('div');vk.className='vk';vk.innerHTML='<div class="vkl">'+c[0]+'</div><div class="vkv">'+c[1]+'</div><div class="vks">'+c[2]+'</div>';kpi.appendChild(vk);
+  });
+  var list=document.getElementById('ventes-list');list.innerHTML='';
+  if(!filtered.length){list.innerHTML='<div class="empty">Aucune vente</div>';return;}
+  filtered.forEach(function(v){
+    var tp=parseInt(v.tpv)||0,up=parseInt(v.upfront)||0,ty=v.type||v.ty||'POS';
+    var ag=ALL_AGENTS.find(function(a){return a.n===v.agent;});
+    var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===v.agent;}))tk=k;});
+    var d=document.createElement('div');d.className='vi';
+    var vit=document.createElement('div');vit.className='vit';
+    var vin=document.createElement('span');vin.className='vin';vin.textContent=v.nom;
+    var ty2=document.createElement('span');ty2.className='pill '+(ty==='POS'?'ok':'bl');ty2.textContent=ty;
+    vit.appendChild(vin);vit.appendChild(ty2);
+    var via=document.createElement('div');via.className='via';
+    via.innerHTML=(ag?ag.n.split(' ')[0]:v.agent)+' <span class="team-chip tc-'+tk+'">'+MANAGERS[tk].name+'</span> - '+v.date;
+    var vg=document.createElement('div');vg.className='vig';
+    [['TPV',tp?formatK(tp)+' EUR':'---'],['Taux',v.taux?v.taux+'%':'---'],['Upfront',up?formatK(up)+' EUR':'0']].forEach(function(c){var vc=document.createElement('div');vc.className='vc';var vcl=document.createElement('div');vcl.className='vcl';vcl.textContent=c[0];var vcv=document.createElement('div');vcv.className='vcv';vcv.textContent=c[1];vc.appendChild(vcl);vc.appendChild(vcv);vg.appendChild(vc);});
+    d.appendChild(vit);d.appendChild(via);d.appendChild(vg);list.appendChild(d);
+  });
+}
+
+function renderMur(){
+  var list=document.getElementById('mur-list');list.innerHTML='';
+  var month=now.toISOString().slice(0,7);
+  var mots=REPORTS.filter(function(r){
+    return r.mot_jour&&r.mot_jour.trim()&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month;
+  });
+  if(!mots.length){list.innerHTML='<div class="empty">Aucune bonne nouvelle ce mois-ci</div>';return;}
+  mots.slice(0,40).forEach(function(r){
+    var ag=ALL_AGENTS.find(function(a){return a.n===r.agent;});
+    var sc=r.score||0,cls=scC(sc);
+    var d=document.createElement('div');d.className='mur-item';
+    var top2=document.createElement('div');top2.className='mur-top';
+    var av=document.createElement('div');av.className='mur-av';av.textContent=ag?ag.i:'?';
+    var info=document.createElement('div');info.style.flex='1';
+    var nm=document.createElement('div');nm.className='mur-name';nm.textContent=r.agent.split(' ')[0];
+    var mt=document.createElement('div');mt.className='mur-meta';mt.textContent=r.date+' - '+sc+' pts';
+    info.appendChild(nm);info.appendChild(mt);
+    var sc2=document.createElement('div');sc2.className='mur-score '+cls;sc2.textContent=sc;
+    top2.appendChild(av);top2.appendChild(info);top2.appendChild(sc2);
+    var txt=document.createElement('div');txt.className='mur-text';txt.textContent='"'+r.mot_jour+'"';
+    d.appendChild(top2);d.appendChild(txt);list.appendChild(d);
+  });
+}
+
+function sw(t){
+  ['today','managers','stats','ventes','mur'].forEach(function(s){
+    document.getElementById('s-'+s).className='scr'+(t===s?' on':'');
+    document.getElementById('t-'+s).className='slide-tab'+(t===s?' on':'');
+  });
+  if(t==='stats')renderStats();
+  if(t==='ventes')renderVentes();
+  if(t==='mur')renderMur();
+}
+
+function setTypeFilter(t){
+  typeFilter=t;
+  document.querySelectorAll('#type-filter .fb').forEach(function(b,i){b.className='fb'+(['all','POS','TPE'][i]===t?' on':'');});
+  renderVentes();
+}
+
+function closeModal(){document.getElementById('eod-modal').style.display='none';}
+function formatK(n){return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'K':n.toString();}
+
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(s){s.unregister();});});}
+document.addEventListener('DOMContentLoaded',function(){init();});
+</script>
+</body>
+</html>
