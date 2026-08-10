@@ -1153,7 +1153,7 @@ function toggleReact(repId,emoji){
 }
 
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(r=>r.forEach(s=>s.unregister()));}
-init();
+document.addEventListener('DOMContentLoaded',function(){init();});
 </script>
 </body>
 </html>
