@@ -206,6 +206,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- MANAGERS -->
     <div id="s-managers" class="scr">
+      <div id="mgr-overview"></div>
       <div class="filter-row" id="mgr-filter"></div>
       <div id="mgr-content"></div>
     </div>
@@ -518,8 +519,33 @@ function togAgent(key,rep){
 }
 
 function renderMgrView(){
-  var tk=mgrFilter,agents=TEAMS[tk]||[];
   var month=now.toISOString().slice(0,7);
+  // -- Vue d ensemble des managers --
+  var ov=document.getElementById('mgr-overview');ov.innerHTML='';
+  var ovGrid=document.createElement('div');ovGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px';
+  MY_TEAMS.forEach(function(tk){
+    var agents=TEAMS[tk]||[];
+    var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
+    var s=reps.reduce(function(x,r){return x+(r.score||0);},0);
+    var v=reps.reduce(function(x,r){return x+(r.total_vente||0);},0);
+    var i=reps.reduce(function(x,r){return x+(r.instal||0);},0);
+    var pos=reps.reduce(function(x,r){return x+(r.total_pos||0);},0);
+    var ps=v>0?Math.round(pos/v*100):0;
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--b);border-radius:var(--rl);padding:14px;border-left:3px solid '+TEAM_COLORS[tk];
+    card.innerHTML='<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">'+MANAGERS[tk].label+'</div>'+
+      '<div style="font-size:36px;font-weight:900;letter-spacing:-1.5px;color:'+TEAM_COLORS[tk]+';line-height:1;margin-bottom:8px">'+s+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'+
+      '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Ventes</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+v+'</div></div>'+
+      '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Instals</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+i+'</div></div>'+
+      '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">POS %</div><div style="font-size:14px;font-weight:700;color:'+(ps>=50?'#4ade80':'#fff')+'">'+ps+'%</div></div>'+
+      '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Score</div><div style="font-size:14px;font-weight:700;color:#fff">'+s+'</div></div>'+
+      '</div>';
+    ovGrid.appendChild(card);
+  });
+  ov.appendChild(ovGrid);
+  // -- Detail equipe --
+  var tk=mgrFilter,agents=TEAMS[tk]||[];
   var stats=agents.map(function(ag){
     var r=getMonth(ag.n,month);
     return{ag:ag,s:r.reduce(function(x,y){return x+(y.score||0);},0),v:r.reduce(function(x,y){return x+(y.total_vente||0);},0),ins:r.reduce(function(x,y){return x+(y.instal||0);},0),pos:r.reduce(function(x,y){return x+(y.total_pos||0);},0),rdvIh:r.reduce(function(x,y){return x+(y.rdv_ih||0);},0),rdvOg:r.reduce(function(x,y){return x+(y.rdv_og||0);},0),n:r.length};
@@ -555,7 +581,7 @@ function renderMgrView(){
     var ra=document.createElement('div');ra.className='ra';ra.textContent=a.ag.i;
     var rf=document.createElement('div');rf.className='rf2';
     var rnm=document.createElement('div');rnm.className='rnm';rnm.textContent=a.ag.n;
-    var rsb=document.createElement('div');rsb.className='rsb';rsb.textContent=a.v+' V - '+a.ins+' I - '+a.rdvIh+' IH - '+a.rdvOg+' OG';
+    var posS2=a.v>0?Math.round(a.pos/a.v*100):0;var rsb=document.createElement('div');rsb.className='rsb';rsb.textContent=a.v+' V - '+a.ins+' I - '+a.rdvIh+' IH - '+a.rdvOg+' OG - POS '+posS2+'%';
     var rbb=document.createElement('div');rbb.className='rbb';var rbf=document.createElement('div');rbf.className='rbf';rbf.style.cssText='height:100%;border-radius:3px;background:'+TEAM_COLORS[tk]+';width:'+Math.round(a.s/mx*100)+'%';rbb.appendChild(rbf);
     rf.appendChild(rnm);rf.appendChild(rsb);rf.appendChild(rbb);
     var rs=document.createElement('div');rs.className='rs '+cls;rs.textContent=a.s;
@@ -630,7 +656,7 @@ function renderStats(){
   var globalStats=getMyAgents().map(function(ag){
     var r=getMonth(ag.n,month);
     var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
-    return{ag:ag,s:r.reduce(function(x,y){return x+(y.score||0);},0),v:r.reduce(function(x,y){return x+(y.total_vente||0);},0),ins:r.reduce(function(x,y){return x+(y.instal||0);},0),tk:tk};
+    return{ag:ag,s:r.reduce(function(x,y){return x+(y.score||0);},0),v:r.reduce(function(x,y){return x+(y.total_vente||0);},0),ins:r.reduce(function(x,y){return x+(y.instal||0);},0),pos:r.reduce(function(x,y){return x+(y.total_pos||0);},0),tk:tk};
   }).sort(function(a,b){return b.s-a.s;});
   var mxG=Math.max(globalStats[0]?globalStats[0].s:1,1);
   globalStats.forEach(function(a,i){
@@ -642,7 +668,7 @@ function renderStats(){
     var rnm=document.createElement('div');rnm.className='rnm';
     var chip=document.createElement('span');chip.className='team-chip tc-'+a.tk;chip.textContent=MANAGERS[a.tk]?MANAGERS[a.tk].name:a.tk;
     rnm.textContent=a.ag.n.split(' ')[0]+' ';rnm.appendChild(chip);
-    var rsb=document.createElement('div');rsb.className='rsb';rsb.textContent=a.v+' ventes - '+a.ins+' instals';
+    var posS3=a.v>0?Math.round((a.pos||0)/a.v*100):0;var rsb=document.createElement('div');rsb.className='rsb';rsb.textContent=a.v+' V - '+a.ins+' I - POS '+posS3+'%';
     var rbb=document.createElement('div');rbb.className='rbb';var rbf=document.createElement('div');rbf.className='rbf';rbf.style.cssText='height:100%;border-radius:3px;background:'+TEAM_COLORS[a.tk]+';width:'+Math.round(a.s/mxG*100)+'%';rbb.appendChild(rbf);
     rf.appendChild(rnm);rf.appendChild(rsb);rf.appendChild(rbb);
     var rs=document.createElement('div');rs.className='rs '+cls;rs.textContent=a.s;
