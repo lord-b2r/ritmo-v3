@@ -39,29 +39,27 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 /* APP */
 #app{display:none;flex-direction:column;height:100%}
 #app.v{display:flex}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 0;background:var(--bg);flex-shrink:0}
-.tl{display:flex;align-items:center;gap:8px}
-.logo-sm{width:28px;height:28px;background:var(--b);border-radius:7px;display:flex;align-items:center;justify-content:center}
-.logo-sm svg{width:16px;height:16px}
-.app-name{font-size:15px;font-weight:800;letter-spacing:-.3px}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;background:var(--bg);flex-shrink:0}
+.pg-date{font-size:26px;font-weight:800;letter-spacing:-.8px;line-height:1.1}
+.pg-sub{font-size:12px;color:var(--g4);margin-top:2px}
 .top-right{display:flex;align-items:center;gap:8px}
+.slide-tabs{display:flex;background:var(--w);border:.5px solid var(--g2);border-radius:30px;padding:4px;margin:0 18px 0;flex-shrink:0}
+.slide-tab{flex:1;text-align:center;padding:9px 6px;font-size:13px;font-weight:600;color:var(--g4);border-radius:26px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.slide-tab.on{background:var(--b);color:#fff;font-weight:700}
 .sd{width:7px;height:7px;border-radius:50%;background:var(--g3)}
 .sd.ok{background:#22c55e}.sd.err{background:var(--red)}.sd.ld{background:#fb923c;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .top-av{width:30px;height:30px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--b);cursor:pointer}
-.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.scr{display:none;padding:14px 16px 8px}.scr.on{display:block}
-.tabbar{display:flex;background:var(--w);border-top:1px solid var(--g2);padding:6px 0;padding-bottom:max(6px,env(safe-area-inset-bottom));flex-shrink:0}
-.tab{flex:1;text-align:center;cursor:pointer;padding:3px 0}
-.tab i{font-size:21px;color:var(--g3);display:block;margin-bottom:1px}
-.tab span{font-size:9px;color:var(--g3);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
-.tab.on i,.tab.on span{color:var(--b)}
+.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-top:12px}
+.scr{display:none;padding:0 18px 24px}.scr.on{display:block}
+
 
 /* SHARED */
 .sec-lbl{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px}
 .pill{display:inline-flex;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
 .pill.ok{background:var(--gbg);color:var(--green)}.pill.er{background:var(--rbg);color:var(--red)}.pill.wn{background:var(--obg);color:var(--orange)}.pill.nu{background:var(--g1);color:var(--g4)}.pill.bl{background:var(--bbg);color:var(--blue)}
 .kgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.kgrid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;margin-bottom:14px}
 .kc{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:13px}
 .kl{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
 .kv{font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1}
@@ -178,10 +176,11 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
 <!-- APP -->
 <div id="app">
+  <!-- TOPBAR -->
   <div class="topbar">
-    <div class="tl">
-      <div class="logo-sm"><svg viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" fill="white"/><rect x="9" y="2" width="5" height="5" rx="1" fill="white"/><rect x="2" y="9" width="5" height="5" rx="1" fill="white"/><rect x="9" y="9" width="5" height="5" rx="1" fill="white" opacity=".3"/></svg></div>
-      <span class="app-name">Ritmo</span>
+    <div>
+      <div class="pg-date" id="pg-date"></div>
+      <div class="pg-sub" id="pg-team"></div>
     </div>
     <div class="top-right">
       <div class="sd ld" id="sd"></div>
@@ -189,12 +188,18 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     </div>
   </div>
 
+  <!-- SLIDING TABS -->
+  <div class="slide-tabs">
+    <div class="slide-tab on" id="t-today" onclick="sw('today')">Aujourd hui</div>
+    <div class="slide-tab" id="t-month" onclick="sw('month')">Ce mois</div>
+    <div class="slide-tab" id="t-ventes" onclick="sw('ventes')">Ventes</div>
+    <div class="slide-tab" id="t-mur" onclick="sw('mur')">Mur</div>
+  </div>
+
   <div class="screens">
 
     <!-- AUJOURD HUI -->
     <div id="s-today" class="scr on">
-      <div style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:2px" id="pg-date"></div>
-      <div style="font-size:12px;color:var(--g4);margin-bottom:12px" id="pg-team"></div>
       <button class="rf" onclick="loadData()"><i class="ti ti-refresh" style="font-size:13px"></i> Actualiser</button>
       <div class="kgrid" id="today-kpis"></div>
       <div class="sec-lbl">Equipe - EOD du jour</div>
@@ -210,7 +215,6 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- VENTES -->
     <div id="s-ventes" class="scr">
-      <div style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:14px">Ventes</div>
       <div class="filter-row" id="team-filter"></div>
       <div class="filter-row" id="type-filter">
         <button class="fb on" onclick="setTypeFilter('all')">Toutes</button>
@@ -223,18 +227,11 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- MUR -->
     <div id="s-mur" class="scr">
-      <div style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px">Mur des bonnes nouvelles</div>
+      <div style="font-size:18px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px">Bonnes nouvelles</div>
       <div style="font-size:13px;color:var(--g4);margin-bottom:16px">Ce que les equipes partagent ce mois-ci</div>
       <div id="mur-list"></div>
     </div>
 
-  </div>
-
-  <div class="tabbar">
-    <div class="tab on" id="t-today" onclick="sw('today')"><i class="ti ti-calendar-today"></i><span>Aujourd hui</span></div>
-    <div class="tab" id="t-month" onclick="sw('month')"><i class="ti ti-chart-bar"></i><span>Ce mois</span></div>
-    <div class="tab" id="t-ventes" onclick="sw('ventes')"><i class="ti ti-currency-euro"></i><span>Ventes</span></div>
-    <div class="tab" id="t-mur" onclick="sw('mur')"><i class="ti ti-speakerphone"></i><span>Mur</span></div>
   </div>
 </div>
 
@@ -338,7 +335,7 @@ function bootApp(){
   document.getElementById('top-av').textContent=mgr.initials;
   var mn=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('pg-date').textContent=mn.charAt(0).toUpperCase()+mn.slice(1);
-  document.getElementById('pg-team').textContent=mgr.label+' - donnees en temps reel';
+  document.getElementById('pg-team').textContent='Vue manager - donnees en temps reel';
   buildTeamFilter();
   loadData();
   setInterval(loadData,60000);
@@ -412,10 +409,19 @@ function renderToday(){
   var sc=reps.reduce(function(s,r){return s+(r.score||0);},0);
   var miss=agents.length-reps.length;
   var kg=document.getElementById('today-kpis');kg.innerHTML='';
+  var trdv_ih=reps.reduce(function(s,r){return s+(r.rdv_ih||0);},0);
+  var trdv_og=reps.reduce(function(s,r){return s+(r.rdv_og||0);},0);
+  var tac=reps.reduce(function(s,r){return s+(r.ac||0);},0);
+  var tpos=reps.reduce(function(s,r){return s+(r.total_pos||0);},0);
+  var posShare=tv>0?Math.round(tpos/tv*100):0;
   [['Rapports',reps.length+'/'+agents.length,miss>0?(miss+' manquant'+(miss>1?'s':'')):'Complet'],
    ['Ventes',tv,'IH + OG'],
    ['Instals',ti,'Aujourd hui'],
-   ['Score equipe',sc,'Total du jour']].forEach(function(item){
+   ['Score equipe',sc,'Total du jour'],
+   ['RDV IH',trdv_ih,'Rendez-vous IH'],
+   ['RDV OG',trdv_og,'Rendez-vous OG'],
+   ['AC total',tac,'Attestations'],
+   ['POS share',posShare+'%',tpos+' POS / '+tv+' ventes']].forEach(function(item){
     var kc=document.createElement('div');kc.className='kc';
     var kl=document.createElement('div');kl.className='kl';kl.textContent=item[0];
     var kv=document.createElement('div');kv.className='kv'+(item[1]>0?' g':'');kv.textContent=item[1];
@@ -435,17 +441,11 @@ function renderToday(){
       var mSc=getMonth(ag.n).reduce(function(x,r){return x+(r.score||0);},0);
       var mV=getMonth(ag.n).reduce(function(x,r){return x+(r.total_vente||0);},0);
       var mI=getMonth(ag.n).reduce(function(x,r){return x+(r.instal||0);},0);
-      var obj=DEFAULT_OBJ;
-      var objPct=Math.min(Math.round((mV+mI)/(obj.ventes+obj.instals)*100),150);
       var av=document.createElement('div');av.className='aga';av.textContent=ag.i;
       var inf=document.createElement('div');inf.className='agi';
       var nm=document.createElement('div');nm.className='agn';nm.textContent=ag.n;
       var mt=document.createElement('div');mt.className='agm';mt.textContent=tv2+' vente'+(tv2!==1?'s':'')+' - '+(rep.instal||0)+' instal - mois: '+mSc+'pts';
-      // Obj bar mini
-      var ob=document.createElement('div');ob.className='obj-bar';
-      var of=document.createElement('div');of.className='obj-fill'+(objPct>=100?' over':'');of.style.width=objPct+'%';
-      ob.appendChild(of);
-      inf.appendChild(nm);inf.appendChild(mt);inf.appendChild(ob);
+      inf.appendChild(nm);inf.appendChild(mt);
       var right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:8px';
       var as=document.createElement('div');as.className='ags '+cls;as.textContent=s;
       var ch=document.createElement('i');ch.className='ti ti-chevron-down chev';
@@ -543,7 +543,10 @@ function renderMonth(){
   right.appendChild(sc);right.appendChild(sl);
   top2.appendChild(left);top2.appendChild(right);
   var mg=document.createElement('div');mg.className='mh-grid';
-  [['Ventes',tv,true],['Instals',ti,true],['POS share',pp+'%',pp>=50]].forEach(function(c){
+  var trdvIh=agents.map(function(ag){return getMonth(ag.n);}).flat().reduce(function(s,r){return s+(r.rdv_ih||0);},0);
+  var trdvOg=agents.map(function(ag){return getMonth(ag.n);}).flat().reduce(function(s,r){return s+(r.rdv_og||0);},0);
+  var tacM=agents.map(function(ag){return getMonth(ag.n);}).flat().reduce(function(s,r){return s+(r.ac||0);},0);
+  [['Ventes',tv,true],['Instals',ti,true],['POS share',pp+'%',pp>=50],['RDV IH',trdvIh,false],['RDV OG',trdvOg,false],['AC total',tacM,false]].forEach(function(c){
     var mc=document.createElement('div');mc.className='mhc';var ml=document.createElement('div');ml.className='mhl';ml.textContent=c[0];var mv=document.createElement('div');mv.className='mhv'+(c[2]?' g':'');mv.textContent=c[1];mc.appendChild(ml);mc.appendChild(mv);mg.appendChild(mc);
   });
   var bb=document.createElement('div');bb.className='bb';var bf=document.createElement('div');bf.className='bf';bf.style.width=pp+'%';bb.appendChild(bf);
@@ -668,7 +671,7 @@ function renderMur(){
 function sw(t){
   ['today','month','ventes','mur'].forEach(function(s){
     document.getElementById('s-'+s).className='scr'+(t===s?' on':'');
-    document.getElementById('t-'+s).className='tab'+(t===s?' on':'');
+    document.getElementById('t-'+s).className='slide-tab'+(t===s?' on':'');
   });
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
