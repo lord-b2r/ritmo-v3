@@ -654,7 +654,7 @@ function logout(){if(!confirm('Changer de compte ?'))return;rpk('salesos_me');rp
 function bootApp(){
   if(!OBJECTIVES[ME])OBJECTIVES[ME]={...DEFAULT_OBJ};
   try{fuList=JSON.parse(localStorage.getItem('ritmo_fu_'+ME)||'[]');}catch(e){fuList=[];}
-  document.getElementById('app').style.display='flex';document.getElementById('app').classList.add('v');
+  document.getElementById('ob').classList.add('h');document.getElementById('ps').classList.remove('show');document.getElementById('app').style.display='flex';document.getElementById('app').classList.add('v');
   const ag=AGENTS_FLAT.find(a=>a.n===ME);
   document.getElementById('top-av').textContent=ag?ag.i:ME.slice(0,2).toUpperCase();
   document.getElementById('sh-agent').textContent=ME;
