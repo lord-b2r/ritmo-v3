@@ -34,7 +34,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .ob-t{font-size:28px;font-weight:900;color:#fff;letter-spacing:-1px;margin-bottom:4px}
 .ob-s{font-size:13px;color:rgba(255,255,255,.35);margin-bottom:32px}
 .ob-team-lbl{font-size:10px;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;width:100%;max-width:340px}
-.ob-grid{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;margin-bottom:8px}
+.ob-grid{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;margin-bottom:8px}.ob-team-grid{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;margin-bottom:8px}
 .ob-row{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:background .12s}
 .ob-row:active{background:rgba(255,255,255,.12)}
 .ob-av{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
@@ -623,7 +623,7 @@ function buildOb(){
   Object.keys(TEAMS).forEach(tk=>{
     const tm=TEAMS[tk];
     const lbl=document.createElement('div');lbl.className='ob-team-lbl';lbl.textContent=tm.label;g.appendChild(lbl);
-    const grid=document.createElement('div');grid.className='ob-grid';
+    const grid=document.createElement('div');grid.className='ob-team-grid';
     const unique=tm.agents.filter((a,i,arr)=>arr.findIndex(x=>x.n===a.n)===i);
     unique.forEach(a=>{
       const d=document.createElement('div');d.className='ob-row';
