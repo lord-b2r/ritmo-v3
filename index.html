@@ -884,11 +884,7 @@ function renderMur(){
     const nm=document.createElement('div');nm.className='mur-name';nm.textContent=r.agent.split(' ')[0];
     const mt=document.createElement('div');mt.className='mur-meta';mt.textContent=r.date+' - '+sc+' pts';
     info.appendChild(nm);info.appendChild(mt);
-    const eodBtn=document.createElement('button');
-    eodBtn.style.cssText='background:var(--g1);border:none;border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:var(--g5);cursor:pointer';
-    eodBtn.textContent='Voir EOD';
-    eodBtn.onclick=(function(rep){return function(){openEOD(rep);};})(r);
-    top.appendChild(av);top.appendChild(info);top.appendChild(eodBtn);
+    top.appendChild(av);top.appendChild(info);
     const txt=document.createElement('div');txt.className='mur-text';txt.textContent='"'+r.mot_jour+'"';
     // Reactions
     const reactRow=document.createElement('div');reactRow.style.cssText='display:flex;gap:6px;margin-top:10px;flex-wrap:wrap';
@@ -1030,7 +1026,10 @@ function renderVentes(){
   const totalUp=filtered.reduce((s,v)=>s+(parseInt(v.upfront||v.up)||0),0);
   const avgUp=filtered.length?totalUp/filtered.length:0;
   const kpi=document.getElementById('ventes-kpi');
-  kpi.innerHTML='<div class="vk"><div class="vkl">TPV total</div><div class="vkv">'+formatK(totalTPV)+'</div><div class="vks">EUR</div></div><div class="vk"><div class="vkl">Taux moyen</div><div class="vkv">'+(avgTaux?avgTaux.toFixed(2)+'%':'---')+'</div><div class="vks">Sur '+filtered.length+' vente'+(filtered.length!==1?'s':'')+'</div></div><div class="vk"><div class="vkl">Upfront total</div><div class="vkv">'+formatK(totalUp)+'</div><div class="vks">EUR</div></div><div class="vk"><div class="vkl">Upfront moyen</div><div class="vkv">'+(avgUp?formatK(avgUp):'0')+'</div><div class="vks">Par vente</div></div>';
+  const posVentes=filtered.filter(v=>(v.type||v.ty||'POS')==='POS');
+  const totalUpPos=posVentes.reduce((s,v)=>s+(parseInt(v.upfront||v.up)||0),0);
+  const avgUpPos=posVentes.length?totalUpPos/posVentes.length:0;
+  kpi.innerHTML='<div class="vk"><div class="vkl">TPV total</div><div class="vkv">'+formatK(totalTPV)+'</div><div class="vks">EUR</div></div><div class="vk"><div class="vkl">Taux moyen</div><div class="vkv">'+(avgTaux?avgTaux.toFixed(2)+'%':'---')+'</div><div class="vks">Sur '+filtered.length+' vente'+(filtered.length!==1?'s':'')+'</div></div><div class="vk"><div class="vkl">Upfront total</div><div class="vkv">'+formatK(totalUp)+'</div><div class="vks">EUR</div></div><div class="vk"><div class="vkl">Upfront moyen POS</div><div class="vkv">'+(avgUpPos?formatK(avgUpPos):'0')+'</div><div class="vks">Par vente POS</div></div>';
   const list=document.getElementById('ventes-list');list.innerHTML='';
   if(!filtered.length){list.innerHTML='<div class="empty">Aucune vente'+(vFilter!=='all'?' '+vFilter:'')+'</div>';return;}
   filtered.forEach(v=>{
