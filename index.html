@@ -754,7 +754,10 @@ function renderRdv(type){
     wrap.appendChild(top);wrap.appendChild(noteEl);
     // Option vente depuis ce RDV
     const vOpt=document.createElement('div');vOpt.style.cssText='margin-top:8px;font-size:12px;color:var(--g5)';
-    vOpt.innerHTML='<span style="font-weight:600">Vente sur ce RDV ?</span> <button onclick="addVenteFromRdv(''+type+'','+i+')" style="background:var(--gbg);color:var(--green);border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px">+ Enregistrer</button>';
+        var sp=document.createElement('span');sp.style.fontWeight='600';sp.textContent='Vente sur ce RDV ?';
+    var btn2=document.createElement('button');btn2.style.cssText='background:var(--gbg);color:var(--green);border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px';btn2.textContent='+ Enregistrer';
+    btn2.onclick=(function(t,ii){return function(){addVenteFromRdv(t,ii);};})(type,i);
+    vOpt.appendChild(sp);vOpt.appendChild(btn2);
     wrap.appendChild(vOpt);
     cont.appendChild(wrap);
   });
