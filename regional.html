@@ -522,6 +522,28 @@ function renderMgrView(){
   var month=now.toISOString().slice(0,7);
   // -- Vue d ensemble des managers --
   var ov=document.getElementById('mgr-overview');ov.innerHTML='';
+  // Hero region totaux
+  var allRepsReg=MY_TEAMS.flatMap(function(tk){return (TEAMS[tk]||[]).flatMap(function(a){return getMonth(a.n,month);});});
+  var rTot={s:allRepsReg.reduce(function(x,r){return x+(r.score||0);},0),v:allRepsReg.reduce(function(x,r){return x+(r.total_vente||0);},0),i:allRepsReg.reduce(function(x,r){return x+(r.instal||0);},0),pos:allRepsReg.reduce(function(x,r){return x+(r.total_pos||0);},0),rdvIh:allRepsReg.reduce(function(x,r){return x+(r.rdv_ih||0);},0),rdvOg:allRepsReg.reduce(function(x,r){return x+(r.rdv_og||0);},0),ac:allRepsReg.reduce(function(x,r){return x+(r.ac||0);},0)};
+  var rPs=rTot.v>0?Math.round(rTot.pos/rTot.v*100):0;
+  var mn2=now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  var hero=document.createElement('div');
+  hero.style.cssText='background:var(--b);border-radius:var(--rl);padding:16px;margin-bottom:12px';
+  hero.innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
+    '<div><div style="font-size:13px;font-weight:700;color:#fff">'+REGIONAL_MANAGERS[ME].label+'</div><div style="font-size:11px;color:rgba(255,255,255,.3)">'+mn2.charAt(0).toUpperCase()+mn2.slice(1)+'</div></div>'+
+    '<div style="text-align:right"><div style="font-size:48px;font-weight:900;letter-spacing:-2px;color:#4ade80;line-height:1">'+rTot.s+'</div><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.6px">Score region</div></div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">'+
+    '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Ventes</div><div style="font-size:20px;font-weight:800;color:#4ade80">'+rTot.v+'</div></div>'+
+    '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Instals</div><div style="font-size:20px;font-weight:800;color:#4ade80">'+rTot.i+'</div></div>'+
+    '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">POS share</div><div style="font-size:20px;font-weight:800;color:'+(rPs>=50?'#4ade80':'#fff')+'">'+rPs+'%</div></div>'+
+    '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">RDV IH</div><div style="font-size:20px;font-weight:800;color:#fff">'+rTot.rdvIh+'</div></div>'+
+    '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">RDV OG</div><div style="font-size:20px;font-weight:800;color:#fff">'+rTot.rdvOg+'</div></div>'+
+    '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">AC total</div><div style="font-size:20px;font-weight:800;color:#fff">'+rTot.ac+'</div></div>'+
+    '</div>'+
+    '<div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#E8FF3A);width:'+Math.min(rPs*2,100)+'%"></div></div>'+
+    '<div style="display:flex;justify-content:space-between;margin-top:4px"><div style="font-size:10px;color:rgba(255,255,255,.3)">'+rTot.pos+' POS / '+rTot.v+' ventes</div><div style="font-size:10px;color:rgba(255,255,255,.3)">'+MY_TEAMS.length+' equipe'+(MY_TEAMS.length>1?'s':'')+' - '+allRepsReg.length+' rapports</div></div>';
+  ov.appendChild(hero);
   var ovGrid=document.createElement('div');ovGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px';
   MY_TEAMS.forEach(function(tk){
     var agents=TEAMS[tk]||[];
