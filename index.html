@@ -373,11 +373,17 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
           <div class="card-hd-r"><span class="pill er" id="pill-rdv">0 RDV</span><i class="ti ti-chevron-down chev" id="chev-rdv"></i></div>
         </div>
         <div class="card-body" id="body-rdv" style="padding-top:12px">
+          <div class="row" style="margin-bottom:8px">
+            <span class="rl" style="font-weight:700">IH</span>
+            <div class="stp"><button class="sb" onclick="stepRdv('ih',-1)">-</button><span class="sv nu" id="sv-rdv-ih">0</span><button class="sb" onclick="stepRdv('ih',1)">+</button></div>
+          </div>
           <div id="rdv-ih-list"></div>
-          <button class="add-btn" onclick="addRdv('ih')"><i class="ti ti-plus"></i> Ajouter RDV IH</button>
           <div class="divl"></div>
+          <div class="row" style="margin-bottom:8px">
+            <span class="rl" style="font-weight:700">OG</span>
+            <div class="stp"><button class="sb" onclick="stepRdv('og',-1)">-</button><span class="sv nu" id="sv-rdv-og">0</span><button class="sb" onclick="stepRdv('og',1)">+</button></div>
+          </div>
           <div id="rdv-og-list"></div>
-          <button class="add-btn" onclick="addRdv('og')"><i class="ti ti-plus"></i> Ajouter RDV OG</button>
         </div>
       </div>
 
@@ -389,8 +395,11 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
           <div class="card-hd-r"><span class="pill nu" id="pill-vt">0 vente</span><i class="ti ti-chevron-down chev" id="chev-vt"></i></div>
         </div>
         <div class="card-body" id="body-vt" style="padding-top:12px">
+          <div class="row" style="margin-bottom:8px">
+            <span class="rl" style="font-weight:700">Nombre de ventes</span>
+            <div class="stp"><button class="sb" onclick="stepVentes(-1)">-</button><span class="sv nu" id="sv-ventes">0</span><button class="sb" onclick="stepVentes(1)">+</button></div>
+          </div>
           <div id="ventes-form-list"></div>
-          <button class="add-btn" id="add-vente-btn" onclick="addVente()" style="display:none"><i class="ti ti-plus"></i> Ajouter une vente</button>
           <div class="total-row"><span class="total-l">Total ventes</span><span class="total-v z" id="total-v">0</span></div>
         </div>
       </div>
@@ -549,8 +558,8 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <div class="tab on" id="t-eod" onclick="sw('eod')"><i class="ti ti-file-text"></i><span>EOD</span></div>
     <div class="tab" id="t-st" onclick="sw('st')"><i class="ti ti-chart-bar"></i><span>Stats</span></div>
     <div class="tab" id="t-fu" onclick="sw('fu')"><i class="ti ti-list-check"></i><span>FU</span></div>
-    <div class="tab" id="t-vt" onclick="sw('vt')"><i class="ti ti-currency-euro"></i><span>Ventes</span></div>
     <div class="tab" id="t-mur" onclick="sw('mur')"><i class="ti ti-speakerphone"></i><span>Mur</span></div>
+    <div class="tab" id="t-vt" onclick="sw('vt')"><i class="ti ti-currency-euro"></i><span>Ventes</span></div>
   </div>
 </div>
 
@@ -732,7 +741,9 @@ function updateAll(){
   document.getElementById('sv-ac').textContent=S.ac;document.getElementById('sv-ac').className='sv'+(S.ac>=1?' ok':' er');
   document.getElementById('sv-ins').textContent=S.ins;document.getElementById('sv-ins').className='sv'+(S.ins>=1?' ok':' er');
   document.getElementById('sv-fu').textContent=S.fu;
-  const addVBtn=document.getElementById('add-vente-btn');addVBtn.style.display=tv<20?'flex':'none';
+  var svIh=document.getElementById('sv-rdv-ih');if(svIh){svIh.textContent=ih;svIh.className='sv '+(ih>0?'ok':'nu');}
+  var svOg=document.getElementById('sv-rdv-og');if(svOg){svOg.textContent=og;svOg.className='sv '+(og>0?'ok':'nu');}
+  var svVt=document.getElementById('sv-ventes');if(svVt){svVt.textContent=tv;svVt.className='sv '+(tv>0?'ok':'nu');}
   updateObjBar();
 }
 
@@ -746,68 +757,114 @@ function tog(id){
 }
 
 // -- RDV --
-function addRdv(type){
-  S['rdv_'+type].push({note:'',vente:null,fu:false});
+function stepRdv(type,d){
+  var cur=S['rdv_'+type].length;
+  var next=Math.max(0,cur+d);
+  if(next>cur){S['rdv_'+type].push({note:'',fu:false});}
+  else if(next<cur){S['rdv_'+type].pop();}
+  var el=document.getElementById('sv-rdv-'+type);
+  if(el){el.textContent=next;el.className='sv '+(next>0?'ok':'nu');}
   renderRdv(type);updateAll();
 }
+function addRdv(type){stepRdv(type,1);}
 function renderRdv(type){
-  const cont=document.getElementById('rdv-'+type+'-list');cont.innerHTML='';
-  S['rdv_'+type].forEach((rdv,i)=>{
-    const wrap=document.createElement('div');wrap.style.cssText='padding:10px 0;border-bottom:1px solid var(--g1)';
-    const top=document.createElement('div');top.style.cssText='display:flex;align-items:center;gap:8px;margin-bottom:8px';
-    const lbl=document.createElement('span');lbl.style.cssText='font-size:13px;font-weight:600;flex:1';lbl.textContent='RDV '+(i+1)+' '+(type==='ih'?'IH':'OG');
-    const del=document.createElement('button');del.style.cssText='background:var(--rbg);border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:12px;color:var(--red);display:flex;align-items:center;justify-content:center';del.textContent='×';
-    del.onclick=(function(t,ii){return function(){S['rdv_'+t].splice(ii,1);renderRdv(t);updateAll();};})(type,i);
-    top.appendChild(lbl);top.appendChild(del);
-    const noteEl=document.createElement('textarea');noteEl.className='note';noteEl.rows=1;noteEl.placeholder='Note : contact, produit, suite...';noteEl.value=rdv.note;
+  var cont=document.getElementById('rdv-'+type+'-list');
+  if(!cont)return;
+  cont.innerHTML='';
+  S['rdv_'+type].forEach(function(rdv,i){
+    var wrap=document.createElement('div');
+    wrap.style.cssText='background:var(--g1);border-radius:var(--r);padding:10px 12px;margin-bottom:6px';
+    var lbl=document.createElement('div');
+    lbl.style.cssText='font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px';
+    lbl.textContent='RDV '+(i+1)+' '+(type==='ih'?'IH':'OG');
+    var noteEl=document.createElement('textarea');
+    noteEl.className='note';noteEl.rows=1;
+    noteEl.placeholder='Note : nom, produit, suite...';
+    noteEl.value=rdv.note||'';
+    noteEl.style.marginBottom='6px';
     (function(t,ii){noteEl.oninput=function(){S['rdv_'+t][ii].note=this.value;};})(type,i);
-    wrap.appendChild(top);wrap.appendChild(noteEl);
-    // Option FU depuis ce RDV
-    const vOpt=document.createElement('div');vOpt.style.cssText='display:flex;align-items:center;gap:6px;margin-top:8px;cursor:pointer';
-    const fuChkRdv=document.createElement('div');
-    fuChkRdv.style.cssText='width:20px;height:20px;border:1.5px solid var(--g3);border-radius:4px;background:var(--w);display:flex;align-items:center;justify-content:center;flex-shrink:0';
-    if(rdv.fu){fuChkRdv.style.background='var(--b)';fuChkRdv.style.borderColor='var(--b)';}
-    const fuLblRdv=document.createElement('span');fuLblRdv.style.cssText='font-size:12px;color:var(--g5)';fuLblRdv.textContent='Ajouter en FU';
-    (function(t,ii,chk){vOpt.onclick=function(){S['rdv_'+t][ii].fu=!S['rdv_'+t][ii].fu;renderRdv(t);};})(type,i,fuChkRdv);
-    vOpt.appendChild(fuChkRdv);vOpt.appendChild(fuLblRdv);
-    wrap.appendChild(vOpt);
+    var fuRow=document.createElement('div');
+    fuRow.style.cssText='display:flex;align-items:center;gap:6px;cursor:pointer';
+    var fuChk=document.createElement('div');
+    fuChk.style.cssText='width:18px;height:18px;border:1.5px solid '+(rdv.fu?'var(--b)':'var(--g3)')+';border-radius:4px;background:'+(rdv.fu?'var(--b)':'var(--w)')+';display:flex;align-items:center;justify-content:center;flex-shrink:0';
+    if(rdv.fu)fuChk.innerHTML='<svg width="10" height="8" viewBox="0 0 12 9" fill="none"><path d="M1 4.5L4.5 8L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    var fuLbl=document.createElement('span');fuLbl.style.cssText='font-size:12px;color:var(--g5)';fuLbl.textContent='Ajouter en FU';
+    (function(t,ii){fuRow.onclick=function(){S['rdv_'+t][ii].fu=!S['rdv_'+t][ii].fu;renderRdv(t);};})(type,i);
+    fuRow.appendChild(fuChk);fuRow.appendChild(fuLbl);
+    wrap.appendChild(lbl);wrap.appendChild(noteEl);wrap.appendChild(fuRow);
     cont.appendChild(wrap);
   });
 }
-
 function addVenteFromRdv(type,rdvIdx){
-  S.ventes.push({nom:'',tpv:'',taux:'',ty:'POS',upfront:'',fu:false,from_rdv:type+'_'+rdvIdx});
+  S.ventes.push({nom:'',tpv:'',taux:'',ty:'POS',src:type,sig:'quick',upfront:''});
   renderVentesForm();updateAll();
 }
-
-// -- VENTES FORM --
-function addVente(){S.ventes.push({nom:'',tpv:'',taux:'',ty:'POS',upfront:'',fu:false});renderVentesForm();updateAll();}
+function stepVentes(d){
+  var cur=S.ventes.length;
+  var next=Math.max(0,cur+d);
+  if(next>cur){S.ventes.push({nom:'',tpv:'',taux:'',ty:'POS',src:'ih',sig:'quick',upfront:''});renderVentesForm();}
+  else if(next<cur){S.ventes.pop();renderVentesForm();}
+  var el=document.getElementById('sv-ventes');
+  if(el){el.textContent=next;el.className='sv '+(next>0?'ok':'nu');}
+  updateAll();
+}
+function addVente(){stepVentes(1);}
 function renderVentesForm(){
-  const list=document.getElementById('ventes-form-list');list.innerHTML='';
-  S.ventes.forEach((v,i)=>{
-    const div=document.createElement('div');div.className='vente-block';
-    const hd=document.createElement('div');hd.className='vente-hd';
-    const hl=document.createElement('span');hl.className='vente-hd-l';hl.textContent='Vente '+(i+1);
-    const dd=document.createElement('button');dd.className='vente-del';dd.innerHTML='<i class="ti ti-x" style="font-size:13px;color:var(--red)"></i>';
-    dd.onclick=(function(ii){return function(){S.ventes.splice(ii,1);renderVentesForm();updateAll();};})(i);
-    hd.appendChild(hl);hd.appendChild(dd);
-    const vf=document.createElement('div');vf.className='vf';
-    // Nom
-    const g1=document.createElement('div');g1.className='vfg';const l1=document.createElement('div');l1.className='vfl';l1.textContent='Nom du commerce';const i1=document.createElement('input');i1.className='vfi';i1.type='text';i1.placeholder='ex: Boulangerie Martin';i1.value=v.nom;(function(ii){i1.oninput=function(){S.ventes[ii].nom=this.value;};})(i);g1.appendChild(l1);g1.appendChild(i1);
-    // TPV + Taux
-    const r1=document.createElement('div');r1.className='vfr';
-    const g2=document.createElement('div');g2.className='vfg';const l2=document.createElement('div');l2.className='vfl';l2.textContent='TPV (EUR)';const i2=document.createElement('input');i2.className='vfi';i2.type='number';i2.placeholder='300000';i2.value=v.tpv;(function(ii){i2.oninput=function(){S.ventes[ii].tpv=this.value;};})(i);g2.appendChild(l2);g2.appendChild(i2);
-    const g3=document.createElement('div');g3.className='vfg';const l3=document.createElement('div');l3.className='vfl';l3.textContent='Taux (%)';const i3=document.createElement('input');i3.className='vfi';i3.type='number';i3.placeholder='1.29';i3.step='0.01';i3.value=v.taux;(function(ii){i3.oninput=function(){S.ventes[ii].taux=this.value;};})(i);g3.appendChild(l3);g3.appendChild(i3);
+  var list=document.getElementById('ventes-form-list');list.innerHTML='';
+  S.ventes.forEach(function(v,i){
+    var div=document.createElement('div');div.className='vente-block';
+    var hd=document.createElement('div');hd.className='vente-hd';
+    var hl=document.createElement('span');hl.className='vente-hd-l';hl.textContent='Vente '+(i+1);
+    hd.appendChild(hl);
+    var vf=document.createElement('div');vf.className='vf';
+    var g1=document.createElement('div');g1.className='vfg';
+    var l1=document.createElement('div');l1.className='vfl';l1.textContent='Nom du commerce';
+    var i1=document.createElement('input');i1.className='vfi';i1.type='text';i1.placeholder='ex: Boulangerie Martin';i1.value=v.nom;
+    (function(ii){i1.oninput=function(){S.ventes[ii].nom=this.value;};})(i);
+    g1.appendChild(l1);g1.appendChild(i1);
+    var r0=document.createElement('div');r0.className='vfr';
+    var g0a=document.createElement('div');g0a.className='vfg';
+    var l0a=document.createElement('div');l0a.className='vfl';l0a.textContent='Source';
+    var tg0a=document.createElement('div');tg0a.className='vft';
+    var tih=document.createElement('div');tih.className='vfo'+(v.src==='ih'?' on':'');tih.textContent='IH';
+    var tog2=document.createElement('div');tog2.className='vfo'+(v.src==='og'?' on':'');tog2.textContent='OG';
+    (function(ii){tih.onclick=function(){S.ventes[ii].src='ih';renderVentesForm();};tog2.onclick=function(){S.ventes[ii].src='og';renderVentesForm();};})(i);
+    tg0a.appendChild(tih);tg0a.appendChild(tog2);g0a.appendChild(l0a);g0a.appendChild(tg0a);
+    var g0b=document.createElement('div');g0b.className='vfg';
+    var l0b=document.createElement('div');l0b.className='vfl';l0b.textContent='Signature';
+    var tg0b=document.createElement('div');tg0b.className='vft';
+    var tqk=document.createElement('div');tqk.className='vfo'+(v.sig==='quick'?' on':'');tqk.textContent='Quick';
+    var tfu=document.createElement('div');tfu.className='vfo'+(v.sig==='fu'?' on':'');tfu.textContent='Follow-up';
+    (function(ii){tqk.onclick=function(){S.ventes[ii].sig='quick';renderVentesForm();};tfu.onclick=function(){S.ventes[ii].sig='fu';renderVentesForm();};})(i);
+    tg0b.appendChild(tqk);tg0b.appendChild(tfu);g0b.appendChild(l0b);g0b.appendChild(tg0b);
+    r0.appendChild(g0a);r0.appendChild(g0b);
+    var r1=document.createElement('div');r1.className='vfr';
+    var g2=document.createElement('div');g2.className='vfg';
+    var l2=document.createElement('div');l2.className='vfl';l2.textContent='TPV (EUR)';
+    var i2=document.createElement('input');i2.className='vfi';i2.type='number';i2.placeholder='300000';i2.value=v.tpv;
+    (function(ii){i2.oninput=function(){S.ventes[ii].tpv=this.value;};})(i);
+    g2.appendChild(l2);g2.appendChild(i2);
+    var g3=document.createElement('div');g3.className='vfg';
+    var l3=document.createElement('div');l3.className='vfl';l3.textContent='Taux (%)';
+    var i3=document.createElement('input');i3.className='vfi';i3.type='number';i3.placeholder='1.29';i3.step='0.01';i3.value=v.taux;
+    (function(ii){i3.oninput=function(){S.ventes[ii].taux=this.value;};})(i);
+    g3.appendChild(l3);g3.appendChild(i3);
     r1.appendChild(g2);r1.appendChild(g3);
-    // Type + Upfront
-    const r2=document.createElement('div');r2.className='vfr';
-    const g4=document.createElement('div');g4.className='vfg';const l4=document.createElement('div');l4.className='vfl';l4.textContent='Type';const tg=document.createElement('div');tg.className='vft';
-    const tp=document.createElement('div');tp.className='vfo'+(v.ty==='POS'?' on':'');tp.textContent='POS';(function(ii){tp.onclick=function(){S.ventes[ii].ty='POS';renderVentesForm();};})(i);
-    const tt=document.createElement('div');tt.className='vfo'+(v.ty==='TPE'?' on':'');tt.textContent='TPE';(function(ii){tt.onclick=function(){S.ventes[ii].ty='TPE';renderVentesForm();};})(i);
+    var r2=document.createElement('div');r2.className='vfr';
+    var g4=document.createElement('div');g4.className='vfg';
+    var l4=document.createElement('div');l4.className='vfl';l4.textContent='Type caisse';
+    var tg=document.createElement('div');tg.className='vft';
+    var tp=document.createElement('div');tp.className='vfo'+(v.ty==='POS'?' on':'');tp.textContent='POS';
+    var tt=document.createElement('div');tt.className='vfo'+(v.ty==='TPE'?' on':'');tt.textContent='TPE';
+    (function(ii){tp.onclick=function(){S.ventes[ii].ty='POS';renderVentesForm();};tt.onclick=function(){S.ventes[ii].ty='TPE';renderVentesForm();};})(i);
     tg.appendChild(tp);tg.appendChild(tt);g4.appendChild(l4);g4.appendChild(tg);
-    const g5=document.createElement('div');g5.className='vfg';const l5=document.createElement('div');l5.className='vfl';l5.textContent='Upfront (EUR)';const i5=document.createElement('input');i5.className='vfi';i5.type='number';i5.placeholder='1000';i5.value=v.upfront;(function(ii){i5.oninput=function(){S.ventes[ii].upfront=this.value;};})(i);g5.appendChild(l5);g5.appendChild(i5);
+    var g5=document.createElement('div');g5.className='vfg';
+    var l5=document.createElement('div');l5.className='vfl';l5.textContent='Upfront (EUR)';
+    var i5=document.createElement('input');i5.className='vfi';i5.type='number';i5.placeholder='1000';i5.value=v.upfront;
+    (function(ii){i5.oninput=function(){S.ventes[ii].upfront=this.value;};})(i);
+    g5.appendChild(l5);g5.appendChild(i5);
     r2.appendChild(g4);r2.appendChild(g5);
-    vf.appendChild(g1);vf.appendChild(r1);vf.appendChild(r2);
+    vf.appendChild(g1);vf.appendChild(r0);vf.appendChild(r1);vf.appendChild(r2);
     div.appendChild(hd);div.appendChild(vf);list.appendChild(div);
   });
 }
@@ -953,7 +1010,8 @@ function renderStMoi(){
   if(!reps.length){dl.innerHTML='<div class="empty">Aucun rapport ce mois</div>';return;}
   reps.slice(0,25).forEach(r=>{
     const sc2=r.score||0,cls=scColor(sc2),tv2=r.total_vente||0;
-    const d=document.createElement('div');d.className='day-item';
+    const d=document.createElement('div');d.className='day-item';d.style.cursor='pointer';
+    d.onclick=(function(rep){return function(){openEOD(rep);};})(r);
     const dot=document.createElement('div');dot.className='day-dot '+cls;
     const inf=document.createElement('div');inf.style.flex='1';
     const dt=document.createElement('div');dt.style.cssText='font-size:12px;font-weight:700;color:var(--g4)';dt.textContent=r.date;
@@ -1077,7 +1135,7 @@ function renderHist(){
 
 // -- TABS --
 function sw(t){
-  ['eod','st','fu','vt','mur'].forEach(s=>{
+  ['eod','st','fu','mur','vt'].forEach(s=>{
     document.getElementById('s-'+s).className='scr'+(t===s?' on':'');
     document.getElementById('t-'+s).className='tab'+(t===s?' on':'');
   });
