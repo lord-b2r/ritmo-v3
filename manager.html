@@ -156,6 +156,19 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .mur-text{font-size:14px;color:var(--b);line-height:1.5;padding:10px;background:var(--g1);border-radius:var(--r);font-style:italic}
 
 .empty{text-align:center;padding:40px 0;font-size:13px;font-weight:600;color:var(--g3)}
+.fu-cat{display:inline-flex;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.fu-rdv{background:rgba(59,130,246,.15);color:#1d4ed8}
+.fu-fu{background:rgba(245,158,11,.15);color:#92400e}
+.fu-mgm{background:rgba(16,185,129,.15);color:#065f46}
+.fu-card{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);margin-bottom:8px;overflow:hidden}
+.fu-agent-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--g1)}
+.fu-agent-body{display:none;padding:10px 14px 14px}
+.fu-agent-body.op{display:block}
+.fu-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--g1)}
+.fu-row:last-child{border-bottom:0}
+.fu-nom{font-size:13px;font-weight:600;flex:1}
+.fu-note{font-size:11px;color:var(--g4);margin-top:2px}
+.fu-type{font-size:10px;font-weight:700;color:var(--g3)}
 </style>
 </head>
 <body>
@@ -193,6 +206,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <div class="slide-tab on" id="t-today" onclick="sw('today')">Aujourd hui</div>
     <div class="slide-tab" id="t-month" onclick="sw('month')">Ce mois</div>
     <div class="slide-tab" id="t-ventes" onclick="sw('ventes')">Ventes</div>
+    <div class="slide-tab" id="t-fu" onclick="sw('fu')">Follow-up</div>
     <div class="slide-tab" id="t-mur" onclick="sw('mur')">Mur</div>
   </div>
 
@@ -216,7 +230,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- VENTES -->
     <div id="s-ventes" class="scr">
-      <div class="filter-row" id="team-filter"></div>
+      <div class="filter-row" id="sales-filter"></div>
       <div class="filter-row" id="type-filter">
         <button class="fb on" onclick="setTypeFilter('all')">Toutes</button>
         <button class="fb" onclick="setTypeFilter('POS')">POS</button>
@@ -224,6 +238,14 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
       </div>
       <div class="kgrid" id="ventes-kpi"></div>
       <div id="ventes-list"></div>
+    </div>
+
+    <!-- FOLLOW-UP -->
+    <div id="s-fu" class="scr">
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px">Follow-up equipe</div>
+      <div style="font-size:13px;color:var(--g4);margin-bottom:14px">Pipeline de mon equipe - dernier envoi EOD</div>
+      <div id="fu-summary"></div>
+      <div id="fu-list-mgr"></div>
     </div>
 
     <!-- MUR -->
@@ -305,6 +327,7 @@ var now = new Date();
 var ME = null, TEAM = null, REPORTS = [];
 var PENDING = null;
 var teamFilter = 'own';
+var salesFilter = 'all';
 var typeFilter = 'all';
 
 function spk(k,v){try{localStorage.setItem(k,v);}catch(e){}document.cookie=k+'='+encodeURIComponent(v)+';path=/;max-age=31536000';}
@@ -370,28 +393,33 @@ function bootApp(){
   var mn=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('pg-date').textContent=mn.charAt(0).toUpperCase()+mn.slice(1);
   document.getElementById('pg-team').textContent='Vue manager - donnees en temps reel';
-  buildTeamFilter();
+  buildSalesFilter();
   loadData();
   setInterval(loadData,60000);
 }
 
-function buildTeamFilter(){
-  var f=document.getElementById('team-filter');f.innerHTML='';
-  var teams=[{k:'own',l:'Mon equipe'}];
-  Object.keys(MANAGERS).forEach(function(k){if(k!==ME)teams.push({k:k,l:MANAGERS[k].label});});
-  teams.push({k:'all',l:'Tous'});
-  teams.forEach(function(t){
-    var b=document.createElement('button');b.className='fb'+(t.k===teamFilter?' on':'');
-    b.textContent=t.l;
-    b.onclick=(function(tk){return function(){setTeamFilter(tk);};})(t.k);
+function buildTeamFilter(){} // deprecated
+function buildSalesFilter(){
+  var f=document.getElementById('sales-filter');if(!f)return;f.innerHTML='';
+  var agents=getTeamAgents('own');
+  // Bouton "Tous"
+  var all=document.createElement('button');all.className='fb'+(salesFilter==='all'?' on':'');
+  all.textContent='Tous';all.onclick=function(){setSalesFilter('all');};f.appendChild(all);
+  agents.forEach(function(ag){
+    var b=document.createElement('button');b.className='fb'+(salesFilter===ag.n?' on':'');
+    b.textContent=ag.n.split(' ')[0];
+    b.onclick=(function(n){return function(){setSalesFilter(n);};})(ag.n);
     f.appendChild(b);
   });
+}
+function setSalesFilter(n){
+  salesFilter=n;buildSalesFilter();renderVentes();
 }
 
 function setTeamFilter(t){
   teamFilter=t;
   document.querySelectorAll('#team-filter .fb').forEach(function(b){b.className='fb'+(b.textContent===(t==='own'?'Mon equipe':t==='all'?'Tous':MANAGERS[t]?MANAGERS[t].label:'')?' on':'');});
-  buildTeamFilter();
+  buildSalesFilter();
   renderVentes();
 }
 function setTypeFilter(t){
@@ -647,32 +675,23 @@ function renderMonth(){
 }
 
 function renderVentes(){
-  var agents=getTeamAgents(teamFilter);
+  var agents=getTeamAgents('own');
+  if(salesFilter!=='all'){agents=agents.filter(function(a){return a.n===salesFilter;});}
   var month=now.toISOString().slice(0,7);
   var reps=REPORTS.filter(function(r){
     return agents.some(function(a){return a.n===r.agent;})&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month;
   });
-  var allV=reps.reduce(function(acc,r){
-    return acc.concat((r.ventes_detail||[]).filter(function(v){return v&&v.nom;}).map(function(v){return Object.assign({},v,{date:r.date,agent:r.agent});}));
-  },[]);
+  var allV=reps.reduce(function(acc,r){return acc.concat((r.ventes_detail||[]).filter(function(v){return v&&v.nom;}).map(function(v){return Object.assign({},v,{date:r.date,agent:r.agent});}));},  []);
   var filtered=typeFilter==='all'?allV:allV.filter(function(v){return (v.type||v.ty||'POS')===typeFilter;});
   var totalTPV=filtered.reduce(function(s,v){return s+(parseInt(v.tpv)||0);},0);
   var avgTaux=filtered.length?filtered.reduce(function(s,v){return s+(parseFloat(v.taux)||0);},0)/filtered.length:0;
   var totalUp=filtered.reduce(function(s,v){return s+(parseInt(v.upfront)||0);},0);
-  var posVentes=filtered.filter(function(v){return (v.type||v.ty||'POS')==='POS';});
-  var totalUpPos=posVentes.reduce(function(s,v){return s+(parseInt(v.upfront)||0);},0);
-  var avgUpPos=posVentes.length?totalUpPos/posVentes.length:0;
-  var kpi=document.getElementById('ventes-kpi');
-  kpi.innerHTML='';
-  [['TPV total',formatK(totalTPV)+' EUR',''],
-   ['Taux moyen',avgTaux?avgTaux.toFixed(2)+'%':'---','Sur '+filtered.length+' vente'+(filtered.length!==1?'s':'')],
-   ['Upfront total',formatK(totalUp)+' EUR',''],
-   ['Upfront moy. POS',avgUpPos?formatK(avgUpPos)+' EUR':'0','Par vente POS']].forEach(function(c){
-    var vk=document.createElement('div');vk.className='vk';
-    var vkl=document.createElement('div');vkl.className='vkl';vkl.textContent=c[0];
-    var vkv=document.createElement('div');vkv.className='vkv';vkv.textContent=c[1];
-    var vks=document.createElement('div');vks.className='vks';vks.textContent=c[2];
-    vk.appendChild(vkl);vk.appendChild(vkv);vk.appendChild(vks);kpi.appendChild(vk);
+  var posV=filtered.filter(function(v){return (v.type||v.ty||'POS')==='POS';});
+  var avgUpPos=posV.length?posV.reduce(function(s,v){return s+(parseInt(v.upfront)||0);},0)/posV.length:0;
+  var kpi=document.getElementById('ventes-kpi');kpi.innerHTML='';
+  [['TPV total',formatK(totalTPV)+' EUR',''],['Taux moyen',avgTaux?avgTaux.toFixed(2)+'%':'---','Sur '+filtered.length+' ventes'],
+   ['Upfront total',formatK(totalUp)+' EUR',''],['Upfront moy. POS',avgUpPos?formatK(avgUpPos)+' EUR':'0','Par vente POS']].forEach(function(c){
+    var vk=document.createElement('div');vk.className='vk';vk.innerHTML='<div class="vkl">'+c[0]+'</div><div class="vkv">'+c[1]+'</div><div class="vks">'+c[2]+'</div>';kpi.appendChild(vk);
   });
   var list=document.getElementById('ventes-list');list.innerHTML='';
   if(!filtered.length){list.innerHTML='<div class="empty">Aucune vente</div>';return;}
@@ -680,16 +699,16 @@ function renderVentes(){
     var tp=parseInt(v.tpv)||0,up=parseInt(v.upfront)||0,ty=v.type||v.ty||'POS';
     var ag=ALL_AGENTS.find(function(a){return a.n===v.agent;});
     var d=document.createElement('div');d.className='vi';
-    var top=document.createElement('div');top.className='vit';
-    var nm=document.createElement('span');nm.className='vin';nm.textContent=v.nom;
+    var vit=document.createElement('div');vit.className='vit';
+    var vin=document.createElement('span');vin.className='vin';vin.textContent=v.nom;
     var ty2=document.createElement('span');ty2.className='pill '+(ty==='POS'?'ok':'bl');ty2.textContent=ty;
-    top.appendChild(nm);top.appendChild(ty2);
+    vit.appendChild(vin);vit.appendChild(ty2);
     var via=document.createElement('div');via.className='via';via.textContent=(ag?ag.n.split(' ')[0]:v.agent)+' - '+v.date;
     var vg=document.createElement('div');vg.className='vig';
     [['TPV',tp?formatK(tp)+' EUR':'---'],['Taux',v.taux?v.taux+'%':'---'],['Upfront',up?formatK(up)+' EUR':'0']].forEach(function(c){
       var vc=document.createElement('div');vc.className='vc';var vcl=document.createElement('div');vcl.className='vcl';vcl.textContent=c[0];var vcv=document.createElement('div');vcv.className='vcv';vcv.textContent=c[1];vc.appendChild(vcl);vc.appendChild(vcv);vg.appendChild(vc);
     });
-    d.appendChild(top);d.appendChild(via);d.appendChild(vg);list.appendChild(d);
+    d.appendChild(vit);d.appendChild(via);d.appendChild(vg);list.appendChild(d);
   });
 }
 
@@ -759,12 +778,88 @@ function openAgentDetail(ag,stats){
 }
 function closeModal(){document.getElementById('eod-modal').style.display='none';}
 
+function renderFU(){
+  var agents=getTeamAgents('own');
+  var month=now.toISOString().slice(0,7);
+  // Dernier rapport de chaque commercial ce mois
+  var summary=document.getElementById('fu-summary');
+  var list=document.getElementById('fu-list-mgr');
+  summary.innerHTML='';list.innerHTML='';
+  // Grille résumé volumes par commercial
+  var sumGrid=document.createElement('div');sumGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px';
+  var hasFU=false;
+  agents.forEach(function(ag){
+    // Prendre le dernier rapport du mois qui a des FU
+    var reps=REPORTS.filter(function(r){return r.agent===ag.n&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month&&r.fu_list&&r.fu_list.length;});
+    var lastRep=reps[0]; // déjà trié par date desc
+    var fuData=lastRep?lastRep.fu_list:[];
+    var nRdv=fuData.filter(function(f){return f.cat==='rdv';}).length;
+    var nFu=fuData.filter(function(f){return f.cat==='fu';}).length;
+    var nMgm=fuData.filter(function(f){return f.cat==='mgm';}).length;
+    var total=fuData.length;
+    if(total>0)hasFU=true;
+    var kc=document.createElement('div');
+    kc.style.cssText='background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:12px';
+    kc.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+      '<div style="width:30px;height:30px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">'+ag.i+'</div>'+
+      '<div style="font-size:13px;font-weight:700">'+ag.n.split(' ')[0]+'</div>'+
+      '<div style="margin-left:auto;font-size:18px;font-weight:800;color:'+(total>0?'var(--green)':'var(--g3)')+'">'+total+'</div></div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+      (nRdv?'<span class="fu-cat fu-rdv">'+nRdv+' RDV</span>':'')+
+      (nFu?'<span class="fu-cat fu-fu">'+nFu+' FU</span>':'')+
+      (nMgm?'<span class="fu-cat fu-mgm">'+nMgm+' MGM</span>':'')+
+      (total===0?'<span style="font-size:11px;color:var(--g3)">Aucun FU</span>':'')+'</div>';
+    sumGrid.appendChild(kc);
+  });
+  summary.appendChild(sumGrid);
+  if(!hasFU){list.innerHTML='<div class="empty">Aucun follow-up renseigne cette semaine</div>';return;}
+  // Liste dépliable par commercial
+  var lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Detail par commercial';list.appendChild(lbl);
+  agents.forEach(function(ag){
+    var reps=REPORTS.filter(function(r){return r.agent===ag.n&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month&&r.fu_list&&r.fu_list.length;});
+    var lastRep=reps[0];
+    var fuData=lastRep?lastRep.fu_list:[];
+    if(!fuData.length)return;
+    var card=document.createElement('div');card.className='fu-card';
+    var key='fu_'+ag.n.replace(/[^a-z0-9]/gi,'_');
+    var hd=document.createElement('div');hd.className='fu-agent-hd';
+    var nRdv=fuData.filter(function(f){return f.cat==='rdv';}).length;
+    var nFu=fuData.filter(function(f){return f.cat==='fu';}).length;
+    var nMgm=fuData.filter(function(f){return f.cat==='mgm';}).length;
+    hd.innerHTML='<div style="width:34px;height:34px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">'+ag.i+'</div>'+
+      '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+ag.n+'</div>'+
+      '<div style="display:flex;gap:5px;margin-top:4px">'+
+      (nRdv?'<span class="fu-cat fu-rdv">'+nRdv+' RDV</span>':'')+
+      (nFu?'<span class="fu-cat fu-fu">'+nFu+' FU</span>':'')+
+      (nMgm?'<span class="fu-cat fu-mgm">'+nMgm+' MGM</span>'  :'')+'</div></div>'+
+      '<div style="font-size:11px;color:var(--g4)">'+(lastRep?lastRep.date:'')+'</div>'+
+      '<i class="ti ti-chevron-down chev" id="chfu-'+key+'"></i>';
+    hd.onclick=(function(k){return function(){
+      var b=document.getElementById('b-'+k),c=document.getElementById('chfu-'+k);
+      if(!b)return;var op=b.classList.contains('op');b.classList.toggle('op');
+      if(c)c.style.transform=op?'':'rotate(180deg)';
+    };})(key);
+    var body=document.createElement('div');body.className='fu-agent-body';body.id='b-'+key;
+    var cats={rdv:'fu-rdv',fu:'fu-fu',mgm:'fu-mgm'};
+    var catLabels={rdv:'RDV',fu:'Follow-up',mgm:'MGM'};
+    fuData.forEach(function(f){
+      var row=document.createElement('div');row.className='fu-row';
+      row.innerHTML='<span class="fu-cat '+(cats[f.cat]||'fu-fu')+'">'+catLabels[f.cat]+'</span>'+
+        '<div style="flex:1"><div class="fu-nom">'+f.nom+'</div>'+(f.note?'<div class="fu-note">'+f.note+'</div>':'')+'</div>'+
+        '<span class="fu-type">'+(f.type||'').toUpperCase()+'</span>';
+      body.appendChild(row);
+    });
+    card.appendChild(hd);card.appendChild(body);list.appendChild(card);
+  });
+}
+
 function sw(t){
-  ['today','month','ventes','mur'].forEach(function(s){
+  ['today','month','ventes','fu','mur'].forEach(function(s){
     document.getElementById('s-'+s).className='scr'+(t===s?' on':'');
     document.getElementById('t-'+s).className='slide-tab'+(t===s?' on':'');
   });
-  if(t==='ventes')renderVentes();
+  if(t==='ventes'){buildSalesFilter();renderVentes();}
+  if(t==='fu')renderFU();
   if(t==='mur')renderMur();
 }
 
