@@ -365,6 +365,7 @@ function bootApp(){
   document.getElementById('app').style.display='flex';
   document.getElementById('app').classList.add('v');
   var mgr=MANAGERS[ME];
+  TEAM=mgr.team;
   document.getElementById('top-av').textContent=mgr.initials;
   var mn=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   document.getElementById('pg-date').textContent=mn.charAt(0).toUpperCase()+mn.slice(1);
