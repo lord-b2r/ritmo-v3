@@ -566,10 +566,16 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 <script>
 // -- CONFIG --
 const TEAMS = {
-  jean:    {label:'Equipe Jean',    pin:null, agents:[{n:'Manon LAURENT',i:'ML'},{n:'Jonathan KHAROUBI',i:'JK'},{n:'Aurelie QUINCHARD',i:'AQ'},{n:'Aurélie QUINCHARD',i:'AQ'},{n:'Mathias AZZOPARDI',i:'MA'},{n:'Menelik KETCHAM',i:'MK'}]},
+  jean:    {label:'Equipe Jean',    pin:null, agents:[{n:'Manon LAURENT',i:'ML'},{n:'Jonathan KHAROUBI',i:'JK'},{n:'Aurelie QUINCHARD',i:'AQ'},{n:'Mathias AZZOPARDI',i:'MA'},{n:'Menelik KETCHAM',i:'MK'}]},
   romeo:   {label:'Equipe Romeo',   pin:null, agents:[{n:'Kelly HOCHET',i:'KH'},{n:'Bastien GEIGER',i:'BG'},{n:'Lea RECORDIER',i:'LR'},{n:'Hugo LAUGIER',i:'HL'},{n:'Raphael BOUTEILLE',i:'RB'}]},
   quentin: {label:'Equipe Quentin', pin:null, agents:[{n:'Anisse CAPUTO',i:'AC'},{n:'Ilyas LARABA',i:'IL'},{n:'Adam KANDILL',i:'AK'},{n:'Matis DEROIN',i:'MD'},{n:'Nicolas YAKDI',i:'NY'}]},
-  cem:     {label:'Equipe Cem',     pin:null, agents:[{n:'Sam PIOGE',i:'SP'},{n:'Gregory BAICHEV',i:'GB'},{n:'Zoe LE KHAL',i:'ZL'},{n:'William VANDENBUSSCHE',i:'WV'},{n:'Robin HINGRAND',i:'RH'}]}
+  cem:     {label:'Equipe Cem',     pin:null, agents:[{n:'Sam PIOGE',i:'SP'},{n:'Gregory BAICHEV',i:'GB'},{n:'Zoe LE KHAL',i:'ZL'},{n:'William VANDENBUSSCHE',i:'WV'},{n:'Robin HINGRAND',i:'RH'}]},
+  idris:   {label:'Equipe Idris',   pin:null, agents:[{n:'Bilal MEZABER',i:'BM'},{n:'Marguerite ALVES',i:'MG'},{n:'Alexandre GLADEL',i:'AG'},{n:'Julie COSTE',i:'JC'},{n:'Alexis COSTE',i:'AL'},{n:'Hillel CHITER',i:'HC'},{n:'Nicolas GESUALDI',i:'NG'}]},
+  arsena:  {label:'Equipe Arsena',  pin:null, agents:[{n:'Zakaria CHAJRI',i:'ZC'},{n:'Tanguy BOUCABEILLE',i:'TB'},{n:'Teo BOINET',i:'TO'},{n:'Paul ROUX',i:'PR'}]},
+  milan:   {label:'Equipe Milan',   pin:null, agents:[{n:'Anthony DOUARCHE',i:'AD'},{n:'Corentin EUSTACHE',i:'CE'},{n:'Theo NORGET',i:'TN'},{n:'Blaise DE MONTGOLFIER',i:'BD'},{n:'Floryan LEMOINE',i:'FL'},{n:'Axel GULLEVIC',i:'AX'},{n:'Esteban DUVERNAY',i:'ED'},{n:'Luc PERRIER',i:'LP'}]},
+  axel_l:  {label:'Equipe Axel L.', pin:null, agents:[{n:'Quentin LARTIGUE',i:'QL'},{n:'Arnaud ROCHETTE',i:'AR'},{n:'Lydiane ROUDAUT',i:'LY'},{n:'Jorys TUEUR',i:'JT'},{n:'Nicolas GENTIL',i:'NI'},{n:'Julian DEL BOSQUE',i:'JD'}]},
+  julien_r:{label:'Equipe Julien R.',pin:null,agents:[{n:'Jean SARBACHER',i:'JS'},{n:'Louis PLUVINAGE',i:'LU'},{n:'Oceane JURQUET',i:'OJ'},{n:'Julien DUPROIX',i:'JD'},{n:'Melih AYDIN',i:'ME'},{n:'Tom MARECHAL',i:'TM'},{n:'Ilhan BABAYAGIT',i:'IB'},{n:'Thomas RENDA',i:'TR'}]},
+  benjamin:{label:'Equipe Benjamin', pin:null, agents:[{n:'Matteo LESIEN',i:'MT'},{n:'Bel MOUYENI',i:'BL'},{n:'Hadrien CHAUVEAU',i:'HD'},{n:'Enzo RUSSO',i:'ER'},{n:'Jonathan POUILLE',i:'JP'},{n:'Pauline DUCAMP',i:'PD'}]}
 };
 
 const AGENTS_FLAT = Object.values(TEAMS).flatMap(t=>t.agents.filter((a,i,arr)=>arr.findIndex(x=>x.n===a.n)===i));
