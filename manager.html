@@ -202,6 +202,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <div id="s-today" class="scr on">
       <button class="rf" onclick="loadData()"><i class="ti ti-refresh" style="font-size:13px"></i> Actualiser</button>
       <div class="kgrid" id="today-kpis"></div>
+      <div id="miss-banner" style="display:none"></div>
       <div class="sec-lbl">Equipe - EOD du jour</div>
       <div id="agents-today"></div>
     </div>
@@ -470,8 +471,17 @@ function renderToday(){
     '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">AC total</div><div style="font-size:20px;font-weight:800;color:#fff">'+tac+'</div></div>'+
     '</div>';
   kg.appendChild(hero);
-  // Rapports manquants
-  if(miss>0){var missEl=document.createElement('div');missEl.style.cssText='background:var(--rbg);border:1px solid var(--rborder);border-radius:var(--r);padding:10px 14px;font-size:12px;font-weight:700;color:var(--red);margin-bottom:14px;display:flex;align-items:center;gap:6px';missEl.innerHTML='<i class="ti ti-alert-triangle" style="font-size:14px"></i> '+miss+' rapport'+(miss>1?'s':'')+' manquant'+(miss>1?'s':'');kg.appendChild(missEl);}
+  // Rapports manquants - bandeau horizontal sous l'encadré noir
+  var missContainer=document.getElementById('miss-banner');
+  if(missContainer){
+    if(miss>0){
+      var missNames=withOut.map(function(a){return a.n.split(' ')[0];}).join(', ');
+      missContainer.innerHTML='<div style="background:var(--rbg);border:1px solid var(--rborder);border-radius:var(--r);padding:10px 14px;font-size:12px;font-weight:700;color:var(--red);display:flex;align-items:center;gap:8px;margin-bottom:12px"><i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0"></i><span>'+miss+' EOD manquante'+(miss>1?'s':'')+' — '+missNames+'</span></div>';
+      missContainer.style.display='block';
+    } else {
+      missContainer.innerHTML='';missContainer.style.display='none';
+    }
+  }
 
   var grid=document.getElementById('agents-today');grid.innerHTML='';
   var withRep=agents.filter(function(a){return getToday(a.n);});
