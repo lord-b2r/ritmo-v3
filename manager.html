@@ -248,20 +248,33 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
 <script>
 var MANAGERS = {
-  jean:    {name:'Jean',    initials:'JE', pin:'2024', team:'jean',    label:'Equipe Jean'},
-  romeo:   {name:'Romeo',  initials:'RO', pin:'2025', team:'romeo',   label:'Equipe Romeo'},
-  quentin: {name:'Quentin',initials:'QU', pin:'2026', team:'quentin', label:'Equipe Quentin'},
-  cem:     {name:'Cem',    initials:'CE', pin:'2027', team:'cem',     label:'Equipe Cem'}
+  jean:    {name:'Jean',            initials:'JE', pin:'2024', team:'jean',     label:'Equipe Jean'},
+  romeo:   {name:'Romeo',           initials:'RO', pin:'2025', team:'romeo',    label:'Equipe Romeo'},
+  quentin: {name:'Quentin',         initials:'QU', pin:'2026', team:'quentin',  label:'Equipe Quentin'},
+  cem:     {name:'Cem',             initials:'CE', pin:'2027', team:'cem',      label:'Equipe Cem'},
+  idris:   {name:'Idris ENE',       initials:'IE', pin:'2028', team:'idris',    label:'Equipe Idris'},
+  arsena:  {name:'Arsena VADAHI',   initials:'AV', pin:'2029', team:'arsena',   label:'Equipe Arsena'},
+  milan:   {name:'Milan PIGEROULET',initials:'MP', pin:'2030', team:'milan',    label:'Equipe Milan'},
+  axel_l:  {name:'Axel LUXEMBOURG', initials:'AL', pin:'2031', team:'axel_l',   label:'Equipe Axel L.'},
+  julien_r:{name:'Julien ROUXEL',   initials:'JR', pin:'2032', team:'julien_r', label:'Equipe Julien R.'},
+  benjamin:{name:'Benjamin CLEMENT',initials:'BC', pin:'2033', team:'benjamin', label:'Equipe Benjamin'}
 };
+
 
 var TEAMS = {
-  jean:    [{n:'Manon LAURENT',i:'ML'},{n:'Jonathan KHAROUBI',i:'JK'},{n:'Aurelie QUINCHARD',i:'AQ'},{n:'Aurelie QUINCHARD',i:'AQ'},{n:'Mathias AZZOPARDI',i:'MA'},{n:'Menelik KETCHAM',i:'MK'}],
+  jean:    [{n:'Manon LAURENT',i:'ML'},{n:'Jonathan KHAROUBI',i:'JK'},{n:'Aurelie QUINCHARD',i:'AQ'},{n:'Mathias AZZOPARDI',i:'MA'},{n:'Menelik KETCHAM',i:'MK'}],
   romeo:   [{n:'Kelly HOCHET',i:'KH'},{n:'Bastien GEIGER',i:'BG'},{n:'Lea RECORDIER',i:'LR'},{n:'Hugo LAUGIER',i:'HL'},{n:'Raphael BOUTEILLE',i:'RB'}],
   quentin: [{n:'Anisse CAPUTO',i:'AC'},{n:'Ilyas LARABA',i:'IL'},{n:'Adam KANDILL',i:'AK'},{n:'Matis DEROIN',i:'MD'},{n:'Nicolas YAKDI',i:'NY'}],
-  cem:     [{n:'Sam PIOGE',i:'SP'},{n:'Gregory BAICHEV',i:'GB'},{n:'Zoe LE KHAL',i:'ZL'},{n:'William VANDENBUSSCHE',i:'WV'},{n:'Robin HINGRAND',i:'RH'}]
+  cem:     [{n:'Sam PIOGE',i:'SP'},{n:'Gregory BAICHEV',i:'GB'},{n:'Zoe LE KHAL',i:'ZL'},{n:'William VANDENBUSSCHE',i:'WV'},{n:'Robin HINGRAND',i:'RH'}],
+  idris:   [{n:'Bilal MEZABER',i:'BM'},{n:'Marguerite ALVES',i:'MG'},{n:'Alexandre GLADEL',i:'AG'},{n:'Julie COSTE',i:'JC'},{n:'Alexis COSTE',i:'AL'},{n:'Hillel CHITER',i:'HC'},{n:'Nicolas GESUALDI',i:'NG'}],
+  arsena:  [{n:'Zakaria CHAJRI',i:'ZC'},{n:'Tanguy BOUCABEILLE',i:'TB'},{n:'Teo BOINET',i:'TO'},{n:'Paul ROUX',i:'PR'}],
+  milan:   [{n:'Anthony DOUARCHE',i:'AD'},{n:'Corentin EUSTACHE',i:'CE'},{n:'Theo NORGET',i:'TN'},{n:'Blaise DE MONTGOLFIER',i:'BD'},{n:'Floryan LEMOINE',i:'FL'},{n:'Axel GULLEVIC',i:'AX'},{n:'Esteban DUVERNAY',i:'ED'},{n:'Luc PERRIER',i:'LP'}],
+  axel_l:  [{n:'Quentin LARTIGUE',i:'QL'},{n:'Arnaud ROCHETTE',i:'AR'},{n:'Lydiane ROUDAUT',i:'LY'},{n:'Jorys TUEUR',i:'JT'},{n:'Nicolas GENTIL',i:'NI'},{n:'Julian DEL BOSQUE',i:'JD'}],
+  julien_r:[{n:'Jean SARBACHER',i:'JS'},{n:'Louis PLUVINAGE',i:'LU'},{n:'Oceane JURQUET',i:'OJ'},{n:'Julien DUPROIX',i:'JD'},{n:'Melih AYDIN',i:'ME'},{n:'Tom MARECHAL',i:'TM'},{n:'Ilhan BABAYAGIT',i:'IB'},{n:'Thomas RENDA',i:'TR'}],
+  benjamin:[{n:'Matteo LESIEN',i:'MT'},{n:'Bel MOUYENI',i:'BL'},{n:'Hadrien CHAUVEAU',i:'HD'},{n:'Enzo RUSSO',i:'ER'},{n:'Jonathan POUILLE',i:'JP'},{n:'Pauline DUCAMP',i:'PD'}]
 };
 
-var TEAM_LABELS = {jean:'Equipe Jean',romeo:'Equipe Romeo',quentin:'Equipe Quentin',cem:'Equipe Cem'};
+var TEAM_LABELS = {jean:'Equipe Jean',romeo:'Equipe Romeo',quentin:'Equipe Quentin',cem:'Equipe Cem',idris:'Equipe Idris',arsena:'Equipe Arsena',milan:'Equipe Milan',axel_l:'Equipe Axel L.',julien_r:'Equipe Julien R.',benjamin:'Equipe Benjamin'};
 var ALL_AGENTS = Object.values(TEAMS).flat().filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
 
 var SB = 'https://twjtdrggjvhvlkhhybgq.supabase.co';
