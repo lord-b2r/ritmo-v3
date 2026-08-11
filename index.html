@@ -24,6 +24,10 @@
   --f:'Inter',sans-serif;--r:10px;--rl:14px
 }
 html,body{height:100%;background:var(--bg);font-family:var(--f);color:var(--b);overflow:hidden}
+.sub-tabs{display:flex;background:var(--g1);border-radius:30px;padding:3px;margin-bottom:14px}
+.sub-tab{flex:1;text-align:center;padding:8px 10px;font-size:13px;font-weight:600;color:var(--g4);border-radius:26px;cursor:pointer;transition:all .2s}
+.sub-tab.on{background:var(--b);color:#fff;font-weight:700}
+.sub-scr{display:none}.sub-scr.on{display:block}
 body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
 /* ONBOARDING */
@@ -443,42 +447,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     </div>
 
     <!-- FU -->
-    <div id="s-fu" class="scr">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-        <div style="font-size:22px;font-weight:800;letter-spacing:-.5px">Follow-up</div>
-        <button class="add-btn" style="width:auto;margin-bottom:0;padding:8px 14px;font-size:12px" onclick="showFuForm()"><i class="ti ti-plus"></i> Ajouter</button>
-      </div>
-      <div style="font-size:13px;color:var(--g4);margin-bottom:14px">Tes opportunites a relancer</div>
-      <div class="fu-add-form" id="fu-add-form">
-        <div class="vfl" style="margin-bottom:6px">Categorie</div>
-        <div class="fu-cats">
-          <button class="fu-cat-btn on rdv" id="fu-cat-rdv" onclick="setFuCat('rdv')">RDV</button>
-          <button class="fu-cat-btn fu" id="fu-cat-fu" onclick="setFuCat('fu')">Follow-up</button>
-          <button class="fu-cat-btn mgm" id="fu-cat-mgm" onclick="setFuCat('mgm')">Source MGM</button>
-        </div>
-        <div class="vfl" style="margin-bottom:6px;margin-top:8px">Type</div>
-        <div class="vft" style="margin-bottom:10px">
-          <div class="vfo on" id="fu-type-ih" onclick="setFuType('ih')">IH</div>
-          <div class="vfo" id="fu-type-og" onclick="setFuType('og')">OG</div>
-        </div>
-        <div class="vfl" style="margin-bottom:4px">Nom du commerce</div>
-        <input class="vfi" type="text" id="fu-nom" placeholder="ex: Boulangerie Martin" style="margin-bottom:10px">
-        <div class="vfl" style="margin-bottom:4px">Note (optionnel)</div>
-        <input class="vfi" type="text" id="fu-note" placeholder="ex: recontacter jeudi, interesse POS" style="margin-bottom:12px">
-        <div style="display:flex;gap:8px">
-          <button class="send-btn" style="margin-top:0;flex:1" onclick="saveFu()">Ajouter</button>
-          <button style="flex:0 0 80px;padding:15px;background:var(--g1);border:none;border-radius:var(--rl);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--f)" onclick="hideFuForm()">Annuler</button>
-        </div>
-      </div>
-      <div class="filter-row">
-        <button class="filter-btn on" onclick="setFuFilter('all')">Tous</button>
-        <button class="filter-btn" onclick="setFuFilter('rdv')">RDV</button>
-        <button class="filter-btn" onclick="setFuFilter('fu')">Follow-up</button>
-        <button class="filter-btn" onclick="setFuFilter('mgm')">MGM</button>
-      </div>
-      <div id="fu-list"></div>
-    </div>
-
+    
     <!-- MUR -->
     <div id="s-mur" class="scr">
       <div style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px">Mur des bonnes nouvelles</div>
@@ -540,14 +509,54 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- VENTES -->
     <div id="s-vt" class="scr">
-      <div style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:14px">Mes ventes</div>
-      <div class="ventes-kpi" id="ventes-kpi"></div>
-      <div class="filter-row">
-        <button class="filter-btn on" onclick="setVFilter('all')">Toutes</button>
-        <button class="filter-btn" onclick="setVFilter('POS')">POS</button>
-        <button class="filter-btn" onclick="setVFilter('TPE')">TPE</button>
+      <div class="sub-tabs">
+        <div class="sub-tab on" id="sst-vt" onclick="swSubSales('vt')">Ventes</div>
+        <div class="sub-tab" id="sst-fu" onclick="swSubSales('fu')">Follow-up</div>
       </div>
-      <div id="ventes-list"></div>
+      <div id="sss-vt" class="sub-scr on">
+        <div class="ventes-kpi" id="ventes-kpi"></div>
+        <div class="filter-row">
+          <button class="filter-btn on" onclick="setVFilter('all')">Toutes</button>
+          <button class="filter-btn" onclick="setVFilter('POS')">POS</button>
+          <button class="filter-btn" onclick="setVFilter('TPE')">TPE</button>
+        </div>
+        <div id="ventes-list"></div>
+      </div>
+      <div id="sss-fu" class="sub-scr">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <div style="font-size:22px;font-weight:800;letter-spacing:-.5px">Follow-up</div>
+        <button class="add-btn" style="width:auto;margin-bottom:0;padding:8px 14px;font-size:12px" onclick="showFuForm()"><i class="ti ti-plus"></i> Ajouter</button>
+      </div>
+      <div style="font-size:13px;color:var(--g4);margin-bottom:14px">Tes opportunites a relancer</div>
+      <div class="fu-add-form" id="fu-add-form">
+        <div class="vfl" style="margin-bottom:6px">Categorie</div>
+        <div class="fu-cats">
+          <button class="fu-cat-btn on rdv" id="fu-cat-rdv" onclick="setFuCat('rdv')">RDV</button>
+          <button class="fu-cat-btn fu" id="fu-cat-fu" onclick="setFuCat('fu')">Follow-up</button>
+          <button class="fu-cat-btn mgm" id="fu-cat-mgm" onclick="setFuCat('mgm')">Source MGM</button>
+        </div>
+        <div class="vfl" style="margin-bottom:6px;margin-top:8px">Type</div>
+        <div class="vft" style="margin-bottom:10px">
+          <div class="vfo on" id="fu-type-ih" onclick="setFuType('ih')">IH</div>
+          <div class="vfo" id="fu-type-og" onclick="setFuType('og')">OG</div>
+        </div>
+        <div class="vfl" style="margin-bottom:4px">Nom du commerce</div>
+        <input class="vfi" type="text" id="fu-nom" placeholder="ex: Boulangerie Martin" style="margin-bottom:10px">
+        <div class="vfl" style="margin-bottom:4px">Note (optionnel)</div>
+        <input class="vfi" type="text" id="fu-note" placeholder="ex: recontacter jeudi, interesse POS" style="margin-bottom:12px">
+        <div style="display:flex;gap:8px">
+          <button class="send-btn" style="margin-top:0;flex:1" onclick="saveFu()">Ajouter</button>
+          <button style="flex:0 0 80px;padding:15px;background:var(--g1);border:none;border-radius:var(--rl);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--f)" onclick="hideFuForm()">Annuler</button>
+        </div>
+      </div>
+      <div class="filter-row">
+        <button class="filter-btn on" onclick="setFuFilter('all')">Tous</button>
+        <button class="filter-btn" onclick="setFuFilter('rdv')">RDV</button>
+        <button class="filter-btn" onclick="setFuFilter('fu')">Follow-up</button>
+        <button class="filter-btn" onclick="setFuFilter('mgm')">MGM</button>
+      </div>
+      <div id="fu-list"></div>
+      </div>
     </div>
 
 
@@ -557,9 +566,8 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
   <div class="tabbar">
     <div class="tab on" id="t-eod" onclick="sw('eod')"><i class="ti ti-file-text"></i><span>EOD</span></div>
     <div class="tab" id="t-st" onclick="sw('st')"><i class="ti ti-chart-bar"></i><span>Stats</span></div>
-    <div class="tab" id="t-fu" onclick="sw('fu')"><i class="ti ti-list-check"></i><span>FU</span></div>
-    <div class="tab" id="t-mur" onclick="sw('mur')"><i class="ti ti-speakerphone"></i><span>Mur</span></div>
     <div class="tab" id="t-vt" onclick="sw('vt')"><i class="ti ti-currency-euro"></i><span>Ventes</span></div>
+    <div class="tab" id="t-mur" onclick="sw('mur')"><i class="ti ti-currency-euro"></i><span>Ventes</span></div>
   </div>
 </div>
 
@@ -1168,15 +1176,22 @@ function renderHist(){
 }
 
 // -- TABS --
+function swSubSales(t){
+  ['vt','fu'].forEach(function(s){
+    var el=document.getElementById('sss-'+s);if(el)el.className='sub-scr'+(t===s?' on':'');
+    var tab=document.getElementById('sst-'+s);if(tab)tab.className='sub-tab'+(t===s?' on':'');
+  });
+  if(t==='fu')renderFu();
+  if(t==='vt'){loadReports().then(renderVentes);}
+}
 function sw(t){
-  ['eod','st','fu','mur','vt'].forEach(s=>{
+  ['eod','st','mur','vt'].forEach(s=>{
     document.getElementById('s-'+s).className='scr'+(t===s?' on':'');
     document.getElementById('t-'+s).className='tab'+(t===s?' on':'');
   });
   if(t==='mur'){loadReports().then(renderMur);}
   if(t==='st'){loadReports().then(()=>{buildWeek();stView(stView_cur);});}
   if(t==='vt'){loadReports().then(renderVentes);}
-  if(t==='fu'){renderFu();}
 }
 
 // Donnees statiques (fallback)
