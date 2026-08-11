@@ -162,6 +162,20 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .stat-val{font-size:13px;font-weight:700;flex:0 0 40px;text-align:right}
 
 .empty{text-align:center;padding:40px 0;font-size:13px;font-weight:600;color:var(--g3)}
+.sub-tabs{display:flex;background:var(--g1);border-radius:30px;padding:3px;margin-bottom:14px}
+.sub-tab{flex:1;text-align:center;padding:8px 10px;font-size:13px;font-weight:600;color:var(--g4);border-radius:26px;cursor:pointer;transition:all .2s}
+.sub-tab.on{background:var(--b);color:#fff;font-weight:700}
+.sub-scr{display:none}.sub-scr.on{display:block}
+.fu-cat-badge{display:inline-flex;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.fu-rdv{background:rgba(59,130,246,.15);color:#1d4ed8}
+.fu-fu{background:rgba(245,158,11,.15);color:#92400e}
+.fu-mgm{background:rgba(16,185,129,.15);color:#065f46}
+.fu-card{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);margin-bottom:8px;overflow:hidden}
+.fu-agent-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.fu-agent-body{display:none;padding:0 14px 14px}
+.fu-agent-body.op{display:block}
+.fu-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--g1)}
+.fu-row:last-child{border-bottom:0}
 .team-chip{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
 .tc-jean{background:rgba(59,130,246,.15);color:var(--jean)}
 .tc-romeo{background:rgba(236,72,153,.15);color:var(--romeo)}
@@ -248,14 +262,25 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- VENTES -->
     <div id="s-ventes" class="scr">
-      <div class="filter-row" id="team-filter-v"></div>
-      <div class="filter-row" id="type-filter">
-        <button class="fb on" onclick="setTypeFilter('all')">Toutes</button>
-        <button class="fb" onclick="setTypeFilter('POS')">POS</button>
-        <button class="fb" onclick="setTypeFilter('TPE')">TPE</button>
+      <div class="sub-tabs">
+        <div class="sub-tab on" id="st-ventes" onclick="swSub('ventes')">Ventes</div>
+        <div class="sub-tab" id="st-fu" onclick="swSub('fu')">Follow-up</div>
       </div>
-      <div class="kgrid" id="ventes-kpi"></div>
-      <div id="ventes-list"></div>
+      <div id="ss-ventes" class="sub-scr on">
+        <div class="filter-row" id="team-filter-v"></div>
+        <div class="filter-row" id="type-filter">
+          <button class="fb on" onclick="setTypeFilter('all')">Toutes</button>
+          <button class="fb" onclick="setTypeFilter('POS')">POS</button>
+          <button class="fb" onclick="setTypeFilter('TPE')">TPE</button>
+        </div>
+        <div class="kgrid" id="ventes-kpi"></div>
+        <div id="ventes-list"></div>
+      </div>
+      <div id="ss-fu" class="sub-scr">
+        <div class="filter-row" id="fu-team-filter"></div>
+        <div id="fu-summary-reg"></div>
+        <div id="fu-list-reg"></div>
+      </div>
     </div>
 
     <!-- MUR -->
@@ -321,7 +346,19 @@ var SB='https://twjtdrggjvhvlkhhybgq.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3anRkcmdnanZodmxraGh5YmdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMjAyMjMsImV4cCI6MjA5Njc5NjIyM30.I-E8aPS5VEH02jpu-XyuAaJWis_y7zv7ef3-udoNmOs';
 
 var now=new Date(),ME=null,MY_TEAMS=[],REPORTS=[],PENDING=null;
-var mgrFilter='jean',teamFilterV='all',typeFilter='all';
+var mgrFilter='jean',teamFilterV='all',typeFilter='all',fuTeamFilter='all';
+var REACT_EMOJIS={fire:'🔥','100':'💯',clap:'👏',muscle:'💪',star:'⭐'};
+var REACTS=['fire','100','clap','muscle','star'];
+function getMurReactions(){try{return JSON.parse(localStorage.getItem('ritmo_rm_reactions')||'{}');}catch(e){return {};}}
+function saveMurReactions(r){try{localStorage.setItem('ritmo_rm_reactions',JSON.stringify(r));}catch(e){}}
+function toggleReact(repId,emoji){
+  var r=getMurReactions();
+  if(!r[repId])r[repId]={};
+  if(!r[repId][emoji])r[repId][emoji]=[];
+  var idx=r[repId][emoji].indexOf(ME);
+  if(idx>=0)r[repId][emoji].splice(idx,1);else r[repId][emoji].push(ME);
+  saveMurReactions(r);renderMur();
+}
 var charts={};
 
 function spk(k,v){try{localStorage.setItem(k,v);}catch(e){}document.cookie=k+'='+encodeURIComponent(v)+';path=/;max-age=31536000';}
@@ -791,21 +828,136 @@ function renderMur(){
     return r.mot_jour&&r.mot_jour.trim()&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month;
   });
   if(!mots.length){list.innerHTML='<div class="empty">Aucune bonne nouvelle ce mois-ci</div>';return;}
-  mots.slice(0,40).forEach(function(r){
+  var reactions=getMurReactions();
+  mots.slice(0,60).forEach(function(r){
     var ag=ALL_AGENTS.find(function(a){return a.n===r.agent;});
+    var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===r.agent;}))tk=k;});
     var sc=r.score||0,cls=scC(sc);
+    var repId=r.id||(r.agent+'_'+r.timestamp);
+    var reps=reactions[repId]||{};
     var d=document.createElement('div');d.className='mur-item';
     var top2=document.createElement('div');top2.className='mur-top';
     var av=document.createElement('div');av.className='mur-av';av.textContent=ag?ag.i:'?';
     var info=document.createElement('div');info.style.flex='1';
     var nm=document.createElement('div');nm.className='mur-name';nm.textContent=r.agent.split(' ')[0];
-    var mt=document.createElement('div');mt.className='mur-meta';mt.textContent=r.date+' - '+sc+' pts';
-    info.appendChild(nm);info.appendChild(mt);
+    var chipWrap=document.createElement('div');chipWrap.style.cssText='display:flex;align-items:center;gap:6px;margin-top:2px';
+    var chip=document.createElement('span');chip.className='team-chip tc-'+tk;chip.textContent=MANAGERS[tk]?MANAGERS[tk].name:tk;
+    var mt=document.createElement('div');mt.className='mur-meta';mt.textContent=r.date+' · '+sc+' pts';
+    chipWrap.appendChild(chip);chipWrap.appendChild(mt);
+    info.appendChild(nm);info.appendChild(chipWrap);
     var sc2=document.createElement('div');sc2.className='mur-score '+cls;sc2.textContent=sc;
     top2.appendChild(av);top2.appendChild(info);top2.appendChild(sc2);
     var txt=document.createElement('div');txt.className='mur-text';txt.textContent='"'+r.mot_jour+'"';
-    d.appendChild(top2);d.appendChild(txt);list.appendChild(d);
+    var reactRow=document.createElement('div');reactRow.style.cssText='display:flex;gap:6px;margin-top:10px;flex-wrap:wrap';
+    REACTS.forEach(function(emo){
+      var users=reps[emo]||[];
+      var active=users.includes(ME);
+      var btn=document.createElement('button');
+      btn.style.cssText='display:flex;align-items:center;gap:4px;padding:5px 10px;border-radius:20px;border:1px solid '+(active?'var(--b)':'var(--g2)')+';background:'+(active?'var(--b)':'var(--w)')+';cursor:pointer;font-size:13px;font-family:var(--f)';
+      var cnt=users.length?'<span style="font-size:11px;font-weight:700;color:'+(active?'#fff':'var(--g4)')+'">'+users.length+'</span>':'';
+      btn.innerHTML=REACT_EMOJIS[emo]+cnt;
+      btn.onclick=(function(id,e){return function(){toggleReact(id,e);};})(repId,emo);
+      reactRow.appendChild(btn);
+    });
+    d.appendChild(top2);d.appendChild(txt);d.appendChild(reactRow);list.appendChild(d);
   });
+}
+
+function buildFuTeamFilter(){
+  var f=document.getElementById('fu-team-filter');if(!f)return;f.innerHTML='';
+  var opts=[{k:'all',l:'Toutes equipes'}];
+  MY_TEAMS.forEach(function(tk){opts.push({k:tk,l:MANAGERS[tk]?MANAGERS[tk].label:tk});});
+  opts.forEach(function(o){
+    var b=document.createElement('button');b.className='fb'+(o.k===fuTeamFilter?' on':'');
+    b.textContent=o.l;
+    b.onclick=(function(t){return function(){fuTeamFilter=t;buildFuTeamFilter();renderFU_reg();};})(o.k);
+    f.appendChild(b);
+  });
+}
+
+function renderFU_reg(){
+  var month=now.toISOString().slice(0,7);
+  var teams=fuTeamFilter==='all'?MY_TEAMS:[fuTeamFilter];
+  var allAgents=[];teams.forEach(function(tk){allAgents=allAgents.concat(TEAMS[tk]||[]);});
+  allAgents=allAgents.filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
+  var summary=document.getElementById('fu-summary-reg');
+  var list=document.getElementById('fu-list-reg');
+  if(!summary||!list)return;
+  summary.innerHTML='';list.innerHTML='';
+  var sumGrid=document.createElement('div');sumGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px';
+  var hasFU=false;
+  allAgents.forEach(function(ag){
+    var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
+    var reps=REPORTS.filter(function(r){return r.agent===ag.n&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month&&r.fu_list&&r.fu_list.length;});
+    var lastRep=reps[0];
+    var fuData=lastRep?lastRep.fu_list:[];
+    var nRdv=fuData.filter(function(f){return f.cat==='rdv';}).length;
+    var nFu=fuData.filter(function(f){return f.cat==='fu';}).length;
+    var nMgm=fuData.filter(function(f){return f.cat==='mgm';}).length;
+    var total=fuData.length;
+    if(total>0)hasFU=true;
+    var kc=document.createElement('div');
+    kc.style.cssText='background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:12px';
+    kc.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+      '<div style="width:30px;height:30px;border-radius:50%;background:'+TEAM_COLORS[tk]+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">'+ag.i+'</div>'+
+      '<div style="flex:1"><div style="font-size:12px;font-weight:700">'+ag.n.split(' ')[0]+'</div><div style="font-size:10px;color:var(--g4)">'+MANAGERS[tk].name+'</div></div>'+
+      '<div style="font-size:18px;font-weight:800;color:'+(total>0?'var(--green)':'var(--g3)')+'">'+total+'</div></div>'+
+      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+      (nRdv?'<span class="fu-cat-badge fu-rdv">'+nRdv+' RDV</span>':'')+
+      (nFu?'<span class="fu-cat-badge fu-fu">'+nFu+' FU</span>':'')+
+      (nMgm?'<span class="fu-cat-badge fu-mgm">'+nMgm+' MGM</span>':'')+
+      (total===0?'<span style="font-size:11px;color:var(--g3)">Aucun</span>':'')+'</div>';
+    sumGrid.appendChild(kc);
+  });
+  summary.appendChild(sumGrid);
+  if(!hasFU){list.innerHTML='<div class="empty">Aucun follow-up renseigne ce mois</div>';return;}
+  var lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Detail par commercial';list.appendChild(lbl);
+  allAgents.forEach(function(ag){
+    var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
+    var reps=REPORTS.filter(function(r){return r.agent===ag.n&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month&&r.fu_list&&r.fu_list.length;});
+    var lastRep=reps[0];
+    var fuData=lastRep?lastRep.fu_list:[];
+    if(!fuData.length)return;
+    var card=document.createElement('div');card.className='fu-card';
+    var key='fu_'+ag.n.replace(/[^a-z0-9]/gi,'_');
+    var nRdv=fuData.filter(function(f){return f.cat==='rdv';}).length;
+    var nFu=fuData.filter(function(f){return f.cat==='fu';}).length;
+    var nMgm=fuData.filter(function(f){return f.cat==='mgm';}).length;
+    var hd=document.createElement('div');hd.className='fu-agent-hd';
+    hd.innerHTML='<div style="width:34px;height:34px;border-radius:50%;background:'+TEAM_COLORS[tk]+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">'+ag.i+'</div>'+
+      '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+ag.n+'</div>'+
+      '<div style="display:flex;gap:5px;margin-top:4px">'+
+      (nRdv?'<span class="fu-cat-badge fu-rdv">'+nRdv+' RDV</span>':'')+
+      (nFu?'<span class="fu-cat-badge fu-fu">'+nFu+' FU</span>':'')+
+      (nMgm?'<span class="fu-cat-badge fu-mgm">'+nMgm+' MGM</span>'  :'')+'</div></div>'+
+      '<div style="font-size:11px;color:var(--g4)">'+MANAGERS[tk].name+'</div>'+
+      '<i class="ti ti-chevron-down chev" id="chfu-'+key+'"></i>';
+    hd.onclick=(function(k){return function(){
+      var b=document.getElementById('b-'+k),c=document.getElementById('chfu-'+k);
+      if(!b)return;var op=b.classList.contains('op');b.classList.toggle('op');
+      if(c)c.style.transform=op?'':'rotate(180deg)';
+    };})(key);
+    var body=document.createElement('div');body.className='fu-agent-body';body.id='b-'+key;
+    var cats={rdv:'fu-rdv',fu:'fu-fu',mgm:'fu-mgm'};
+    var catLabels={rdv:'RDV',fu:'Follow-up',mgm:'MGM'};
+    fuData.forEach(function(f){
+      var row=document.createElement('div');row.className='fu-row';
+      row.innerHTML='<span class="fu-cat-badge '+(cats[f.cat]||'fu-fu')+'">'+catLabels[f.cat]+'</span>'+
+        '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+f.nom+'</div>'+(f.note?'<div style="font-size:11px;color:var(--g4)">'+f.note+'</div>':'')+'</div>'+
+        '<span style="font-size:10px;font-weight:700;color:var(--g3)">'+(f.type||'').toUpperCase()+'</span>';
+      body.appendChild(row);
+    });
+    card.appendChild(hd);card.appendChild(body);list.appendChild(card);
+  });
+}
+
+function swSub(t){
+  ['ventes','fu'].forEach(function(s){
+    var el=document.getElementById('ss-'+s);if(el)el.className='sub-scr'+(t===s?' on':'');
+    var tab=document.getElementById('st-'+s);if(tab)tab.className='sub-tab'+(t===s?' on':'');
+  });
+  if(t==='fu'){buildFuTeamFilter();renderFU_reg();}
+  if(t==='ventes')renderVentes();
 }
 
 function sw(t){
