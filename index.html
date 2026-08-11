@@ -890,11 +890,38 @@ async function sendEOD(){
   S.rdv_ih.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV IH',cat:'rdv',type:'ih',note:r.note,ts:Date.now()});});
   S.rdv_og.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV OG',cat:'rdv',type:'og',note:r.note,ts:Date.now()});});
   saveFuLocal();
-  const eod={agent:ME,team:MY_TEAM,date:now.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}),timestamp:Date.now(),rdv_ih:rdv_ih_count,rdv_og:rdv_og_count,notes_ih,notes_og,vente_ih:S.ventes.filter(v=>v.nom).length,vente_og:0,total_vente:totalV,total_pos:totalPos,ac:S.ac,instal:S.ins,leads_fu:S.fu,outlook:S.ol,crm:S.cr,mot_jour:document.getElementById('mot').value,score:sc,ventes_detail,fu_list:fuList.map(f=>({nom:f.nom,cat:f.cat,type:f.type,note:f.note||''}))};
+  const eodNow=new Date();const eod={agent:ME,team:MY_TEAM,date:eodNow.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}),timestamp:Date.now(),rdv_ih:rdv_ih_count,rdv_og:rdv_og_count,notes_ih,notes_og,vente_ih:S.ventes.filter(v=>v.nom).length,vente_og:0,total_vente:totalV,total_pos:totalPos,ac:S.ac,instal:S.ins,leads_fu:S.fu,outlook:S.ol,crm:S.cr,mot_jour:document.getElementById('mot').value,score:sc,ventes_detail,fu_list:fuList.map(f=>({nom:f.nom,cat:f.cat,type:f.type,note:f.note||''}))};
   setSd('ld');
-  try{await fetch(SB+'/rest/v1/eod_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(eod)});allReports.unshift(eod);setSd('ok');}catch(e){setSd('err');allReports.unshift(eod);}
+  let sent=false;
+  try{
+    const res=await fetch(SB+'/rest/v1/eod_reports',{
+      method:'POST',
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(eod)
+    });
+    if(res.ok){
+      sent=true;setSd('ok');
+    } else {
+      const errTxt=await res.text();
+      console.error('Supabase error',res.status,errTxt);
+      // Retry une fois
+      const res2=await fetch(SB+'/rest/v1/eod_reports',{
+        method:'POST',
+        headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify(eod)
+      });
+      if(res2.ok){sent=true;setSd('ok');}
+      else{setSd('err');console.error('Retry failed',res2.status,await res2.text());}
+    }
+  }catch(e){
+    setSd('err');console.error('sendEOD fetch error',e);
+  }
+  allReports.unshift(eod);
   const ss=document.getElementById('sent-score');ss.textContent=sc;ss.style.color=sc===0?'var(--red)':sc===1?'#ea580c':'var(--green)';
   document.getElementById('form-send').style.display='none';document.getElementById('sent').style.display='flex';
+  // Indicateur envoi Supabase
+  const syncEl=document.getElementById('sync-status');
+  if(syncEl){syncEl.textContent=sent?'Synchro OK ✓':'Sync echouee - verifie ta connexion';syncEl.style.color=sent?'var(--green)':'var(--red)';syncEl.style.display='block';}
   buildWeek();
 }
 
