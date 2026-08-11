@@ -201,7 +201,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <!-- AUJOURD HUI -->
     <div id="s-today" class="scr on">
       <button class="rf" onclick="loadData()"><i class="ti ti-refresh" style="font-size:13px"></i> Actualiser</button>
-      <div class="kgrid" id="today-kpis"></div>
+      <div id="today-kpis"></div>
       <div id="miss-banner" style="display:none"></div>
       <div class="sec-lbl">Equipe - EOD du jour</div>
       <div id="agents-today"></div>
@@ -731,6 +731,32 @@ function renderMur(){
     d.appendChild(top2);d.appendChild(txt);d.appendChild(reactRow);list.appendChild(d);
   });
 }
+
+function openAgentDetail(ag,stats){
+  document.getElementById('modal-agent').textContent=ag.n+' - '+now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  var obj=OBJ_POINTS;
+  var objPct=Math.min(Math.round(stats.s/obj*100),150);
+  var posShare=stats.v>0?Math.round(stats.pos/stats.v*100):0;
+  var html='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:14px">';
+  [['Score',stats.s,true],['Objectif',obj+' pts',false],['Ventes',stats.v,true],['Instals',stats.ins,true],['POS share',posShare+'%',posShare>=50],['Regularite',stats.regPct+'%',stats.missing===0]].forEach(function(c){
+    html+='<div style="background:var(--g1);border-radius:8px;padding:9px 11px"><div style="font-size:9px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px">'+c[0]+'</div><div style="font-size:20px;font-weight:800;'+(c[2]?'color:var(--green)':'')+'">'+c[1]+'</div></div>';
+  });
+  html+='</div>';
+  if(stats.missing>0)html+='<div style="background:var(--rbg);border:1px solid var(--rborder);border-radius:var(--r);padding:8px 12px;font-size:12px;font-weight:700;color:var(--red);margin-bottom:12px">'+stats.missing+' EOD manquante'+(stats.missing>1?'s':'')+' ce mois</div>';
+  var reps=getMonth(ag.n);
+  html+='<div style="font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">EODs du mois ('+reps.length+')</div>';
+  reps.slice(0,20).forEach(function(r){
+    var s=r.score||0,cls=scC(s),tv=r.total_vente||0;
+    var col=cls==='grn'?'var(--green)':cls==='ora'?'#ea580c':'var(--red)';
+    html+='<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--g1)">';
+    html+='<div style="width:8px;height:8px;border-radius:50%;background:'+col+';flex-shrink:0"></div>';
+    html+='<div style="flex:1"><div style="font-size:12px;font-weight:600">'+r.date+'</div><div style="font-size:11px;color:var(--g4)">'+tv+' V - '+(r.instal||0)+' I'+(r.mot_jour?' - "'+r.mot_jour.slice(0,30)+(r.mot_jour.length>30?'...':'')+'"':'')+'</div></div>';
+    html+='<div style="font-size:16px;font-weight:800;color:'+col+'">'+s+'</div></div>';
+  });
+  document.getElementById('modal-content').innerHTML=html;
+  document.getElementById('eod-modal').style.display='block';
+}
+function closeModal(){document.getElementById('eod-modal').style.display='none';}
 
 function sw(t){
   ['today','month','ventes','mur'].forEach(function(s){
