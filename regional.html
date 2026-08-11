@@ -13,7 +13,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#f7f7f5;--w:#fff;--b:#0a0a0a;--g1:#f0f0ee;--g2:#e5e5e2;--g3:#c8c8c4;--g4:#888;--g5:#555;--acc:#E8FF3A;--green:#1a5c38;--gbg:#d4f0e0;--red:#7a1a1a;--rbg:#ffd6d6;--rborder:#ffb3b3;--orange:#92400e;--obg:#fef3c7;--blue:#1e3a8a;--bbg:#dbeafe;--f:'Inter',sans-serif;--r:10px;--rl:14px;--jean:#3b82f6;--romeo:#ec4899;--quentin:#10b981;--cem:#f59e0b}
+:root{--bg:#f7f7f5;--w:#fff;--b:#0a0a0a;--g1:#f0f0ee;--g2:#e5e5e2;--g3:#c8c8c4;--g4:#888;--g5:#555;--acc:#E8FF3A;--green:#1a5c38;--gbg:#d4f0e0;--red:#7a1a1a;--rbg:#ffd6d6;--rborder:#ffb3b3;--orange:#92400e;--obg:#fef3c7;--blue:#1e3a8a;--bbg:#dbeafe;--f:'Inter',sans-serif;--r:10px;--rl:14px;--jean:#3b82f6;--romeo:#ec4899;--quentin:#10b981;--cem:#f59e0b;--idris:#8b5cf6;--arsena:#ef4444;--milan:#06b6d4;--axel_l:#84cc16;--julien_r:#f97316;--benjamin:#64748b}
 html,body{height:100%;background:var(--bg);font-family:var(--f);color:var(--b);overflow:hidden}
 body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
@@ -64,6 +64,13 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .team-hd.romeo{background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.2)}
 .team-hd.quentin{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)}
 .team-hd.cem{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)}
+.team-hd.idris{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)}
+.team-hd.arsena{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)}
+.team-hd.milan{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2)}
+.team-hd.axel_l{background:rgba(132,204,22,.1);border:1px solid rgba(132,204,22,.2)}
+.team-hd.julien_r{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2)}
+.team-hd.benjamin{background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.2)}
+.team-sc.idris{color:var(--idris)}.team-sc.arsena{color:var(--arsena)}.team-sc.milan{color:var(--milan)}.team-sc.axel_l{color:var(--axel_l)}.team-sc.julien_r{color:var(--julien_r)}.team-sc.benjamin{color:var(--benjamin)}
 .team-nm{font-size:13px;font-weight:700}
 .team-sc{font-size:22px;font-weight:800}
 .team-sc.jean{color:var(--jean)}.team-sc.romeo{color:var(--romeo)}.team-sc.quentin{color:var(--quentin)}.team-sc.cem{color:var(--cem)}
@@ -160,6 +167,12 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .tc-romeo{background:rgba(236,72,153,.15);color:var(--romeo)}
 .tc-quentin{background:rgba(16,185,129,.15);color:var(--quentin)}
 .tc-cem{background:rgba(245,158,11,.15);color:var(--cem)}
+.tc-idris{background:rgba(139,92,246,.15);color:var(--idris)}
+.tc-arsena{background:rgba(239,68,68,.15);color:var(--arsena)}
+.tc-milan{background:rgba(6,182,212,.15);color:var(--milan)}
+.tc-axel_l{background:rgba(132,204,22,.15);color:var(--axel_l)}
+.tc-julien_r{background:rgba(249,115,22,.15);color:var(--julien_r)}
+.tc-benjamin{background:rgba(100,116,139,.15);color:var(--benjamin)}
 </style>
 </head>
 <body>
@@ -268,25 +281,40 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
 <script>
 var REGIONAL_MANAGERS = {
-  baptiste: {name:'Baptiste', initials:'BA', pin:'3001', teams:['jean','romeo','quentin'], label:'Region Marseille'},
-  mohamed:  {name:'Mohamed SATA', initials:'MS', pin:'3002', teams:['cem'], label:'Region Cem'}
+  baptiste: {name:'Baptiste',       initials:'BA', pin:'3001', teams:['jean','romeo','quentin','idris','arsena','milan','axel_l'], label:'Region Baptiste'},
+  louis:    {name:'Louis STEINCKER',initials:'LS', pin:'3003', teams:['julien_r'],                                                 label:'Region Louis Steincker'},
+  mohamed:  {name:'Mohamed SATA',   initials:'MS', pin:'3002', teams:['cem','benjamin'],                                           label:'Region Mohamed Sata'}
 };
 
+
 var MANAGERS = {
-  jean:    {name:'Jean',    initials:'JE', team:'jean',    label:'Equipe Jean',    color:'jean'},
-  romeo:   {name:'Romeo',  initials:'RO', team:'romeo',   label:'Equipe Romeo',   color:'romeo'},
-  quentin: {name:'Quentin',initials:'QU', team:'quentin', label:'Equipe Quentin', color:'quentin'},
-  cem:     {name:'Cem',    initials:'CE', team:'cem',     label:'Equipe Cem',     color:'cem'}
+  jean:    {name:'Jean',            initials:'JE', team:'jean',     label:'Equipe Jean',    color:'jean'},
+  romeo:   {name:'Romeo',           initials:'RO', team:'romeo',    label:'Equipe Romeo',   color:'romeo'},
+  quentin: {name:'Quentin',         initials:'QU', team:'quentin',  label:'Equipe Quentin', color:'quentin'},
+  cem:     {name:'Cem',             initials:'CE', team:'cem',      label:'Equipe Cem',     color:'cem'},
+  idris:   {name:'Idris ENE',       initials:'IE', team:'idris',    label:'Equipe Idris',   color:'idris'},
+  arsena:  {name:'Arsena VADAHI',   initials:'AV', team:'arsena',   label:'Equipe Arsena',  color:'arsena'},
+  milan:   {name:'Milan PIGEROULET',initials:'MP', team:'milan',    label:'Equipe Milan',   color:'milan'},
+  axel_l:  {name:'Axel LUXEMBOURG', initials:'AL', team:'axel_l',   label:'Equipe Axel L.', color:'axel_l'},
+  julien_r:{name:'Julien ROUXEL',   initials:'JR', team:'julien_r', label:'Equipe Julien R.',color:'julien_r'},
+  benjamin:{name:'Benjamin CLEMENT',initials:'BC', team:'benjamin', label:'Equipe Benjamin',color:'benjamin'}
 };
+
 
 var TEAMS = {
   jean:    [{n:'Manon LAURENT',i:'ML'},{n:'Jonathan KHAROUBI',i:'JK'},{n:'Aurelie QUINCHARD',i:'AQ'},{n:'Mathias AZZOPARDI',i:'MA'},{n:'Menelik KETCHAM',i:'MK'}],
   romeo:   [{n:'Kelly HOCHET',i:'KH'},{n:'Bastien GEIGER',i:'BG'},{n:'Lea RECORDIER',i:'LR'},{n:'Hugo LAUGIER',i:'HL'},{n:'Raphael BOUTEILLE',i:'RB'}],
   quentin: [{n:'Anisse CAPUTO',i:'AC'},{n:'Ilyas LARABA',i:'IL'},{n:'Adam KANDILL',i:'AK'},{n:'Matis DEROIN',i:'MD'},{n:'Nicolas YAKDI',i:'NY'}],
-  cem:     [{n:'Sam PIOGE',i:'SP'},{n:'Gregory BAICHEV',i:'GB'},{n:'Zoe LE KHAL',i:'ZL'},{n:'William VANDENBUSSCHE',i:'WV'},{n:'Robin HINGRAND',i:'RH'}]
+  cem:     [{n:'Sam PIOGE',i:'SP'},{n:'Gregory BAICHEV',i:'GB'},{n:'Zoe LE KHAL',i:'ZL'},{n:'William VANDENBUSSCHE',i:'WV'},{n:'Robin HINGRAND',i:'RH'}],
+  idris:   [{n:'Bilal MEZABER',i:'BM'},{n:'Marguerite ALVES',i:'MG'},{n:'Alexandre GLADEL',i:'AG'},{n:'Julie COSTE',i:'JC'},{n:'Alexis COSTE',i:'AL'},{n:'Hillel CHITER',i:'HC'},{n:'Nicolas GESUALDI',i:'NG'}],
+  arsena:  [{n:'Zakaria CHAJRI',i:'ZC'},{n:'Tanguy BOUCABEILLE',i:'TB'},{n:'Teo BOINET',i:'TO'},{n:'Paul ROUX',i:'PR'}],
+  milan:   [{n:'Anthony DOUARCHE',i:'AD'},{n:'Corentin EUSTACHE',i:'CE'},{n:'Theo NORGET',i:'TN'},{n:'Blaise DE MONTGOLFIER',i:'BD'},{n:'Floryan LEMOINE',i:'FL'},{n:'Axel GULLEVIC',i:'AX'},{n:'Esteban DUVERNAY',i:'ED'},{n:'Luc PERRIER',i:'LP'}],
+  axel_l:  [{n:'Quentin LARTIGUE',i:'QL'},{n:'Arnaud ROCHETTE',i:'AR'},{n:'Lydiane ROUDAUT',i:'LY'},{n:'Jorys TUEUR',i:'JT'},{n:'Nicolas GENTIL',i:'NI'},{n:'Julian DEL BOSQUE',i:'JD'}],
+  julien_r:[{n:'Jean SARBACHER',i:'JS'},{n:'Louis PLUVINAGE',i:'LU'},{n:'Oceane JURQUET',i:'OJ'},{n:'Julien DUPROIX',i:'JD'},{n:'Melih AYDIN',i:'ME'},{n:'Tom MARECHAL',i:'TM'},{n:'Ilhan BABAYAGIT',i:'IB'},{n:'Thomas RENDA',i:'TR'}],
+  benjamin:[{n:'Matteo LESIEN',i:'MT'},{n:'Bel MOUYENI',i:'BL'},{n:'Hadrien CHAUVEAU',i:'HD'},{n:'Enzo RUSSO',i:'ER'},{n:'Jonathan POUILLE',i:'JP'},{n:'Pauline DUCAMP',i:'PD'}]
 };
 
-var TEAM_COLORS = {jean:'#3b82f6',romeo:'#ec4899',quentin:'#10b981',cem:'#f59e0b'};
+var TEAM_COLORS = {jean:'#3b82f6',romeo:'#ec4899',quentin:'#10b981',cem:'#f59e0b',idris:'#8b5cf6',arsena:'#ef4444',milan:'#06b6d4',axel_l:'#84cc16',julien_r:'#f97316',benjamin:'#64748b'};
 var ALL_AGENTS = Object.values(TEAMS).flat().filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
 
 var SB='https://twjtdrggjvhvlkhhybgq.supabase.co';
