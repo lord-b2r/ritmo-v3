@@ -1033,6 +1033,10 @@ function renderStMoi(){
   document.getElementById('st-rog').textContent=reps.reduce((s,r)=>s+(r.rdv_og||0),0);
   document.getElementById('st-ac').textContent=reps.reduce((s,r)=>s+(r.ac||0),0);
   document.getElementById('st-j').textContent=reps.filter(r=>(r.score||0)>0).length;
+  const totalPos=reps.reduce((s,r)=>s+(r.total_pos||0),0);
+  const posSharePct=tv>0?Math.round(totalPos/tv*100):0;
+  const stPos=document.getElementById('st-pos');
+  if(stPos)stPos.textContent=posSharePct+'%';
   const obj=OBJECTIVES[agent]||DEFAULT_OBJ;
   const ti=reps.reduce((s,r)=>s+(r.instal||0),0);
   const objScore=tv+ti,objTarget=obj.ventes+obj.instals;
