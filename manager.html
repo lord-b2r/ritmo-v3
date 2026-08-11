@@ -156,6 +156,10 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .mur-text{font-size:14px;color:var(--b);line-height:1.5;padding:10px;background:var(--g1);border-radius:var(--r);font-style:italic}
 
 .empty{text-align:center;padding:40px 0;font-size:13px;font-weight:600;color:var(--g3)}
+.sub-tabs{display:flex;background:var(--g1);border-radius:30px;padding:3px;margin-bottom:14px;flex-shrink:0}
+.sub-tab{flex:1;text-align:center;padding:8px 10px;font-size:13px;font-weight:600;color:var(--g4);border-radius:26px;cursor:pointer;transition:all .2s}
+.sub-tab.on{background:var(--b);color:#fff;font-weight:700}
+.sub-scr{display:none}.sub-scr.on{display:block}
 .fu-cat{display:inline-flex;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
 .fu-rdv{background:rgba(59,130,246,.15);color:#1d4ed8}
 .fu-fu{background:rgba(245,158,11,.15);color:#92400e}
@@ -206,7 +210,6 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <div class="slide-tab on" id="t-today" onclick="sw('today')">Aujourd hui</div>
     <div class="slide-tab" id="t-month" onclick="sw('month')">Ce mois</div>
     <div class="slide-tab" id="t-ventes" onclick="sw('ventes')">Ventes</div>
-    <div class="slide-tab" id="t-fu" onclick="sw('fu')">Follow-up</div>
     <div class="slide-tab" id="t-mur" onclick="sw('mur')">Mur</div>
   </div>
 
@@ -228,24 +231,28 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
       <div class="rk" id="ranking"></div>
     </div>
 
-    <!-- VENTES -->
+    <!-- VENTES + FU -->
     <div id="s-ventes" class="scr">
-      <div class="filter-row" id="sales-filter"></div>
-      <div class="filter-row" id="type-filter">
-        <button class="fb on" onclick="setTypeFilter('all')">Toutes</button>
-        <button class="fb" onclick="setTypeFilter('POS')">POS</button>
-        <button class="fb" onclick="setTypeFilter('TPE')">TPE</button>
+      <div class="sub-tabs">
+        <div class="sub-tab on" id="st-ventes" onclick="swSub('ventes')">Ventes</div>
+        <div class="sub-tab" id="st-fu" onclick="swSub('fu')">Follow-up</div>
       </div>
-      <div class="kgrid" id="ventes-kpi"></div>
-      <div id="ventes-list"></div>
-    </div>
-
-    <!-- FOLLOW-UP -->
-    <div id="s-fu" class="scr">
-      <div style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px">Follow-up equipe</div>
-      <div style="font-size:13px;color:var(--g4);margin-bottom:14px">Pipeline de mon equipe - dernier envoi EOD</div>
-      <div id="fu-summary"></div>
-      <div id="fu-list-mgr"></div>
+      <!-- Sous-ecran Ventes -->
+      <div id="ss-ventes" class="sub-scr on">
+        <div class="filter-row" id="sales-filter"></div>
+        <div class="filter-row" id="type-filter">
+          <button class="fb on" onclick="setTypeFilter('all')">Toutes</button>
+          <button class="fb" onclick="setTypeFilter('POS')">POS</button>
+          <button class="fb" onclick="setTypeFilter('TPE')">TPE</button>
+        </div>
+        <div class="kgrid" id="ventes-kpi"></div>
+        <div id="ventes-list"></div>
+      </div>
+      <!-- Sous-ecran Follow-up -->
+      <div id="ss-fu" class="sub-scr">
+        <div id="fu-summary"></div>
+        <div id="fu-list-mgr"></div>
+      </div>
     </div>
 
     <!-- MUR -->
@@ -854,13 +861,20 @@ function renderFU(){
 }
 
 function sw(t){
-  ['today','month','ventes','fu','mur'].forEach(function(s){
+  ['today','month','ventes','mur'].forEach(function(s){
     document.getElementById('s-'+s).className='scr'+(t===s?' on':'');
     document.getElementById('t-'+s).className='slide-tab'+(t===s?' on':'');
   });
   if(t==='ventes'){buildSalesFilter();renderVentes();}
-  if(t==='fu')renderFU();
   if(t==='mur')renderMur();
+}
+function swSub(t){
+  ['ventes','fu'].forEach(function(s){
+    var el=document.getElementById('ss-'+s);if(el)el.className='sub-scr'+(t===s?' on':'');
+    var tab=document.getElementById('st-'+s);if(tab)tab.className='sub-tab'+(t===s?' on':'');
+  });
+  if(t==='fu')renderFU();
+  if(t==='ventes'){buildSalesFilter();renderVentes();}
 }
 
 function formatK(n){return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'K':n.toString();}
