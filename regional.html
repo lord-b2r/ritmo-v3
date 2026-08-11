@@ -347,8 +347,8 @@ var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR
 
 var now=new Date(),ME=null,MY_TEAMS=[],REPORTS=[],PENDING=null;
 var mgrFilter='jean',teamFilterV='all',typeFilter='all',fuTeamFilter='all';
-var REACT_EMOJIS={fire:'\uD83D\uDD25','100':'\uD83D\uDCAF',clap:'\uD83D\uDC4F',muscle:'\uD83D\uDCAA',star:'\u2B50'};
-var REACTS=['fire','100','clap','muscle','star'];
+var REACT_EMOJIS={goat:'\uD83D\uDC10'};
+var REACTS=['goat'];
 function getMurReactions(){try{return JSON.parse(localStorage.getItem('ritmo_rm_reactions')||'{}');}catch(e){return {};}}
 function saveMurReactions(r){try{localStorage.setItem('ritmo_rm_reactions',JSON.stringify(r));}catch(e){}}
 function toggleReact(repId,emoji){
