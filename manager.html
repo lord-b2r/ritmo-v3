@@ -476,7 +476,7 @@ function renderToday(){
   var missContainer=document.getElementById('miss-banner');
   if(missContainer){
     if(miss>0){
-      var missNames=withOut.map(function(a){return a.n.split(' ')[0];}).join(', ');
+      var missNames=agents.filter(function(a){return !getToday(a.n);}).map(function(a){return a.n.split(' ')[0];}).join(', ');
       missContainer.innerHTML='<div style="background:var(--rbg);border:1px solid var(--rborder);border-radius:var(--r);padding:10px 14px;font-size:12px;font-weight:700;color:var(--red);display:flex;align-items:center;gap:8px;margin-bottom:12px"><i class="ti ti-alert-triangle" style="font-size:14px;flex-shrink:0"></i><span>'+miss+' EOD manquante'+(miss>1?'s':'')+' — '+missNames+'</span></div>';
       missContainer.style.display='block';
     } else {
