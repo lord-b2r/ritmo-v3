@@ -957,7 +957,7 @@ function swSub(t){
     var tab=document.getElementById('st-'+s);if(tab)tab.className='sub-tab'+(t===s?' on':'');
   });
   if(t==='fu'){buildFuTeamFilter();renderFU_reg();}
-  if(t==='ventes')renderVentes();
+  if(t==='ventes'){buildTeamFilterV();renderVentes();}
 }
 
 function sw(t){
