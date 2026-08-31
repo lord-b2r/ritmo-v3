@@ -613,6 +613,7 @@ function rpk(k){try{localStorage.removeItem(k);}catch(e){}document.cookie=k+'=;p
 function init(){
   // FU depuis localStorage
   try{fuList=JSON.parse(localStorage.getItem('ritmo_fu_'+ME)||'[]');}catch(e){fuList=[];}
+  loadFuFromSupabase();
   // Objectifs
   try{const o=JSON.parse(localStorage.getItem('ritmo_obj_'+ME)||'{}');OBJECTIVES[ME]={...DEFAULT_OBJ,...o};}catch(e){OBJECTIVES[ME]={...DEFAULT_OBJ};}
 
@@ -669,6 +670,7 @@ function logout(){if(!confirm('Changer de compte ?'))return;rpk('salesos_me');rp
 function bootApp(){
   if(!OBJECTIVES[ME])OBJECTIVES[ME]={...DEFAULT_OBJ};
   try{fuList=JSON.parse(localStorage.getItem('ritmo_fu_'+ME)||'[]');}catch(e){fuList=[];}
+  loadFuFromSupabase();
   document.getElementById('ob').classList.add('h');document.getElementById('ps').classList.remove('show');document.getElementById('app').style.display='flex';document.getElementById('app').classList.add('v');
   const ag=AGENTS_FLAT.find(a=>a.n===ME);
   document.getElementById('top-av').textContent=ag?ag.i:ME.slice(0,2).toUpperCase();
@@ -890,6 +892,7 @@ async function sendEOD(){
   S.rdv_ih.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV IH',cat:'rdv',type:'ih',note:r.note,ts:Date.now()});});
   S.rdv_og.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV OG',cat:'rdv',type:'og',note:r.note,ts:Date.now()});});
   saveFuLocal();
+  fuList.forEach(f=>{if(!f._synced){syncFuToSupabase(f);f._synced=true;}});
   const eodNow=new Date();const eod={agent:ME,team:MY_TEAM,date:eodNow.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}),timestamp:Date.now(),rdv_ih:rdv_ih_count,rdv_og:rdv_og_count,notes_ih,notes_og,vente_ih:S.ventes.filter(v=>v.nom).length,vente_og:0,total_vente:totalV,total_pos:totalPos,ac:S.ac,instal:S.ins,leads_fu:S.fu,outlook:S.ol,crm:S.cr,mot_jour:document.getElementById('mot').value,score:sc,ventes_detail,fu_list:fuList.map(f=>({nom:f.nom,cat:f.cat,type:f.type,note:f.note||''}))};
   setSd('ld');
   let sent=false;
@@ -933,11 +936,44 @@ function setFuCat(c){fuCat=c;['rdv','fu','mgm'].forEach(x=>{document.getElementB
 function setFuType(t){fuType=t;['ih','og'].forEach(x=>{document.getElementById('fu-type-'+x).className='vfo'+(x===t?' on':'');});}
 function saveFu(){
   const nom=document.getElementById('fu-nom').value.trim();if(!nom)return;
-  fuList.push({id:Date.now(),nom,cat:fuCat,type:fuType,note:document.getElementById('fu-note').value,ts:Date.now()});
-  saveFuLocal();document.getElementById('fu-nom').value='';document.getElementById('fu-note').value='';hideFuForm();renderFu();
+  const newFu={id:Date.now()+'_'+Math.random().toString(36).slice(2),nom,cat:fuCat,type:fuType,note:document.getElementById('fu-note').value,ts:Date.now()};
+  fuList.push(newFu);
+  saveFuLocal();syncFuToSupabase(newFu);
+  document.getElementById('fu-nom').value='';document.getElementById('fu-note').value='';hideFuForm();renderFu();
 }
 function saveFuLocal(){try{localStorage.setItem('ritmo_fu_'+ME,JSON.stringify(fuList));}catch(e){}}
-function delFu(id){fuList=fuList.filter(f=>f.id!==id);saveFuLocal();renderFu();}
+async function syncFuToSupabase(fu){
+  try{
+    await fetch(SB+'/rest/v1/fu_items',{
+      method:'POST',
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({id:String(fu.id),agent:ME,team:MY_TEAM,nom:fu.nom,cat:fu.cat,type:fu.type,note:fu.note||'',done:false})
+    });
+  }catch(e){console.error('FU sync error',e);}
+}
+async function deleteFuSupabase(id){
+  try{
+    await fetch(SB+'/rest/v1/fu_items?id=eq.'+encodeURIComponent(String(id))+'&agent=eq.'+encodeURIComponent(ME),{
+      method:'DELETE',
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+    });
+  }catch(e){console.error('FU delete error',e);}
+}
+async function loadFuFromSupabase(){
+  try{
+    const res=await fetch(SB+'/rest/v1/fu_items?agent=eq.'+encodeURIComponent(ME)+'&done=eq.false&order=created_at.asc',{
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+    });
+    if(res.ok){
+      const data=await res.json();
+      if(data&&data.length){
+        fuList=data.map(f=>({id:f.id,nom:f.nom,cat:f.cat,type:f.type,note:f.note||'',ts:new Date(f.created_at).getTime()}));
+        saveFuLocal();renderFu();
+      }
+    }
+  }catch(e){console.error('FU load error',e);}
+}
+function delFu(id){fuList=fuList.filter(f=>f.id!==id);saveFuLocal();deleteFuSupabase(id);renderFu();}
 function setFuFilter(f){fuFilter=f;document.querySelectorAll('#s-fu .filter-btn').forEach((b,i)=>{b.className='filter-btn'+(['all','rdv','fu','mgm'][i]===f?' on':'');});renderFu();}
 function renderFu(){
   const list=document.getElementById('fu-list');
