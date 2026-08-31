@@ -785,25 +785,37 @@ function openAgentDetail(ag,stats){
 }
 function closeModal(){document.getElementById('eod-modal').style.display='none';}
 
+async function loadFuItems(agents){
+  try{
+    var names=agents.map(function(a){return a.n;});
+    var filter=names.map(function(n){return 'agent=eq.'+encodeURIComponent(n);}).join(',');
+    var res=await fetch(SB+'/rest/v1/fu_items?or=('+filter+')&done=eq.false&order=created_at.asc',{
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+    });
+    if(res.ok){var data=await res.json();return data||[];}
+  }catch(e){console.error('loadFuItems error',e);}
+  return [];
+}
 function renderFU(){
   var agents=getTeamAgents('own');
-  var month=now.toISOString().slice(0,7);
-  // Dernier rapport de chaque commercial ce mois
   var summary=document.getElementById('fu-summary');
   var list=document.getElementById('fu-list-mgr');
-  summary.innerHTML='';list.innerHTML='';
+  if(!summary||!list)return;
+  summary.innerHTML='';list.innerHTML='<div class="empty">Chargement...</div>';
+  loadFuItems(agents).then(function(fuData){
+    renderFuContent(agents, fuData, summary, list);
+  });
+}
+function renderFuContent(agents, fuData, summary, list){
   // Grille résumé volumes par commercial
   var sumGrid=document.createElement('div');sumGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px';
   var hasFU=false;
   agents.forEach(function(ag){
-    // Prendre le dernier rapport du mois qui a des FU
-    var reps=REPORTS.filter(function(r){return r.agent===ag.n&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month&&r.fu_list&&r.fu_list.length;});
-    var lastRep=reps[0]; // déjà trié par date desc
-    var fuData=lastRep?lastRep.fu_list:[];
-    var nRdv=fuData.filter(function(f){return f.cat==='rdv';}).length;
-    var nFu=fuData.filter(function(f){return f.cat==='fu';}).length;
-    var nMgm=fuData.filter(function(f){return f.cat==='mgm';}).length;
-    var total=fuData.length;
+    var agFu=fuData.filter(function(f){return f.agent===ag.n;});
+    var nRdv=agFu.filter(function(f){return f.cat==='rdv';}).length;
+    var nFu=agFu.filter(function(f){return f.cat==='fu';}).length;
+    var nMgm=agFu.filter(function(f){return f.cat==='mgm';}).length;
+    var total=agFu.length;
     if(total>0)hasFU=true;
     var kc=document.createElement('div');
     kc.style.cssText='background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:12px';
@@ -823,10 +835,8 @@ function renderFU(){
   // Liste dépliable par commercial
   var lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Detail par commercial';list.appendChild(lbl);
   agents.forEach(function(ag){
-    var reps=REPORTS.filter(function(r){return r.agent===ag.n&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month&&r.fu_list&&r.fu_list.length;});
-    var lastRep=reps[0];
-    var fuData=lastRep?lastRep.fu_list:[];
-    if(!fuData.length)return;
+    var agFu=fuData.filter(function(f){return f.agent===ag.n;});
+    if(!agFu.length)return;
     var card=document.createElement('div');card.className='fu-card';
     var key='fu_'+ag.n.replace(/[^a-z0-9]/gi,'_');
     var hd=document.createElement('div');hd.className='fu-agent-hd';
@@ -849,7 +859,7 @@ function renderFU(){
     var body=document.createElement('div');body.className='fu-agent-body';body.id='b-'+key;
     var cats={rdv:'fu-rdv',fu:'fu-fu',mgm:'fu-mgm'};
     var catLabels={rdv:'RDV',fu:'Follow-up',mgm:'MGM'};
-    fuData.forEach(function(f){
+    agFu.forEach(function(f){
       var row=document.createElement('div');row.className='fu-row';
       row.innerHTML='<span class="fu-cat '+(cats[f.cat]||'fu-fu')+'">'+catLabels[f.cat]+'</span>'+
         '<div style="flex:1"><div class="fu-nom">'+f.nom+'</div>'+(f.note?'<div class="fu-note">'+f.note+'</div>':'')+'</div>'+
