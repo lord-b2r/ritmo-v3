@@ -1145,7 +1145,7 @@ function renderStEq(){
     const rn=document.createElement('div');rn.className='rank-n'+(i===0?' gd':'');rn.textContent=(i+1);
     const ra=document.createElement('div');ra.className='rank-av';ra.textContent=a.i;
     const rf=document.createElement('div');rf.className='rank-info';
-    const rnm=document.createElement('div');rnm.className='rank-name';rnm.textContent=a.n.split(' ')[0]+(isMe?' (moi)':'');
+    const rnm=document.createElement('div');rnm.className='rank-name';rnm.textContent=a.n+(isMe?' (moi)':'');
     const rsb=document.createElement('div');rsb.className='rank-sub';rsb.textContent=a.v+' vente'+(a.v!==1?'s':'')+'  -  '+a.ins+' instal';
     const rbb=document.createElement('div');rbb.className='rank-bar-bg';const rbf=document.createElement('div');rbf.className='rank-bar-fill';rbf.style.width=Math.round(a.s/mx*100)+'%';rbb.appendChild(rbf);
     rf.appendChild(rnm);rf.appendChild(rsb);rf.appendChild(rbb);
