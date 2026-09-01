@@ -603,7 +603,32 @@ let fuCat = 'rdv';
 let fuType = 'ih';
 const OBJECTIVES = {};
 
-function freshS(){return {rdv_ih:[], rdv_og:[], ventes:[], ac:0, ins:0, fu:0, ol:false, cr:false, mot:''};}
+function showToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#0a0a0a;color:#E8FF3A;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:999;opacity:1;transition:opacity .5s';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},500);},2000);
+}
+function freshS(){return {rdv_ih:[], rdv_og:[], ventes:[], ac:0, ins:0, fu:0, ol:false, cr:false, mot:''};};
+function saveS(){
+  if(!ME)return;
+  var today=new Date().toISOString().slice(0,10);
+  try{localStorage.setItem('ritmo_draft_'+ME,JSON.stringify({s:S,date:today,mot:document.getElementById('mot')?document.getElementById('mot').value:''}));}catch(e){}
+}
+function loadS(){
+  if(!ME)return false;
+  var today=new Date().toISOString().slice(0,10);
+  try{
+    var raw=localStorage.getItem('ritmo_draft_'+ME);
+    if(!raw)return false;
+    var data=JSON.parse(raw);
+    if(data.date!==today)return false;
+    S=data.s;
+    if(data.mot&&document.getElementById('mot'))document.getElementById('mot').value=data.mot;
+    return true;
+  }catch(e){return false;}
+}
+function clearDraft(){if(ME)try{localStorage.removeItem('ritmo_draft_'+ME);}catch(e){}}
 
 // -- STORAGE --
 function spk(k,v){try{localStorage.setItem(k,v);}catch(e){}document.cookie=k+'='+encodeURIComponent(v)+';path=/;max-age=31536000';}
@@ -679,6 +704,11 @@ function bootApp(){
   document.getElementById('sh-date').textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
   stAgent=ME;
   buildWeek();updateAll();loadReports();
+  // Restaurer le brouillon du jour si existant
+  if(loadS()){
+    renderAll();
+    showToast('Brouillon du jour restaure');
+  }
 }
 
 // -- SYNC --
@@ -923,7 +953,7 @@ async function sendEOD(){
   }
   allReports.unshift(eod);
   const ss=document.getElementById('sent-score');ss.textContent=sc;ss.style.color=sc===0?'var(--red)':sc===1?'#ea580c':'var(--green)';
-  document.getElementById('form-send').style.display='none';document.getElementById('sent').style.display='flex';
+  document.getElementById('form-send').style.display='none';document.getElementById('sent').style.display='flex';clearDraft();
   // Indicateur envoi Supabase
   const syncEl=document.getElementById('sync-status');
   if(syncEl){syncEl.textContent=sent?'Synchro OK ✓':'Sync echouee - verifie ta connexion';syncEl.style.color=sent?'var(--green)':'var(--red)';syncEl.style.display='block';}
