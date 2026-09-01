@@ -594,6 +594,7 @@ let ME = null, MY_TEAM = null;
 let S = freshS();
 let openB = {rdv:true, vt:true, ac:true};
 let allReports = [];
+let allReportsGlobal = [];
 let fuList = [];
 let fuFilter = 'all';
 let vFilter = 'all';
@@ -721,6 +722,7 @@ async function loadReports(){
   try{
     const res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
     const d=await res.json();
+    allReportsGlobal=d;
     const teamAgents=TEAMS[MY_TEAM]?TEAMS[MY_TEAM].agents.map(a=>a.n):[];
     allReports=d.filter(r=>teamAgents.some(n=>n===r.agent||n.toLowerCase()===r.agent.toLowerCase()));
     setSd('ok');buildWeek();
@@ -1063,7 +1065,8 @@ function renderMur(){
 // -- STATS --
 function getMonthReps(agent,month){
   const m=month||now.toISOString().slice(0,7);
-  return allReports.filter(r=>r.agent===agent&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===m);
+  const src=eqViewCur==='all'?allReportsGlobal:allReports;
+  return src.filter(r=>r.agent===agent&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===m);
 }
 function stView(v){
   stView_cur=v;
