@@ -338,6 +338,7 @@ var PENDING = null;
 var teamFilter = 'own';
 var salesFilter = 'all';
 var typeFilter = 'all';
+var fuCache = null;
 
 function spk(k,v){try{localStorage.setItem(k,v);}catch(e){}document.cookie=k+'='+encodeURIComponent(v)+';path=/;max-age=31536000';}
 function gpk(k){try{var v=localStorage.getItem(k);if(v)return v;}catch(e){}var m=document.cookie.match('(?:^|;)\\s*'+k+'=([^;]*)');return m?decodeURIComponent(m[1]):null;}
@@ -448,6 +449,7 @@ async function loadData(){
     REPORTS=data;
     setSd('ok');
   }catch(e){setSd('err');}
+  fuCache=null;
   renderAll();
 }
 
@@ -805,10 +807,20 @@ function renderFU(){
   var summary=document.getElementById('fu-summary');
   var list=document.getElementById('fu-list-mgr');
   if(!summary||!list)return;
+  if(fuCache){
+    summary.innerHTML='';list.innerHTML='';
+    renderFuContent(agents, fuCache, summary, list);
+    return;
+  }
   summary.innerHTML='';list.innerHTML='<div class="empty">Chargement...</div>';
   loadFuItems(agents).then(function(fuData){
+    fuCache=fuData;
     renderFuContent(agents, fuData, summary, list);
   });
+}
+function preloadFu(){
+  var agents=getTeamAgents('own');
+  loadFuItems(agents).then(function(fuData){fuCache=fuData;});
 }
 function renderFuContent(agents, fuData, summary, list){
   // Grille résumé volumes par commercial
@@ -879,7 +891,7 @@ function sw(t){
     document.getElementById('s-'+s).className='scr'+(t===s?' on':'');
     document.getElementById('t-'+s).className='slide-tab'+(t===s?' on':'');
   });
-  if(t==='ventes'){buildSalesFilter();renderVentes();}
+  if(t==='ventes'){buildSalesFilter();renderVentes();preloadFu();}
   if(t==='mur')renderMur();
 }
 function swSub(t){
@@ -888,7 +900,7 @@ function swSub(t){
     var tab=document.getElementById('st-'+s);if(tab)tab.className='sub-tab'+(t===s?' on':'');
   });
   if(t==='fu')renderFU();
-  if(t==='ventes'){buildSalesFilter();renderVentes();}
+  if(t==='ventes'){buildSalesFilter();renderVentes();preloadFu();}
 }
 
 function formatK(n){return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'K':n.toString();}
