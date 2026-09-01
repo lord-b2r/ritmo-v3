@@ -13,7 +13,302 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-:root{--bg:#f7f7f5;--w:#fff;--b:#0a0a0a;--g1:#f0f0ee;--g2:#e5e5e2;--g3:#c8c8c4;--g4:#888;--g5:#555;--acc:#E8FF3A;--green:#1a5c38;--gbg:#d4f0e0;--red:#7a1a1a;--rbg:#ffd6d6;--rborder:#ffb3b3;--orange:#92400e;--obg:#fef3c7;--blue:#1e3a8a;--bbg:#dbeafe;--f:'Inter',sans-serif;--r:10px;--rl:14px;--jean:#3b82f6;--romeo:#ec4899;--quentin:#10b981;--cem:#f59e0b;--idris:#8b5cf6;--arsena:#ef4444; label:'Region Baptiste'},
+:root{--bg:#f7f7f5;--w:#fff;--b:#0a0a0a;--g1:#f0f0ee;--g2:#e5e5e2;--g3:#c8c8c4;--g4:#888;--g5:#555;--acc:#E8FF3A;--green:#1a5c38;--gbg:#d4f0e0;--red:#7a1a1a;--rbg:#ffd6d6;--rborder:#ffb3b3;--orange:#92400e;--obg:#fef3c7;--blue:#1e3a8a;--bbg:#dbeafe;--f:'Inter',sans-serif;--r:10px;--rl:14px;--jean:#3b82f6;--romeo:#ec4899;--quentin:#10b981;--cem:#f59e0b;--idris:#8b5cf6;--arsena:#ef4444;--milan:#06b6d4;--axel_l:#84cc16;--julien_r:#f97316;--benjamin:#64748b;--alex_g:#06b6d4}
+html,body{height:100%;background:var(--bg);font-family:var(--f);color:var(--b);overflow:hidden}
+body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
+
+#lock{position:fixed;inset:0;background:var(--b);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+#lock.h{display:none}
+.lock-logo{width:52px;height:52px;background:var(--acc);border-radius:13px;display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.lock-logo svg{width:28px;height:28px}
+.lock-t{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:4px}
+.lock-s{font-size:13px;color:rgba(255,255,255,.35);margin-bottom:28px}
+.rm-grid{display:flex;flex-direction:column;gap:8px;width:100%;max-width:300px}
+.rm-row{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.rm-row:active{background:rgba(255,255,255,.12)}
+.rm-av{width:40px;height:40px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--b);flex-shrink:0}
+.rm-nm{font-size:14px;font-weight:700;color:#fff}
+.rm-tm{font-size:11px;color:rgba(255,255,255,.35)}
+.pin-wrap{display:none;flex-direction:column;align-items:center;width:100%;max-width:300px}
+.pin-wrap.show{display:flex}
+.pin-back{background:none;border:none;color:rgba(255,255,255,.35);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--f);margin-bottom:14px;align-self:flex-start}
+.pin-inp{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px;color:#fff;font-size:24px;width:100%;outline:none;font-family:var(--f);text-align:center;letter-spacing:10px;margin-bottom:10px}
+.pin-btn{width:100%;padding:14px;background:var(--acc);color:var(--b);border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--f)}
+.pin-err{color:#f87171;font-size:12px;margin-top:6px;display:none}
+
+#app{display:none;flex-direction:column;height:100%}
+#app.v{display:flex}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;background:var(--bg);flex-shrink:0}
+.pg-date{font-size:22px;font-weight:800;letter-spacing:-.6px;line-height:1.1}
+.pg-sub{font-size:12px;color:var(--g4);margin-top:2px}
+.top-right{display:flex;align-items:center;gap:8px}
+.sd{width:7px;height:7px;border-radius:50%;background:var(--g3)}
+.sd.ok{background:#22c55e}.sd.err{background:var(--red)}.sd.ld{background:#fb923c;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.top-av{width:30px;height:30px;border-radius:50%;background:var(--acc);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--b);cursor:pointer}
+.slide-tabs{display:flex;background:var(--w);border:.5px solid var(--g2);border-radius:30px;padding:4px;margin:0 18px 0;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.slide-tabs::-webkit-scrollbar{display:none}
+.slide-tab{flex-shrink:0;text-align:center;padding:9px 14px;font-size:13px;font-weight:600;color:var(--g4);border-radius:26px;cursor:pointer;transition:all .2s}
+.slide-tab.on{background:var(--b);color:#fff;font-weight:700}
+.screens{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;margin-top:12px}
+.scr{display:none;padding:0 18px 24px}.scr.on{display:block}
+
+.sec-lbl{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 8px}
+.pill{display:inline-flex;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px}
+.pill.ok{background:var(--gbg);color:var(--green)}.pill.er{background:var(--rbg);color:var(--red)}.pill.wn{background:var(--obg);color:var(--orange)}.pill.nu{background:var(--g1);color:var(--g4)}.pill.bl{background:var(--bbg);color:var(--blue)}
+.rf{background:var(--g1);border:1px solid var(--g2);border-radius:var(--r);padding:8px 14px;font-size:12px;font-weight:600;color:var(--g5);cursor:pointer;font-family:var(--f);display:inline-flex;align-items:center;gap:6px;margin-bottom:14px}
+
+/* TEAM HEADERS */
+.team-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:var(--rl);margin-bottom:6px}
+.team-hd.jean{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2)}
+.team-hd.romeo{background:rgba(236,72,153,.1);border:1px solid rgba(236,72,153,.2)}
+.team-hd.quentin{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.2)}
+.team-hd.cem{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2)}
+.team-hd.idris{background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2)}
+.team-hd.arsena{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)}
+.team-hd.milan{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2)}
+.team-hd.axel_l{background:rgba(132,204,22,.1);border:1px solid rgba(132,204,22,.2)}
+.team-hd.julien_r{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2)}
+.team-hd.benjamin{background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.2)}
+.team-hd.alex_g{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2)}
+.team-sc.idris{color:var(--idris)}.team-sc.arsena{color:var(--arsena)}.team-sc.milan{color:var(--milan)}.team-sc.axel_l{color:var(--axel_l)}.team-sc.julien_r{color:var(--julien_r)}.team-sc.benjamin{color:var(--benjamin)}.team-sc.alex_g{color:var(--alex_g)}
+.team-nm{font-size:13px;font-weight:700}
+.team-sc{font-size:22px;font-weight:800}
+.team-sc.jean{color:var(--jean)}.team-sc.romeo{color:var(--romeo)}.team-sc.quentin{color:var(--quentin)}.team-sc.cem{color:var(--cem)}
+
+/* AGENT CARDS */
+.agc{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);margin-bottom:6px;overflow:hidden}
+.agc.ms{border-color:var(--rborder);background:#fffaf8}
+.agh{display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer}
+.aga{width:36px;height:36px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.aga.ms{background:var(--rbg);color:var(--red)}
+.agi{flex:1;min-width:0}
+.agn{font-size:13px;font-weight:700}
+.agm{font-size:11px;color:var(--g4)}
+.ags{font-size:24px;font-weight:800}
+.ags.red{color:var(--red)}.ags.ora{color:#ea580c}.ags.grn{color:var(--green)}
+.agb{padding:0 14px 14px;border-top:1px solid var(--g2);display:none}
+.agb.op{display:block}
+.chev{font-size:14px;color:var(--g3);transition:transform .2s}
+.mgd{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:10px}
+.mce{background:var(--g1);border-radius:var(--r);padding:7px 9px}
+.mcl{font-size:9px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.mcv{font-size:16px;font-weight:800}
+.mcv.g{color:var(--green)}
+.ni{background:var(--g1);border-radius:var(--r);padding:7px 10px;margin-bottom:5px;font-size:12px;color:var(--g5)}
+.nil{font-size:9px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px}
+.rch{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.rc{padding:4px 9px;border-radius:20px;font-size:11px;font-weight:700}
+.rc.ok{background:var(--gbg);color:var(--green)}.rc.ko{background:var(--rbg);color:var(--red)}
+.mj{font-size:12px;color:var(--g4);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--g2)}
+
+/* VENTES */
+.vi{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:11px 13px;margin-bottom:6px}
+.vit{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.vin{font-size:13px;font-weight:700}
+.via{font-size:11px;color:var(--g4);margin-bottom:6px}
+.vig{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px}
+.vc{background:var(--g1);border-radius:6px;padding:6px 8px}
+.vcl{font-size:9px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.3px}
+.vcv{font-size:13px;font-weight:700}
+.vk{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:12px}
+.vkl{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.vkv{font-size:22px;font-weight:800;letter-spacing:-.5px}
+.vks{font-size:11px;color:var(--g4);margin-top:2px}
+.kgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.kc{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:12px}
+.kl{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.kv{font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1}
+.kv.g{color:var(--green)}.ks{font-size:11px;color:var(--g4);margin-top:2px}
+.filter-row{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.fb{padding:6px 13px;border-radius:20px;border:1px solid var(--g2);background:var(--w);font-size:12px;font-weight:700;color:var(--g4);cursor:pointer;font-family:var(--f)}
+.fb.on{background:var(--b);color:#fff;border-color:var(--b)}
+
+/* CLASSEMENT */
+.rk{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);overflow:hidden;margin-bottom:14px}
+.rr{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--g1)}
+.rr:last-child{border-bottom:0}
+.rn{font-size:14px;font-weight:800;color:var(--g3);min-width:18px}
+.rn.gd{color:#b8860b}
+.ra{width:32px;height:32px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.rf2{flex:1;min-width:0}
+.rnm{font-size:13px;font-weight:700}
+.rsb{font-size:11px;color:var(--g4)}
+.rbb{background:var(--g1);border-radius:3px;height:4px;margin-top:4px}
+.rbf{height:100%;border-radius:3px}
+.rs{font-size:20px;font-weight:800}
+.rs.red{color:var(--red)}.rs.ora{color:#ea580c}.rs.grn{color:var(--green)}
+
+/* MUR */
+.mur-item{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:14px;margin-bottom:8px}
+.mur-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.mur-av{width:34px;height:34px;border-radius:50%;background:var(--b);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
+.mur-name{font-size:13px;font-weight:700}
+.mur-meta{font-size:11px;color:var(--g4)}
+.mur-score{font-size:22px;font-weight:800}
+.mur-score.red{color:var(--red)}.mur-score.ora{color:#ea580c}.mur-score.grn{color:var(--green)}
+.mur-text{font-size:14px;color:var(--b);line-height:1.5;padding:10px;background:var(--g1);border-radius:var(--r);font-style:italic}
+
+/* CHARTS */
+.chart-card{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:16px;margin-bottom:12px}
+.chart-title{font-size:13px;font-weight:700;margin-bottom:12px}
+.chart-wrap{position:relative;height:200px}
+
+/* STATS INLINE */
+.stat-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--g1)}
+.stat-row:last-child{border-bottom:0}
+.stat-label{font-size:13px;font-weight:500;flex:1;color:var(--g5)}
+.stat-bar-bg{flex:0 0 100px;background:var(--g1);border-radius:4px;height:7px;overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:4px}
+.stat-val{font-size:13px;font-weight:700;flex:0 0 40px;text-align:right}
+
+.empty{text-align:center;padding:40px 0;font-size:13px;font-weight:600;color:var(--g3)}
+.sub-tabs{display:flex;background:var(--g1);border-radius:30px;padding:3px;margin-bottom:14px}
+.sub-tab{flex:1;text-align:center;padding:8px 10px;font-size:13px;font-weight:600;color:var(--g4);border-radius:26px;cursor:pointer;transition:all .2s}
+.sub-tab.on{background:var(--b);color:#fff;font-weight:700}
+.sub-scr{display:none}.sub-scr.on{display:block}
+.fu-cat-badge{display:inline-flex;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.fu-rdv{background:rgba(59,130,246,.15);color:#1d4ed8}
+.fu-fu{background:rgba(245,158,11,.15);color:#92400e}
+.fu-mgm{background:rgba(16,185,129,.15);color:#065f46}
+.fu-card{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);margin-bottom:8px;overflow:hidden}
+.fu-agent-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.fu-agent-body{display:none;padding:0 14px 14px}
+.fu-agent-body.op{display:block}
+.fu-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--g1)}
+.fu-row:last-child{border-bottom:0}
+.team-chip{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.tc-jean{background:rgba(59,130,246,.15);color:var(--jean)}
+.tc-romeo{background:rgba(236,72,153,.15);color:var(--romeo)}
+.tc-quentin{background:rgba(16,185,129,.15);color:var(--quentin)}
+.tc-cem{background:rgba(245,158,11,.15);color:var(--cem)}
+.tc-idris{background:rgba(139,92,246,.15);color:var(--idris)}
+.tc-arsena{background:rgba(239,68,68,.15);color:var(--arsena)}
+.tc-milan{background:rgba(6,182,212,.15);color:var(--milan)}
+.tc-axel_l{background:rgba(132,204,22,.15);color:var(--axel_l)}
+.tc-julien_r{background:rgba(249,115,22,.15);color:var(--julien_r)}
+.tc-benjamin{background:rgba(100,116,139,.15);color:var(--benjamin)}
+.tc-alex_g{background:rgba(6,182,212,.15);color:var(--alex_g)}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <div class="lock-logo"><svg viewBox="0 0 28 28" fill="none"><rect x="2" y="2" width="10" height="10" rx="2" fill="#0a0a0a"/><rect x="16" y="2" width="10" height="10" rx="2" fill="#0a0a0a"/><rect x="2" y="16" width="10" height="10" rx="2" fill="#0a0a0a"/><rect x="16" y="16" width="10" height="10" rx="2" fill="#0a0a0a" opacity=".3"/></svg></div>
+  <div class="lock-t">Ritmo Regional</div>
+  <div class="lock-s">Acces manager regional</div>
+  <div class="rm-grid" id="rm-grid"></div>
+  <div class="pin-wrap" id="pin-wrap">
+    <button class="pin-back" onclick="backSel()">Retour</button>
+    <input class="pin-inp" type="password" id="pin-inp" placeholder="****" maxlength="4" onkeydown="if(event.key==='Enter')chkPin()">
+    <button class="pin-btn" onclick="chkPin()">Acceder</button>
+    <div class="pin-err" id="pin-err">Code incorrect</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div>
+      <div class="pg-date" id="pg-date"></div>
+      <div class="pg-sub" id="pg-sub"></div>
+    </div>
+    <div class="top-right">
+      <div class="sd ld" id="sd"></div>
+      <div class="top-av" id="top-av" onclick="logout()"></div>
+    </div>
+  </div>
+  <div class="slide-tabs">
+    <div class="slide-tab on" id="t-today" onclick="sw('today')">Aujourd hui</div>
+    <div class="slide-tab" id="t-managers" onclick="sw('managers')">Managers</div>
+    <div class="slide-tab" id="t-stats" onclick="sw('stats')">Stats</div>
+    <div class="slide-tab" id="t-ventes" onclick="sw('ventes')">Ventes</div>
+    <div class="slide-tab" id="t-mur" onclick="sw('mur')">Mur</div>
+  </div>
+  <div class="screens">
+
+    <!-- AUJOURD HUI -->
+    <div id="s-today" class="scr on">
+      <button class="rf" onclick="loadData()"><i class="ti ti-refresh" style="font-size:13px"></i> Actualiser</button>
+      <div class="kgrid" id="today-kpi"></div>
+      <div id="teams-today"></div>
+    </div>
+
+    <!-- MANAGERS -->
+    <div id="s-managers" class="scr">
+      <div id="mgr-overview"></div>
+      <div class="filter-row" id="mgr-filter"></div>
+      <div id="mgr-content"></div>
+    </div>
+
+    <!-- STATS -->
+    <div id="s-stats" class="scr">
+      <div class="chart-card">
+        <div class="chart-title">Routine par equipe - Juillet</div>
+        <div class="chart-wrap"><canvas id="chart-routine"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Top performers - Score mensuel</div>
+        <div class="chart-wrap"><canvas id="chart-top"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">Stats cles - Juillet</div>
+        <div class="chart-wrap"><canvas id="chart-stats"></canvas></div>
+      </div>
+      <div class="sec-lbl">Classement global</div>
+      <div class="rk" id="rank-global"></div>
+      <div class="sec-lbl">RDV IH vs OG par equipe</div>
+      <div class="kgrid" id="rdv-stats"></div>
+      <div class="sec-lbl">Follow-up en cours</div>
+      <div class="kgrid" id="fu-stats"></div>
+    </div>
+
+    <!-- VENTES -->
+    <div id="s-ventes" class="scr">
+      <div class="sub-tabs">
+        <div class="sub-tab on" id="st-ventes" onclick="swSub('ventes')">Ventes</div>
+        <div class="sub-tab" id="st-fu" onclick="swSub('fu')">Follow-up</div>
+      </div>
+      <div id="ss-ventes" class="sub-scr on">
+        <div class="filter-row" id="team-filter-v"></div>
+        <div class="filter-row" id="type-filter">
+          <button class="fb on" onclick="setTypeFilter('all')">Toutes</button>
+          <button class="fb" onclick="setTypeFilter('POS')">POS</button>
+          <button class="fb" onclick="setTypeFilter('TPE')">TPE</button>
+        </div>
+        <div class="kgrid" id="ventes-kpi"></div>
+        <div id="ventes-list"></div>
+      </div>
+      <div id="ss-fu" class="sub-scr">
+        <div class="filter-row" id="fu-team-filter"></div>
+        <div id="fu-summary-reg"></div>
+        <div id="fu-list-reg"></div>
+      </div>
+    </div>
+
+    <!-- MUR -->
+    <div id="s-mur" class="scr">
+      <div style="font-size:18px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px">Bonnes nouvelles</div>
+      <div style="font-size:13px;color:var(--g4);margin-bottom:14px">Toutes les equipes - ce mois-ci</div>
+      <div id="mur-list"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- EOD MODAL -->
+<div id="eod-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;overflow-y:auto;padding:20px 16px">
+  <div style="background:var(--w);border-radius:var(--rl);max-width:400px;margin:0 auto;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--g2)">
+      <div id="modal-agent" style="font-size:14px;font-weight:700"></div>
+      <button onclick="closeModal()" style="background:var(--g1);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:16px;color:var(--g4)">x</button>
+    </div>
+    <div id="modal-content" style="padding:16px"></div>
+  </div>
+</div>
+
+<script>
+var REGIONAL_MANAGERS = {
+  baptiste: {name:'Baptiste',       initials:'BA', pin:'3001', teams:['jean','romeo','quentin','idris','arsena','milan','axel_l','alex_g'], label:'Region Baptiste'},
   louis:    {name:'Louis STEINCKER',initials:'LS', pin:'3003', teams:['julien_r'],                                                 label:'Region Louis Steincker'},
   mohamed:  {name:'Mohamed SATA',   initials:'MS', pin:'3002', teams:['cem','benjamin'],                                           label:'Region Mohamed Sata'}
 };
@@ -47,7 +342,7 @@ var TEAMS = {
   alex_g: [{n:'Corentin EUSTACHE',i:'CE'},{n:'Anthony DOUARCHE',i:'AD'},{n:'Axel GUILLEVIC',i:'AX'},{n:'Floryan LEMOINE',i:'FL'},{n:'Leo PEYRARD',i:'LP'},{n:'Esteban DUVERNAY',i:'ED'},{n:'Frederic COELHO',i:'FC'},{n:'Ijlal AGGA',i:'IA'}]
 };
 
-var TEAM_COLORS = {jean:'#3b82f6',romeo:'#ec4899',quentin:'#10b981',cem:'#f59e0b',idris:'#8b5cf6',arsena:'#ef4444',axel_l:'#84cc16',julien_r:'#f97316',benjamin:'#64748b',alex_g:'#06b6d4'};
+var TEAM_COLORS = {jean:'#3b82f6',romeo:'#ec4899',quentin:'#10b981',cem:'#f59e0b',idris:'#8b5cf6',arsena:'#ef4444',milan:'#06b6d4',axel_l:'#84cc16',julien_r:'#f97316',benjamin:'#64748b',alex_g:'#06b6d4'};
 var ALL_AGENTS = Object.values(TEAMS).flat().filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
 
 var SB='https://twjtdrggjvhvlkhhybgq.supabase.co';
