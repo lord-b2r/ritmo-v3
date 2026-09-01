@@ -784,6 +784,7 @@ function updateAll(){
   var svOg=document.getElementById('sv-rdv-og');if(svOg){svOg.textContent=og;svOg.className='sv '+(og>0?'ok':'nu');}
   var svVt=document.getElementById('sv-ventes');if(svVt){svVt.textContent=tv;svVt.className='sv '+(tv>0?'ok':'nu');}
   updateObjBar();
+  saveS();
 }
 
 function step(k,d){S[k]=Math.max(0,S[k]+d);updateAll();}
