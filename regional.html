@@ -895,80 +895,81 @@ async function loadFuItems(agents){
   return [];
 }
 function renderFU_reg(){
-  var month=now.toISOString().slice(0,7);
   var teams=fuTeamFilter==='all'?MY_TEAMS:[fuTeamFilter];
   var allAgents=[];teams.forEach(function(tk){allAgents=allAgents.concat(TEAMS[tk]||[]);});
   allAgents=allAgents.filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
   var summary=document.getElementById('fu-summary-reg');
   var list=document.getElementById('fu-list-reg');
   if(!summary||!list)return;
-  summary.innerHTML='';list.innerHTML='';
-  var sumGrid=document.createElement('div');sumGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px';
-  var hasFU=false;
-  allAgents.forEach(function(ag){
-    var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
-    var reps=REPORTS.filter(function(r){return r.agent===ag.n&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month&&r.fu_list&&r.fu_list.length;});
-    var lastRep=reps[0];
-    var fuData=lastRep?lastRep.fu_list:[];
-    var nRdv=fuData.filter(function(f){return f.cat==='rdv';}).length;
-    var nFu=fuData.filter(function(f){return f.cat==='fu';}).length;
-    var nMgm=fuData.filter(function(f){return f.cat==='mgm';}).length;
-    var total=fuData.length;
-    if(total>0)hasFU=true;
-    var kc=document.createElement('div');
-    kc.style.cssText='background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:12px';
-    kc.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
-      '<div style="width:30px;height:30px;border-radius:50%;background:'+TEAM_COLORS[tk]+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">'+ag.i+'</div>'+
-      '<div style="flex:1"><div style="font-size:12px;font-weight:700">'+ag.n.split(' ')[0]+'</div><div style="font-size:10px;color:var(--g4)">'+MANAGERS[tk].name+'</div></div>'+
-      '<div style="font-size:18px;font-weight:800;color:'+(total>0?'var(--green)':'var(--g3)')+'">'+total+'</div></div>'+
-      '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
-      (nRdv?'<span class="fu-cat-badge fu-rdv">'+nRdv+' RDV</span>':'')+
-      (nFu?'<span class="fu-cat-badge fu-fu">'+nFu+' FU</span>':'')+
-      (nMgm?'<span class="fu-cat-badge fu-mgm">'+nMgm+' MGM</span>':'')+
-      (total===0?'<span style="font-size:11px;color:var(--g3)">Aucun</span>':'')+'</div>';
-    sumGrid.appendChild(kc);
-  });
-  summary.appendChild(sumGrid);
-  if(!hasFU){list.innerHTML='<div class="empty">Aucun follow-up renseigne ce mois</div>';return;}
-  var lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Detail par commercial';list.appendChild(lbl);
-  allAgents.forEach(function(ag){
-    var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
-    var reps=REPORTS.filter(function(r){return r.agent===ag.n&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month&&r.fu_list&&r.fu_list.length;});
-    var lastRep=reps[0];
-    var fuData=lastRep?lastRep.fu_list:[];
-    if(!fuData.length)return;
-    var card=document.createElement('div');card.className='fu-card';
-    var key='fu_'+ag.n.replace(/[^a-z0-9]/gi,'_');
-    var nRdv=fuData.filter(function(f){return f.cat==='rdv';}).length;
-    var nFu=fuData.filter(function(f){return f.cat==='fu';}).length;
-    var nMgm=fuData.filter(function(f){return f.cat==='mgm';}).length;
-    var hd=document.createElement('div');hd.className='fu-agent-hd';
-    hd.innerHTML='<div style="width:34px;height:34px;border-radius:50%;background:'+TEAM_COLORS[tk]+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">'+ag.i+'</div>'+
-      '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+ag.n+'</div>'+
-      '<div style="display:flex;gap:5px;margin-top:4px">'+
-      (nRdv?'<span class="fu-cat-badge fu-rdv">'+nRdv+' RDV</span>':'')+
-      (nFu?'<span class="fu-cat-badge fu-fu">'+nFu+' FU</span>':'')+
-      (nMgm?'<span class="fu-cat-badge fu-mgm">'+nMgm+' MGM</span>'  :'')+'</div></div>'+
-      '<div style="font-size:11px;color:var(--g4)">'+MANAGERS[tk].name+'</div>'+
-      '<i class="ti ti-chevron-down chev" id="chfu-'+key+'"></i>';
-    hd.onclick=(function(k){return function(){
-      var b=document.getElementById('b-'+k),c=document.getElementById('chfu-'+k);
-      if(!b)return;var op=b.classList.contains('op');b.classList.toggle('op');
-      if(c)c.style.transform=op?'':'rotate(180deg)';
-    };})(key);
-    var body=document.createElement('div');body.className='fu-agent-body';body.id='b-'+key;
-    var cats={rdv:'fu-rdv',fu:'fu-fu',mgm:'fu-mgm'};
-    var catLabels={rdv:'RDV',fu:'Follow-up',mgm:'MGM'};
-    fuData.forEach(function(f){
-      var row=document.createElement('div');row.className='fu-row';
-      row.innerHTML='<span class="fu-cat-badge '+(cats[f.cat]||'fu-fu')+'">'+catLabels[f.cat]+'</span>'+
-        '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+f.nom+'</div>'+(f.note?'<div style="font-size:11px;color:var(--g4)">'+f.note+'</div>':'')+'</div>'+
-        '<span style="font-size:10px;font-weight:700;color:var(--g3)">'+(f.type||'').toUpperCase()+'</span>';
-      body.appendChild(row);
+  summary.innerHTML='';list.innerHTML='<div class="empty">Chargement...</div>';
+  loadFuItems(allAgents).then(function(fuData){
+    summary.innerHTML='';list.innerHTML='';
+    var sumGrid=document.createElement('div');sumGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px';
+    var hasFU=false;
+    allAgents.forEach(function(ag){
+      var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
+      var agFu=fuData.filter(function(f){return f.agent===ag.n;});
+      var nRdv=agFu.filter(function(f){return f.cat==='rdv';}).length;
+      var nFu=agFu.filter(function(f){return f.cat==='fu';}).length;
+      var nMgm=agFu.filter(function(f){return f.cat==='mgm';}).length;
+      var total=agFu.length;
+      if(total>0)hasFU=true;
+      var mgrName=(MANAGERS[tk]&&MANAGERS[tk].name)||tk;
+      var kc=document.createElement('div');
+      kc.style.cssText='background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:12px';
+      kc.innerHTML='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">'+
+        '<div style="width:30px;height:30px;border-radius:50%;background:'+(TEAM_COLORS[tk]||'#888')+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">'+ag.i+'</div>'+
+        '<div style="flex:1"><div style="font-size:12px;font-weight:700">'+ag.n.split(' ')[0]+'</div><div style="font-size:10px;color:var(--g4)">'+mgrName+'</div></div>'+
+        '<div style="font-size:18px;font-weight:800;color:'+(total>0?'var(--green)':'var(--g3)')+'">'+total+'</div></div>'+
+        '<div style="display:flex;gap:5px;flex-wrap:wrap">'+
+        (nRdv?'<span class="fu-cat-badge fu-rdv">'+nRdv+' RDV</span>':'')+
+        (nFu?'<span class="fu-cat-badge fu-fu">'+nFu+' FU</span>':'')+
+        (nMgm?'<span class="fu-cat-badge fu-mgm">'+nMgm+' MGM</span>':'')+
+        (total===0?'<span style="font-size:11px;color:var(--g3)">Aucun</span>':'')+'</div>';
+      sumGrid.appendChild(kc);
     });
-    card.appendChild(hd);card.appendChild(body);list.appendChild(card);
+    summary.appendChild(sumGrid);
+    if(!hasFU){list.innerHTML='<div class="empty">Aucun follow-up renseigne</div>';return;}
+    var lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Detail par commercial';list.appendChild(lbl);
+    allAgents.forEach(function(ag){
+      var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
+      var agFu=fuData.filter(function(f){return f.agent===ag.n;});
+      if(!agFu.length)return;
+      var mgrName=(MANAGERS[tk]&&MANAGERS[tk].name)||tk;
+      var card=document.createElement('div');card.className='fu-card';
+      var key='fu_'+ag.n.replace(/[^a-z0-9]/gi,'_');
+      var nRdv=agFu.filter(function(f){return f.cat==='rdv';}).length;
+      var nFu=agFu.filter(function(f){return f.cat==='fu';}).length;
+      var nMgm=agFu.filter(function(f){return f.cat==='mgm';}).length;
+      var hd=document.createElement('div');hd.className='fu-agent-hd';
+      hd.innerHTML='<div style="width:34px;height:34px;border-radius:50%;background:'+(TEAM_COLORS[tk]||'#888')+';display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">'+ag.i+'</div>'+
+        '<div style="flex:1"><div style="font-size:13px;font-weight:700">'+ag.n+'</div>'+
+        '<div style="display:flex;gap:5px;margin-top:4px">'+
+        (nRdv?'<span class="fu-cat-badge fu-rdv">'+nRdv+' RDV</span>':'')+
+        (nFu?'<span class="fu-cat-badge fu-fu">'+nFu+' FU</span>':'')+
+        (nMgm?'<span class="fu-cat-badge fu-mgm">'+nMgm+' MGM</span>':'')+'</div></div>'+
+        '<div style="font-size:11px;color:var(--g4)">'+mgrName+'</div>'+
+        '<i class="ti ti-chevron-down chev" id="chfu-'+key+'"></i>';
+      hd.onclick=(function(k){return function(){
+        var b=document.getElementById('b-'+k),c=document.getElementById('chfu-'+k);
+        if(!b)return;var op=b.classList.contains('op');b.classList.toggle('op');
+        if(c)c.style.transform=op?'':'rotate(180deg)';
+      };})(key);
+      var body=document.createElement('div');body.className='fu-agent-body';body.id='b-'+key;
+      var cats={rdv:'fu-rdv',fu:'fu-fu',mgm:'fu-mgm'};
+      var catLabels={rdv:'RDV',fu:'Follow-up',mgm:'MGM'};
+      agFu.forEach(function(f){
+        var row=document.createElement('div');row.className='fu-row';
+        row.innerHTML='<span class="fu-cat-badge '+(cats[f.cat]||'fu-fu')+'">'+catLabels[f.cat]+'</span>'+
+          '<div style="flex:1"><div style="font-size:13px;font-weight:600">'+f.nom+'</div>'+(f.note?'<div style="font-size:11px;color:var(--g4)">'+f.note+'</div>':'')+'</div>'+
+          '<span style="font-size:10px;font-weight:700;color:var(--g3)">'+(f.type||'').toUpperCase()+'</span>';
+        body.appendChild(row);
+      });
+      card.appendChild(hd);card.appendChild(body);list.appendChild(card);
+    });
   });
 }
+
 
 function swSub(t){
   ['ventes','fu'].forEach(function(s){
