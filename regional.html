@@ -499,7 +499,7 @@ function renderToday(){
 
   var cont=document.getElementById('teams-today');cont.innerHTML='';
   MY_TEAMS.forEach(function(tk){
-    var mgr=MANAGERS[tk];var tAgents=TEAMS[tk]||[];
+    var mgr=MANAGERS[tk];if(!mgr)return;var tAgents=TEAMS[tk]||[];
     var tReps=tAgents.map(function(a){return getToday(a.n);}).filter(Boolean);
     var tMiss=tAgents.length-tReps.length;
     var tSc=tReps.reduce(function(s,r){return s+(r.score||0);},0);
@@ -615,6 +615,7 @@ function renderMgrView(){
   ov.appendChild(hero);
   var ovGrid=document.createElement('div');ovGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px';
   MY_TEAMS.forEach(function(tk){
+    var mgr2=MANAGERS[tk];if(!mgr2)return;
     var agents=TEAMS[tk]||[];
     var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
     var s=reps.reduce(function(x,r){return x+(r.score||0);},0);
@@ -648,10 +649,11 @@ function renderMgrView(){
   var tp=stats.reduce(function(x,a){return x+a.pos;},0);
   var pp=tv>0?Math.round(tp/tv*100):0;
   var mn=now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  var mgrInfo=MANAGERS[tk]||{label:'Equipe '+tk,name:tk};
   var hero=document.createElement('div');
   hero.style.cssText='background:var(--b);border-radius:var(--rl);padding:16px;margin-bottom:14px';
   var heroTop=document.createElement('div');heroTop.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px';
-  var hl=document.createElement('div');hl.innerHTML='<div style="font-size:13px;font-weight:600;color:#fff">'+MANAGERS[tk].label+'</div><div style="font-size:11px;color:rgba(255,255,255,.3)">'+mn.charAt(0).toUpperCase()+mn.slice(1)+'</div>';
+  var hl=document.createElement('div');hl.innerHTML='<div style="font-size:13px;font-weight:600;color:#fff">'+mgrInfo.label+'</div><div style="font-size:11px;color:rgba(255,255,255,.3)">'+mn.charAt(0).toUpperCase()+mn.slice(1)+'</div>';
   var hr=document.createElement('div');hr.style.textAlign='right';hr.innerHTML='<div style="font-size:44px;font-weight:900;letter-spacing:-2px;color:#4ade80;line-height:1">'+ts+'</div><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.6px">Score equipe</div>';
   heroTop.appendChild(hl);heroTop.appendChild(hr);
   var hg=document.createElement('div');hg.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px';
