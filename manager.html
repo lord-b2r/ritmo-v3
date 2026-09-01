@@ -811,6 +811,7 @@ function renderFU(){
   });
 }
 function renderFuContent(agents, fuData, summary, list){
+  summary.innerHTML='';list.innerHTML='';
   var sumGrid=document.createElement('div');sumGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px';
   var hasFU=false;
   agents.forEach(function(ag){
