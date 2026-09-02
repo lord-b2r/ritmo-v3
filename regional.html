@@ -146,7 +146,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .mur-name{font-size:13px;font-weight:700}
 .mur-meta{font-size:11px;color:var(--g4)}
 .mur-score{font-size:22px;font-weight:800}
-.mur-score.red{color:var(--red)}.mur-score.ora{color:#ea580c}.mur-score.grn{color:var(--green)}
+.mur-score.red{color:var(--red)}.mur-score.ora{color:#ea580c}.mur-score.grn{color:var(--green)}.mur-score.blue{color:#3b82f6}
 .mur-text{font-size:14px;color:var(--b);line-height:1.5;padding:10px;background:var(--g1);border-radius:var(--r);font-style:italic}
 
 /* CHARTS */
@@ -444,7 +444,7 @@ function buildTeamFilterV(){
 }
 
 function setSd(s){document.getElementById('sd').className='sd '+s;}
-function scC(s){return s===0?'red':s<=2?'ora':'grn';}
+function scC(s){return s>=4?'blue':s>=3?'grn':s>=2?'ora':'red';}
 
 async function loadData(){
   setSd('ld');
@@ -509,7 +509,7 @@ function renderToday(){
     var tn=document.createElement('div');tn.className='team-nm';tn.textContent=mgr.label;
     var ts=document.createElement('div');ts.style.cssText='font-size:11px;color:var(--g4);margin-top:2px';ts.textContent=tReps.length+'/'+tAgents.length+' EOD'+(tMiss>0?' - '+tMiss+' manquant'+(tMiss>1?'s':''):'');
     lf.appendChild(tn);lf.appendChild(ts);
-    var sc2=document.createElement('div');sc2.className='team-sc '+mgr.color;sc2.textContent=tSc;
+    var teamObj=tAgents.length*2;var teamBlue=tSc>(tAgents.length*2)+3;var sc2=document.createElement('div');sc2.className='team-sc '+mgr.color;sc2.style.color=teamBlue?'#3b82f6':tSc>=teamObj?'#4ade80':'#f87171';sc2.textContent=tSc;
     hd.appendChild(lf);hd.appendChild(sc2);
     cont.appendChild(hd);
 
