@@ -495,7 +495,7 @@ function renderToday(){
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
     '<div><div style="font-size:13px;font-weight:700;color:#fff">Score equipe du jour</div>'+
     '<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:2px">Objectif journalier : '+dayTarget+' pts</div></div>'+
-    '<div style="text-align:right"><div style="font-size:48px;font-weight:900;letter-spacing:-2px;line-height:1;color:'+(sc>(agents.length*2)+3?'#3b82f6':sc>=agents.length*2?'#4ade80':'#f87171')+'">'+sc+'</div>'+
+    '<div style="text-align:right"><div style="font-size:48px;font-weight:900;letter-spacing:-2px;line-height:1;color:'+(sc>(agents.length*2)+3?'#3b82f6':sc>=agents.length*2?'#4ade80':sc>=agents.length*1.5?'#fb923c':'#f87171')+'">'+sc+'</div>'+
     '<div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px">/ '+dayTarget+' pts</div></div></div>'+
     '<div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden;margin-bottom:10px">'+
     '<div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#E8FF3A);width:'+Math.min(dayTarget>0?Math.round(sc/dayTarget*100):0,100)+'%"></div></div>'+
