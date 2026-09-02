@@ -509,7 +509,7 @@ function renderToday(){
     var tn=document.createElement('div');tn.className='team-nm';tn.textContent=mgr.label;
     var ts=document.createElement('div');ts.style.cssText='font-size:11px;color:var(--g4);margin-top:2px';ts.textContent=tReps.length+'/'+tAgents.length+' EOD'+(tMiss>0?' - '+tMiss+' manquant'+(tMiss>1?'s':''):'');
     lf.appendChild(tn);lf.appendChild(ts);
-    var teamObj=tAgents.length*2;var teamBlue=tSc>(tAgents.length*2)+3;var sc2=document.createElement('div');sc2.className='team-sc '+mgr.color;sc2.style.color=teamBlue?'#3b82f6':tSc>=teamObj?'#4ade80':'#f87171';sc2.textContent=tSc;
+    var teamObj=tAgents.length*2;var teamBlue=tSc>(tAgents.length*2)+3;var sc2=document.createElement('div');sc2.className='team-sc '+mgr.color;sc2.style.color=teamBlue?'#3b82f6':tSc>=teamObj?'#4ade80':tSc>=tAgents.length*1.5?'#fb923c':'#f87171';sc2.textContent=tSc;
     hd.appendChild(lf);hd.appendChild(sc2);
     cont.appendChild(hd);
 
