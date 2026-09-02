@@ -526,7 +526,7 @@ function renderToday(){
         var av=document.createElement('div');av.className='aga';av.textContent=ag.i;
         var inf=document.createElement('div');inf.className='agi';
         var nm=document.createElement('div');nm.className='agn';nm.textContent=ag.n;
-        var mt=document.createElement('div');mt.className='agm';mt.textContent=tv2+' vente'+(tv2!==1?'s':'')+' - '+(rep.instal||0)+' instal - mois: '+mSc+'pts';
+        var mt=document.createElement('div');mt.className='agm';mt.textContent=tv2+' vente'+(tv2!==1?'s':'')+' - '+(rep.instal||0)+' instal - IH: '+(rep.rdv_ih||0)+' OG: '+(rep.rdv_og||0)+(rep.noshow?' NS: '+rep.noshow:'')+' - mois: '+mSc+'pts';
         inf.appendChild(nm);inf.appendChild(mt);
         var right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:8px';
         var as=document.createElement('div');as.className='ags '+cls;as.textContent=s;
