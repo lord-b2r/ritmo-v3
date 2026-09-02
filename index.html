@@ -610,6 +610,11 @@ function showToast(msg){
   t.textContent=msg;document.body.appendChild(t);
   setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},500);},2000);
 }
+function backToForm(){
+  document.getElementById('sent').style.display='none';
+  document.getElementById('form-send').style.display='flex';
+  showToast('Tu peux modifier et renvoyer');
+}
 function freshS(){return {rdv_ih:[], rdv_og:[], ventes:[], ac:0, ins:0, fu:0, noshow:0, ol:false, cr:false, mot:''};};
 function saveS(){
   if(!ME)return;
@@ -708,7 +713,10 @@ function bootApp(){
   // Restaurer le brouillon du jour si existant
   if(loadS()){
     updateAll();
-    showToast('Brouillon du jour restaure');
+    // Vérifier si une EOD a déjà été envoyée aujourd'hui
+    var today=new Date().toISOString().slice(0,10);
+    var sentToday=allReports.some(function(r){return r.agent===ME&&r.date&&r.date.includes(today.slice(8,10));});
+    showToast(sentToday?'EOD deja envoyee aujourd hui — tu peux modifier':'Brouillon du jour restaure');
   }
 }
 
@@ -956,7 +964,7 @@ async function sendEOD(){
   }
   allReports.unshift(eod);
   const ss=document.getElementById('sent-score');ss.textContent=sc;ss.style.color=sc===0?'var(--red)':sc===1?'#ea580c':'var(--green)';
-  document.getElementById('form-send').style.display='none';document.getElementById('sent').style.display='flex';clearDraft();
+  document.getElementById('form-send').style.display='none';document.getElementById('sent').style.display='flex';saveS();
   // Indicateur envoi Supabase
   const syncEl=document.getElementById('sync-status');
   if(syncEl){syncEl.textContent=sent?'Synchro OK ✓':'Sync echouee - verifie ta connexion';syncEl.style.color=sent?'var(--green)':'var(--red)';syncEl.style.display='block';}
