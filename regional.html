@@ -483,12 +483,13 @@ function renderToday(){
   var sc=reps.reduce(function(s,r){return s+(r.score||0);},0);
   var trdvIh=reps.reduce(function(s,r){return s+(r.rdv_ih||0);},0);
   var trdvOg=reps.reduce(function(s,r){return s+(r.rdv_og||0);},0);
+  var tnoshow=reps.reduce(function(s,r){return s+(r.noshow||0);},0);
   var tpos=reps.reduce(function(s,r){return s+(r.total_pos||0);},0);
   var posShare=tv>0?Math.round(tpos/tv*100):0;
   var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
   [['Rapports',reps.length+'/'+agents.length,miss>0?(miss+' manquant'+(miss>1?'s':'')):'Complet'],
    ['Ventes',tv,'IH + OG'],['Instals',ti,'Aujourd hui'],['Score',sc,'Toutes equipes'],
-   ['RDV IH',trdvIh,''],['RDV OG',trdvOg,''],['AC total',reps.reduce(function(s,r){return s+(r.ac||0);},0),''],['POS share',posShare+'%',tpos+' POS']].forEach(function(item){
+   ['RDV IH',trdvIh,''],['RDV OG',trdvOg,''],['No show',tnoshow,''],['AC total',reps.reduce(function(s,r){return s+(r.ac||0);},0),''],['POS share',posShare+'%',tpos+' POS']].forEach(function(item){
     var kc=document.createElement('div');kc.className='kc';
     var kl=document.createElement('div');kl.className='kl';kl.textContent=item[0];
     var kv=document.createElement('div');kv.className='kv'+(item[1]>0?' g':'');kv.textContent=item[1];
@@ -537,7 +538,7 @@ function renderToday(){
         var body=document.createElement('div');body.className='agb';body.id='bd-'+key;
         var mg=document.createElement('div');mg.className='mgd';
         var pos=rep.total_pos||0,posS=tv2>0?Math.round(pos/tv2*100):0;
-        [['RDV IH',rep.rdv_ih||0,false],['RDV OG',rep.rdv_og||0,false],['Ventes',tv2,true],
+        [['RDV IH',rep.rdv_ih||0,false],['RDV OG',rep.rdv_og||0,false],['No show',rep.noshow||0,false],['Ventes',tv2,true],
          ['IH',rep.vente_ih||0,false],['OG',rep.vente_og||0,false],['POS share',posS+'%',posS>=50],
          ['AC',rep.ac||0,false],['INSTAL',rep.instal||0,true],['FU',rep.leads_fu||0,false]].forEach(function(c){
           var mc=document.createElement('div');mc.className='mce';
