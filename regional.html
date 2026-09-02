@@ -741,6 +741,7 @@ function renderStats(){
     allReps.reduce(function(s,r){return s+(r.instal||0);},0),
     sRdvIh,
     allReps.reduce(function(s,r){return s+(r.rdv_og||0);},0),
+    allReps.reduce(function(s,r){return s+(r.ac||0);},0),
     sNoshow,
     sIhReel
   ];
@@ -749,8 +750,8 @@ function renderStats(){
     charts.statsc=new Chart(ctx3,{
       type:'bar',
       data:{
-        labels:['Ventes','Instals','RDV IH','RDV OG','No show','IH reel'],
-        datasets:[{data:statsData,backgroundColor:['#4ade80','#4ade80','#60a5fa','#60a5fa','#f87171','#22d3ee'],borderRadius:6}]
+        labels:['Ventes','Instals','RDV IH','RDV OG','AC','No show','IH reel'],
+        datasets:[{data:statsData,backgroundColor:['#4ade80','#4ade80','#60a5fa','#60a5fa','#f59e0b','#f87171','#22d3ee'],borderRadius:6}]
       },
       options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{beginAtZero:true}}}
     });
