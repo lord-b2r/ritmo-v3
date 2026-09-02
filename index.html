@@ -707,7 +707,7 @@ function bootApp(){
   buildWeek();updateAll();loadReports();
   // Restaurer le brouillon du jour si existant
   if(loadS()){
-    renderAll();
+    updateAll();
     showToast('Brouillon du jour restaure');
   }
 }
