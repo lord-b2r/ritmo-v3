@@ -489,7 +489,7 @@ function renderToday(){
   var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
   [['Rapports',reps.length+'/'+agents.length,miss>0?(miss+' manquant'+(miss>1?'s':'')):'Complet'],
    ['Ventes',tv,'IH + OG'],['Instals',ti,'Aujourd hui'],['Score',sc,'Toutes equipes'],
-   ['RDV IH',trdvIh,''],['RDV OG',trdvOg,''],['No show',tnoshow,''],['AC total',reps.reduce(function(s,r){return s+(r.ac||0);},0),''],['POS share',posShare+'%',tpos+' POS']].forEach(function(item){
+   ['RDV IH',trdvIh,''],['RDV OG',trdvOg,''],['No show / Impossible',tnoshow,'red'],['POS share',posShare+'%',tpos+' POS']].forEach(function(item){
     var kc=document.createElement('div');kc.className='kc';
     var kl=document.createElement('div');kl.className='kl';kl.textContent=item[0];
     var kv=document.createElement('div');kv.className='kv'+(item[1]>0?' g':'');kv.textContent=item[1];
