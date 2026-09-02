@@ -482,6 +482,7 @@ function renderToday(){
   var trdv_ih=reps.reduce(function(s,r){return s+(r.rdv_ih||0);},0);
   var trdv_og=reps.reduce(function(s,r){return s+(r.rdv_og||0);},0);
   var tac=reps.reduce(function(s,r){return s+(r.ac||0);},0);
+  var tnoshow=reps.reduce(function(s,r){return s+(r.noshow||0);},0);
   var tpos=reps.reduce(function(s,r){return s+(r.total_pos||0);},0);
   var posShare=tv>0?Math.round(tpos/tv*100):0;
   // Objectif journalier
@@ -505,6 +506,7 @@ function renderToday(){
     '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">POS share</div><div style="font-size:20px;font-weight:800;color:'+(posShare>=50?'#4ade80':'#fff')+'">'+posShare+'%</div></div>'+
     '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">RDV IH</div><div style="font-size:20px;font-weight:800;color:#fff">'+trdv_ih+'</div></div>'+
     '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">RDV OG</div><div style="font-size:20px;font-weight:800;color:#fff">'+trdv_og+'</div></div>'+
+    '<div style="background:rgba(248,113,113,.15);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(248,113,113,.7);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">No show</div><div style="font-size:20px;font-weight:800;color:#f87171">'+tnoshow+'</div></div>'+
     '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">AC total</div><div style="font-size:20px;font-weight:800;color:#fff">'+tac+'</div></div>'+
     '</div>';
   kg.appendChild(hero);
