@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ritmo · Pitch HQ — Septembre 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
+.page{max-width:900px;margin:0 auto;padding:60px 32px}
+.logo-row{display:flex;align-items:center;gap:12px;margin-bottom:80px}
+.logo-box{width:44px;height:44px;background:#E8FF3A;border-radius:10px;display:flex;align-items:center;justify-content:center}
+.logo-box svg{width:24px;height:24px}
+.logo-name{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.logo-sub{font-size:12px;color:rgba(255,255,255,.35);margin-left:4px;font-weight:500}
+
+.hero{margin-bottom:80px}
+.tag{display:inline-flex;background:rgba(232,255,58,.12);border:1px solid rgba(232,255,58,.25);border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;color:#E8FF3A;letter-spacing:.5px;text-transform:uppercase;margin-bottom:24px}
+.hero-title{font-size:56px;font-weight:900;letter-spacing:-2.5px;line-height:1.05;margin-bottom:20px}
+.hero-title span{color:#E8FF3A}
+.hero-desc{font-size:17px;color:rgba(255,255,255,.55);line-height:1.65;max-width:680px}
+
+.divider{height:1px;background:rgba(255,255,255,.08);margin:64px 0}
+
+.section-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:1px;margin-bottom:24px}
+.section-title{font-size:32px;font-weight:800;letter-spacing:-1px;margin-bottom:16px;line-height:1.15}
+.section-desc{font-size:16px;color:rgba(255,255,255,.5);line-height:1.65;max-width:680px;margin-bottom:36px}
+
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:64px}
+.kpi{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:20px}
+.kpi-v{font-size:40px;font-weight:800;letter-spacing:-1.5px;color:#E8FF3A;line-height:1}
+.kpi-l{font-size:11px;color:rgba(255,255,255,.35);margin-top:6px;font-weight:500}
+
+.kpi-row-2{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:64px}
+
+/* DEPLOYMENT TIMELINE */
+.timeline{display:flex;flex-direction:column;gap:0;margin-bottom:64px;position:relative}
+.timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;background:rgba(255,255,255,.08)}
+.tl-item{display:flex;gap:20px;align-items:flex-start;padding-bottom:32px;position:relative}
+.tl-dot{width:41px;height:41px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;position:relative;z-index:1}
+.tl-dot.y{background:#E8FF3A;color:#0a0a0a}
+.tl-dot.g{background:rgba(74,222,128,.15);border:1px solid rgba(74,222,128,.3);color:#4ade80}
+.tl-dot.b{background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#3b82f6}
+.tl-body{}
+.tl-date{font-size:10px;font-weight:700;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+.tl-title{font-size:15px;font-weight:700;margin-bottom:4px}
+.tl-desc{font-size:13px;color:rgba(255,255,255,.4);line-height:1.5}
+
+/* PROOF */
+.proof-block{margin-bottom:64px}
+.proof-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.proof-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:26px}
+.proof-card.accent{background:rgba(232,255,58,.06);border-color:rgba(232,255,58,.2)}
+.pc-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px}
+.pc-val{font-size:42px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:8px}
+.pc-val.y{color:#E8FF3A}
+.pc-desc{font-size:13px;color:rgba(255,255,255,.45);line-height:1.55}
+
+/* DEPLOYMENT SCALE */
+.scale-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:64px}
+.sc-card{border-radius:14px;padding:24px}
+.sc-card.dark{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}
+.sc-card.light{background:rgba(232,255,58,.07);border:1px solid rgba(232,255,58,.2)}
+.sc-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px}
+.sc-label.y{color:#E8FF3A}
+.sc-item{display:flex;gap:10px;margin-bottom:10px;font-size:13px}
+.sc-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);flex-shrink:0;margin-top:5px}
+.sc-dot.y{background:#E8FF3A}
+.sc-text{color:rgba(255,255,255,.5);line-height:1.4}
+.sc-text.y{color:rgba(255,255,255,.8);font-weight:500}
+
+/* USERS */
+.users-section{margin-bottom:64px}
+.user-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.user-row:last-child{border-bottom:0}
+.user-av{width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0}
+.user-name{font-size:14px;font-weight:600}
+.user-meta{font-size:12px;color:rgba(255,255,255,.35)}
+.user-bar-wrap{flex:0 0 120px}
+.user-bar{background:rgba(255,255,255,.08);border-radius:3px;height:5px;overflow:hidden}
+.user-bar-fill{height:100%;border-radius:3px;background:#E8FF3A}
+.user-score{font-size:16px;font-weight:800;flex:0 0 36px;text-align:right;color:#E8FF3A}
+
+/* VISION */
+.vision{margin-bottom:64px}
+.vision-text{font-size:22px;font-weight:700;color:rgba(255,255,255,.85);line-height:1.55;max-width:720px;margin-bottom:36px}
+.vision-text em{color:#E8FF3A;font-style:normal}
+.pillars{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.pillar{border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:20px}
+.pillar-icon{font-size:22px;margin-bottom:12px}
+.pillar-title{font-size:14px;font-weight:700;margin-bottom:8px}
+.pillar-desc{font-size:12px;color:rgba(255,255,255,.4);line-height:1.5}
+
+/* AMBITION */
+.ambition{background:rgba(232,255,58,.06);border:1px solid rgba(232,255,58,.2);border-radius:16px;padding:36px;margin-bottom:64px}
+.amb-tag{font-size:10px;font-weight:700;color:#E8FF3A;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px}
+.amb-title{font-size:30px;font-weight:800;letter-spacing:-1px;margin-bottom:14px;line-height:1.15}
+.amb-title span{color:#E8FF3A}
+.amb-desc{font-size:15px;color:rgba(255,255,255,.55);line-height:1.65}
+
+.footer{padding:40px 0;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:space-between}
+.footer-left{font-size:13px;color:rgba(255,255,255,.25)}
+.footer-right{font-size:11px;font-weight:700;color:#E8FF3A;text-transform:uppercase;letter-spacing:.8px}
+
+@media(max-width:640px){
+  .hero-title{font-size:36px}
+  .kpi-row,.kpi-row-2{grid-template-columns:1fr 1fr}
+  .proof-grid,.scale-grid,.pillars{grid-template-columns:1fr}
+  .footer{flex-direction:column;gap:12px;text-align:center}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="logo-row">
+    <div class="logo-box"><svg viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="9" height="9" rx="2" fill="#0a0a0a"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#0a0a0a"/><rect x="2" y="13" width="9" height="9" rx="2" fill="#0a0a0a"/><rect x="13" y="13" width="9" height="9" rx="2" fill="#0a0a0a" opacity=".3"/></svg></div>
+    <span class="logo-name">Ritmo</span>
+    <span class="logo-sub">by Jean Barbier · FlatPay Marseille</span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="tag">Initiative interne · Septembre 2026</div>
+    <div class="hero-title">Ce que Power BI<br>ne verra jamais.<br><span>Ritmo le capture.</span></div>
+    <div class="hero-desc">Ritmo est un outil de pilotage comportemental des equipes terrain, construit en interne depuis juin 2026. En moins de 3 mois, il est passe de 3 commerciaux pilotes a 65 en production, sur 9 equipes dans deux regions. Sans budget. Sans equipe dedie. Avec des donnees qui prouvent ce qu'on savait deja intuitivement.</div>
+  </div>
+
+  <!-- KPIs GLOBAUX -->
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-v">430+</div><div class="kpi-l">Rapports EOD collectes depuis le lancement</div></div>
+    <div class="kpi"><div class="kpi-v">65</div><div class="kpi-l">Commerciaux actifs sur 9 equipes</div></div>
+    <div class="kpi"><div class="kpi-v">80j</div><div class="kpi-l">De donnees comportementales exploitables</div></div>
+    <div class="kpi"><div class="kpi-v">100%</div><div class="kpi-l">Top 5 Ritmo = Top 5 performers chaque mois</div></div>
+  </div>
+
+  <!-- KPIs SEPT -->
+  <div class="section-label">Donnees reelles · 1 et 2 septembre 2026</div>
+  <div class="kpi-row-2" style="margin-top:16px">
+    <div class="kpi"><div class="kpi-v" style="font-size:28px">59 / 65</div><div class="kpi-l">Commerciaux ayant envoye leur EOD en 2 jours</div></div>
+    <div class="kpi"><div class="kpi-v" style="font-size:28px">105V · 51I</div><div class="kpi-l">Ventes et installations documentees</div></div>
+    <div class="kpi"><div class="kpi-v" style="font-size:28px">346</div><div class="kpi-l">RDV documentes sur 2 jours</div></div>
+    <div class="kpi"><div class="kpi-v" style="font-size:28px">74%</div><div class="kpi-l">Routine Outlook + CRM completee</div></div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- TIMELINE DEPLOIEMENT -->
+  <div class="section-label">Ce qui s'est passe en 80 jours</div>
+  <div class="section-title">De 3 commerciaux pilotes<br>a 65 en production.</div>
+  <div class="section-desc">Chaque iteration a ete deployee en moins de 24h, directement issue des retours terrain. Pas de specs. Pas de comites. Le terrain parle, l'outil evolue.</div>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot y">J1</div>
+      <div class="tl-body">
+        <div class="tl-date">Juin 2026</div>
+        <div class="tl-title">Lancement avec 3 commerciaux pilotes</div>
+        <div class="tl-desc">Formulaire EOD basique, stockage Supabase, classement quotidien. Premier rapport envoye le 12 juin.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot g">J20</div>
+      <div class="tl-body">
+        <div class="tl-date">Juillet 2026</div>
+        <div class="tl-title">20 commerciaux · Premiere version manager</div>
+        <div class="tl-desc">Vue manager en temps reel, classement equipe, mur des bonnes nouvelles, stats comportementales. 313 rapports collectes en un mois.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot b">J60</div>
+      <div class="tl-body">
+        <div class="tl-date">Aout 2026</div>
+        <div class="tl-title">Extension a 9 equipes · Vue regionale</div>
+        <div class="tl-desc">Onboarding de 6 nouvelles equipes, vue regional manager multi-equipes, follow-up centralises en temps reel sur Supabase, rapport modifiable dans la journee.</div>
+      </div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot y">J80</div>
+      <div class="tl-body">
+        <div class="tl-date">Septembre 2026</div>
+        <div class="tl-title">65 commerciaux · 10 managers · 3 directeurs regionaux</div>
+        <div class="tl-desc">Mesure de la qualite des RDV (no show), stats comportementales en temps reel, classement tous Ritmo en direct depuis Supabase. 59/65 EODs recues le premier jour ouvre.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PREUVES -->
+  <div class="proof-block">
+    <div class="section-label">Ce que la data prouve</div>
+    <div class="section-title">Les comportements predisent<br>la performance.</div>
+    <div class="proof-grid">
+      <div class="proof-card accent">
+        <div class="pc-label">Routine superieure a 80%</div>
+        <div class="pc-val y">2x</div>
+        <div class="pc-desc">Les commerciaux qui completent Outlook + CRM chaque jour affichent un score mensuel deux fois superieur. La discipline quotidienne est le levier le plus fiable — pas le talent, pas le territoire.</div>
+      </div>
+      <div class="proof-card">
+        <div class="pc-label">Installations quotidiennes</div>
+        <div class="pc-val">3x</div>
+        <div class="pc-desc">Les installateurs reguliers affichent un score trois fois superieur. L'instal est le meilleur predicteur du score mensuel — avant les ventes elles-memes. Ritmo le rend visible le soir meme.</div>
+      </div>
+      <div class="proof-card">
+        <div class="pc-label">Adoption = performance</div>
+        <div class="pc-val">90%</div>
+        <div class="pc-desc">Taux d'adoption en septembre des la premiere semaine. Les equipes qui utilisent Ritmo ne reviennent pas en arriere — parce que la transparence cree de l'engagement, pas de la pression.</div>
+      </div>
+      <div class="proof-card accent">
+        <div class="pc-label">Top 5 users = Top 5 scores</div>
+        <div class="pc-val y">100%</div>
+        <div class="pc-desc">Sans exception sur toute la periode : les 5 commerciaux les plus rigoureux sur Ritmo sont les 5 meilleurs performers du mois. La correlation est parfaite, reproductible, et croissante.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP PERFORMERS -->
+  <div class="users-section">
+    <div class="section-label">Top performers · Cumul depuis le lancement</div>
+    <div class="user-row">
+      <div class="user-av" style="background:#E8FF3A;color:#0a0a0a">JK</div>
+      <div style="flex:1"><div class="user-name">Jonathan KHAROUBI</div><div class="user-meta">30+ jours actifs · 93% routine · 37 ventes · 43 instals</div></div>
+      <div class="user-bar-wrap"><div class="user-bar"><div class="user-bar-fill" style="width:100%"></div></div></div>
+      <div class="user-score">80</div>
+    </div>
+    <div class="user-row">
+      <div class="user-av">ML</div>
+      <div style="flex:1"><div class="user-name">Manon LAURENT</div><div class="user-meta">30+ jours actifs · 93% routine · 32 ventes · 29 instals</div></div>
+      <div class="user-bar-wrap"><div class="user-bar"><div class="user-bar-fill" style="width:76%"></div></div></div>
+      <div class="user-score">61</div>
+    </div>
+    <div class="user-row">
+      <div class="user-av">MK</div>
+      <div style="flex:1"><div class="user-name">Menelik KETCHAM</div><div class="user-meta">25+ jours actifs · 100% routine · 29 ventes · 22 instals</div></div>
+      <div class="user-bar-wrap"><div class="user-bar"><div class="user-bar-fill" style="width:64%"></div></div></div>
+      <div class="user-score">51</div>
+    </div>
+    <div class="user-row">
+      <div class="user-av">BM</div>
+      <div style="flex:1"><div class="user-name">Bilal MEZABER</div><div class="user-meta">Idris · 100% routine · 8 pts le 1er sept. a lui seul</div></div>
+      <div class="user-bar-wrap"><div class="user-bar"><div class="user-bar-fill" style="width:58%"></div></div></div>
+      <div class="user-score">46</div>
+    </div>
+    <div class="user-row">
+      <div class="user-av">NY</div>
+      <div style="flex:1"><div class="user-name">Nicolas YAKDI</div><div class="user-meta">Quentin · 100% routine · progression constante</div></div>
+      <div class="user-bar-wrap"><div class="user-bar"><div class="user-bar-fill" style="width:51%"></div></div></div>
+      <div class="user-score">41</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ECHELLE DE DEPLOIEMENT -->
+  <div class="section-label">Ce qui rend ca deployable a grande echelle</div>
+  <div class="section-title">Un modele reproductible.<br>Pas un projet Marseille.</div>
+  <div class="section-desc" style="margin-bottom:28px">Ritmo n'est pas lie a une region ou a une configuration d'equipe. C'est une infrastructure legere, sans dependance, deployable sur n'importe quelle equipe terrain en moins d'une semaine.</div>
+
+  <div class="scale-grid">
+    <div class="sc-card dark">
+      <div class="sc-label">Aujourd'hui</div>
+      <div class="sc-item"><div class="sc-dot"></div><div class="sc-text">2 regions · 9 equipes · 65 commerciaux</div></div>
+      <div class="sc-item"><div class="sc-dot"></div><div class="sc-text">10 managers · 3 directeurs regionaux</div></div>
+      <div class="sc-item"><div class="sc-dot"></div><div class="sc-text">430+ rapports EOD collectes</div></div>
+      <div class="sc-item"><div class="sc-dot"></div><div class="sc-text">Onboarding d'une equipe : 30 minutes</div></div>
+      <div class="sc-item"><div class="sc-dot"></div><div class="sc-text">Deploiement d'une mise a jour : moins de 24h</div></div>
+    </div>
+    <div class="sc-card light">
+      <div class="sc-label y">Ce qui est possible</div>
+      <div class="sc-item"><div class="sc-dot y"></div><div class="sc-text y">200 commerciaux deployes en moins d'un mois</div></div>
+      <div class="sc-item"><div class="sc-dot y"></div><div class="sc-text y">Vue nationale multi-regions pour le siege</div></div>
+      <div class="sc-item"><div class="sc-dot y"></div><div class="sc-text y">Benchmark inter-equipes en temps reel</div></div>
+      <div class="sc-item"><div class="sc-dot y"></div><div class="sc-text y">Donnees comportementales comme KPI de management</div></div>
+      <div class="sc-item"><div class="sc-dot y"></div><div class="sc-text y">Infrastructure existante — zero cout de reconstruction</div></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- VISION -->
+  <div class="vision">
+    <div class="section-label">Ce qu'on construit vraiment</div>
+    <div class="vision-text">Ritmo n'est pas un outil de reporting. C'est <em>la couche comportementale</em> qui manque a tous les outils de performance commerciale. Power BI mesure ce qui s'est passe. Ritmo mesure <em>ce qui va se passer</em> — et donne aux managers le temps d'agir avant que les resultats ne chutent.</div>
+    <div class="pillars">
+      <div class="pillar">
+        <div class="pillar-icon">⚡</div>
+        <div class="pillar-title">Intervention avant la chute</div>
+        <div class="pillar-desc">Le manager voit la routine chuter, le volume de RDV baisser. Il intervient le soir meme. Pas apres le bilan mensuel.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">🔬</div>
+        <div class="pillar-title">Performance reproductible</div>
+        <div class="pillar-desc">Les comportements des top performers sont identifies, nommes, transmis. La performance devient une methode, pas un talent.</div>
+      </div>
+      <div class="pillar">
+        <div class="pillar-icon">📈</div>
+        <div class="pillar-title">Adoption organique</div>
+        <div class="pillar-desc">Aucun commercial n'a ete force. L'outil a ete adopte parce qu'il est utile au commercial lui-meme — pas seulement au manager.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- AMBITION -->
+  <div class="ambition">
+    <div class="amb-tag">Ce qu'on voit devant nous</div>
+    <div class="amb-title">Le terrain qui se pilote<br><span>avec ses propres donnees.</span></div>
+    <div class="amb-desc">On a construit quelque chose qui fonctionne, sur des ressources nulles, avec une adoption reelle et des correlations prouvees. Ce n'est pas un proof of concept — c'est deja en production. Ce qui nous enthousiasme, c'est l'idee que ce modele puisse beneficier a l'ensemble des equipes FlatPay. On est prets a le faire grandir avec les bonnes personnes.</div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-left">Ritmo · Initiative interne · FlatPay Marseille · Septembre 2026</div>
+    <div class="footer-right">Jean Barbier</div>
+  </div>
+
+</div>
+</body>
+</html>
