@@ -408,13 +408,13 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
       <div class="sec-lbl">Activite</div>
       <div class="card">
         <div class="card-hd" onclick="tog('ac')">
-          <span class="card-hd-l">AC  -  INSTAL  -  FU</span>
+          <span class="card-hd-l">AC  -  INSTAL  -  NO SHOW</span>
           <div class="card-hd-r"><span class="pill er" id="pill-ac">AC 0  -  I 0</span><i class="ti ti-chevron-down chev" id="chev-ac"></i></div>
         </div>
         <div class="card-body" id="body-ac" style="padding-top:12px">
           <div class="row"><span class="rl">AC</span><div class="stp"><button class="sb" onclick="step('ac',-1)">-</button><span class="sv er" id="sv-ac">0</span><button class="sb" onclick="step('ac',1)">+</button></div></div>
           <div class="row"><span class="rl">INSTAL</span><div class="stp"><button class="sb" onclick="step('ins',-1)">-</button><span class="sv er" id="sv-ins">0</span><button class="sb" onclick="step('ins',1)">+</button></div></div>
-          <div class="row" style="border-bottom:0;display:none"><span class="rl">No show / Impossible</span><div class="stp"><button class="sb" onclick="step('noshow',-1)">-</button><span class="sv nu" id="sv-noshow">0</span><button class="sb" onclick="step('noshow',1)">+</button></div></div>
+          <div class="row" style="border-bottom:0"><span class="rl">No show / Impossible</span><div class="stp"><button class="sb" onclick="step('noshow',-1)">-</button><span class="sv nu" id="sv-noshow">0</span><button class="sb" onclick="step('noshow',1)">+</button></div></div>
         </div>
       </div>
 
@@ -778,10 +778,10 @@ function updateAll(){
   const tvEl=document.getElementById('total-v');tvEl.textContent=tv;tvEl.className='total-v'+(tv>0?' ps':' z');
   const prRdv=document.getElementById('pill-rdv');prRdv.textContent=(ih+og)+' RDV';prRdv.className='pill '+((ih+og)>=3?'ok':(ih+og)>0?'wn':'er');
   const prVt=document.getElementById('pill-vt');prVt.textContent=tv+(tv===1?' vente':' ventes');prVt.className='pill '+(tv>0?'ok':'nu');
-  const prAc=document.getElementById('pill-ac');prAc.textContent='AC '+S.ac+'  -  I '+S.ins;prAc.className='pill '+((S.ac>=1&&S.ins>=1)?'ok':(S.ac>=1||S.ins>=1)?'wn':'er');
+  const prAc=document.getElementById('pill-ac');prAc.textContent='AC '+S.ac+'  -  I '+S.ins+'  -  NS '+(S.noshow||0);prAc.className='pill '+((S.ac>=1&&S.ins>=1)?'ok':(S.ac>=1||S.ins>=1)?'wn':'er');
   document.getElementById('sv-ac').textContent=S.ac;document.getElementById('sv-ac').className='sv'+(S.ac>=1?' ok':' er');
   document.getElementById('sv-ins').textContent=S.ins;document.getElementById('sv-ins').className='sv'+(S.ins>=1?' ok':' er');
-  document.getElementById('sv-fu').textContent=S.fu;
+  var svFuEl=document.getElementById('sv-fu');if(svFuEl)svFuEl.textContent=S.fu;
   var svIh=document.getElementById('sv-rdv-ih');if(svIh){svIh.textContent=ih;svIh.className='sv '+(ih>0?'ok':'nu');}
   var svOg=document.getElementById('sv-rdv-og');if(svOg){svOg.textContent=og;svOg.className='sv '+(og>0?'ok':'nu');}
   var svVt=document.getElementById('sv-ventes');if(svVt){svVt.textContent=tv;svVt.className='sv '+(tv>0?'ok':'nu');}
