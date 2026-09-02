@@ -789,7 +789,8 @@ function updateAll(){
   const prRdv=document.getElementById('pill-rdv');prRdv.textContent=(ih+og)+' RDV';prRdv.className='pill '+((ih+og)>=3?'ok':(ih+og)>0?'wn':'er');
   const prVt=document.getElementById('pill-vt');prVt.textContent=tv+(tv===1?' vente':' ventes');prVt.className='pill '+(tv>0?'ok':'nu');
   const prAc=document.getElementById('pill-ac');prAc.textContent='AC '+S.ac+'  -  I '+S.ins+'  -  NS '+(S.noshow||0);prAc.className='pill '+((S.ac>=1&&S.ins>=1)?'ok':(S.ac>=1||S.ins>=1)?'wn':'er');
-  document.getElementById('sv-ac').textContent=S.ac;document.getElementById('sv-ac').className='sv'+(S.ac>=1?' ok':' er');
+  document.getElementById('sv-ac').textContent=S.ac;
+  var svNs=document.getElementById('sv-noshow');if(svNs)svNs.textContent=S.noshow||0;document.getElementById('sv-ac').className='sv'+(S.ac>=1?' ok':' er');
   document.getElementById('sv-ins').textContent=S.ins;document.getElementById('sv-ins').className='sv'+(S.ins>=1?' ok':' er');
   var svFuEl=document.getElementById('sv-fu');if(svFuEl)svFuEl.textContent=S.fu;
   var svIh=document.getElementById('sv-rdv-ih');if(svIh){svIh.textContent=ih;svIh.className='sv '+(ih>0?'ok':'nu');}
