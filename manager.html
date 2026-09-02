@@ -76,7 +76,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .agn{font-size:13px;font-weight:700;margin-bottom:2px}
 .agm{font-size:11px;color:var(--g4)}
 .ags{font-size:26px;font-weight:800}
-.ags.red{color:var(--red)}.ags.ora{color:#ea580c}.ags.grn{color:var(--green)}
+.ags.red{color:var(--red)}.ags.ora{color:#ea580c}.ags.grn{color:var(--green)}.ags.blue{color:#3b82f6}
 .agb{padding:0 14px 14px;border-top:1px solid var(--g2);display:none}
 .agb.op{display:block}
 .chev{font-size:14px;color:var(--g3);transition:transform .2s}
@@ -125,7 +125,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .rbb{background:var(--g1);border-radius:3px;height:4px;margin-top:4px}
 .rbf{height:100%;border-radius:3px;background:var(--b)}
 .rs{font-size:20px;font-weight:800}
-.rs.red{color:var(--red)}.rs.ora{color:#ea580c}.rs.grn{color:var(--green)}
+.rs.red{color:var(--red)}.rs.ora{color:#ea580c}.rs.grn{color:var(--green)}.rs.blue{color:#3b82f6}
 
 /* VENTES */
 .vi{background:var(--w);border:1px solid var(--g2);border-radius:var(--rl);padding:11px 13px;margin-bottom:6px}
@@ -311,8 +311,8 @@ var ALL_AGENTS = Object.values(TEAMS).flat().filter(function(a,i,arr){return arr
 var SB = 'https://twjtdrggjvhvlkhhybgq.supabase.co';
 var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3anRkcmdnanZodmxraGh5YmdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMjAyMjMsImV4cCI6MjA5Njc5NjIyM30.I-E8aPS5VEH02jpu-XyuAaJWis_y7zv7ef3-udoNmOs';
 var DEFAULT_OBJ = {ventes:20,instals:20};
-var OBJ_POINTS = 40; // M3+ tous les commerciaux
-var WORK_DAYS_PER_MONTH = 22; // jours ouvrés estimés
+var OBJ_POINTS = 40;
+var WORK_DAYS_PER_MONTH = 20; // jours ouvrés estimés
 function getDailyObjTarget(){
   var d=now.getDate();
   var workDaysPassed=Math.ceil(d*WORK_DAYS_PER_MONTH/30);
@@ -437,7 +437,7 @@ function setTypeFilter(t){
 }
 
 function setSd(s){document.getElementById('sd').className='sd '+s;}
-function scC(s){return s===0?'red':s<=2?'ora':'grn';}
+function scC(s){return s>=4?'blue':s>=3?'grn':s>=2?'ora':'red';}
 
 async function loadData(){
   setSd('ld');
@@ -485,7 +485,7 @@ function renderToday(){
   var tpos=reps.reduce(function(s,r){return s+(r.total_pos||0);},0);
   var posShare=tv>0?Math.round(tpos/tv*100):0;
   // Objectif journalier
-  var dayTarget=getDailyObjTarget();
+  var dayTarget=agents.length*2;
   var monthSc=agents.reduce(function(s,a){return s+getMonth(a.n).reduce(function(x,r){return x+(r.score||0);},0);},0);
   // Hero encadre noir
   var kg=document.getElementById('today-kpis');kg.innerHTML='';
@@ -495,7 +495,7 @@ function renderToday(){
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
     '<div><div style="font-size:13px;font-weight:700;color:#fff">Score equipe du jour</div>'+
     '<div style="font-size:11px;color:rgba(255,255,255,.3);margin-top:2px">Objectif journalier : '+dayTarget+' pts</div></div>'+
-    '<div style="text-align:right"><div style="font-size:48px;font-weight:900;letter-spacing:-2px;line-height:1;color:'+(sc>=dayTarget?'#4ade80':sc>=dayTarget*0.6?'#fb923c':'#f87171')+'">'+sc+'</div>'+
+    '<div style="text-align:right"><div style="font-size:48px;font-weight:900;letter-spacing:-2px;line-height:1;color:'+(sc>(agents.length*2)+3?'#3b82f6':sc>=agents.length*2?'#4ade80':'#f87171')+'">'+sc+'</div>'+
     '<div style="font-size:10px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px">/ '+dayTarget+' pts</div></div></div>'+
     '<div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden;margin-bottom:10px">'+
     '<div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#E8FF3A);width:'+Math.min(dayTarget>0?Math.round(sc/dayTarget*100):0,100)+'%"></div></div>'+
