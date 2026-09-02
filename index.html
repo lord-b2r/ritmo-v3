@@ -435,9 +435,11 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
       <div id="form-send"><button class="send-btn" id="send-btn" onclick="sendEOD()">Envoyer ma EOD</button></div>
       <div class="sent" id="sent">
         <div class="sent-ring"><i class="ti ti-check"></i></div>
-        <div style="font-size:18px;font-weight:800;margin-bottom:8px">EOD envoyee</div>
+        <div style="font-size:18px;font-weight:800;margin-bottom:8px">EOD envoyee ✓</div>
         <div class="sent-score" id="sent-score">0</div>
         <div class="sent-lbl">Score du jour</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:12px;margin-bottom:16px;text-align:center;padding:0 20px">Tu peux continuer a modifier et renvoyer. La derniere version compte.</div>
+        <button onclick="backToForm()" style="background:var(--b);color:#fff;border:none;border-radius:12px;padding:12px 24px;font-size:14px;font-weight:700;cursor:pointer">Modifier le rapport</button>
       </div>
       <div style="height:16px"></div>
     </div>
