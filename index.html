@@ -714,7 +714,7 @@ function bootApp(){
 
 // -- SYNC --
 function setSd(s){document.getElementById('sync-dot').className='sync-dot '+s;}
-function scColor(s){return s===0?'red':s===1?'ora':'grn';}
+function scColor(s){return s>=4?'blue':s>=3?'grn':s>=2?'ora':'red';}
 function calcScore(){return S.ventes.length + S.ins;}
 
 async function loadReports(){
