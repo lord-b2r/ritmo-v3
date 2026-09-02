@@ -414,7 +414,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
         <div class="card-body" id="body-ac" style="padding-top:12px">
           <div class="row"><span class="rl">AC</span><div class="stp"><button class="sb" onclick="step('ac',-1)">-</button><span class="sv er" id="sv-ac">0</span><button class="sb" onclick="step('ac',1)">+</button></div></div>
           <div class="row"><span class="rl">INSTAL</span><div class="stp"><button class="sb" onclick="step('ins',-1)">-</button><span class="sv er" id="sv-ins">0</span><button class="sb" onclick="step('ins',1)">+</button></div></div>
-          <div class="row" style="border-bottom:0"><span class="rl">Leads FU</span><div class="stp"><button class="sb" onclick="step('fu',-1)">-</button><span class="sv nu" id="sv-fu">0</span><button class="sb" onclick="step('fu',1)">+</button></div></div>
+          <div class="row" style="border-bottom:0"><span class="rl">No show / Impossible</span><div class="stp"><button class="sb" onclick="step('noshow',-1)">-</button><span class="sv nu" id="sv-noshow">0</span><button class="sb" onclick="step('noshow',1)">+</button></div></div>
         </div>
       </div>
 
@@ -610,7 +610,7 @@ function showToast(msg){
   t.textContent=msg;document.body.appendChild(t);
   setTimeout(function(){t.style.opacity='0';setTimeout(function(){t.remove();},500);},2000);
 }
-function freshS(){return {rdv_ih:[], rdv_og:[], ventes:[], ac:0, ins:0, fu:0, ol:false, cr:false, mot:''};};
+function freshS(){return {rdv_ih:[], rdv_og:[], ventes:[], ac:0, ins:0, fu:0, noshow:0, ol:false, cr:false, mot:''};};
 function saveS(){
   if(!ME)return;
   var today=new Date().toISOString().slice(0,10);
@@ -927,7 +927,7 @@ async function sendEOD(){
   S.rdv_og.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV OG',cat:'rdv',type:'og',note:r.note,ts:Date.now()});});
   saveFuLocal();
   fuList.forEach(f=>{if(!f._synced){syncFuToSupabase(f);f._synced=true;}});
-  const eodNow=new Date();const eod={agent:ME,team:MY_TEAM,date:eodNow.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}),timestamp:Date.now(),rdv_ih:rdv_ih_count,rdv_og:rdv_og_count,notes_ih,notes_og,vente_ih:S.ventes.filter(v=>v.nom).length,vente_og:0,total_vente:totalV,total_pos:totalPos,ac:S.ac,instal:S.ins,leads_fu:S.fu,outlook:S.ol,crm:S.cr,mot_jour:document.getElementById('mot').value,score:sc,ventes_detail,fu_list:fuList.map(f=>({nom:f.nom,cat:f.cat,type:f.type,note:f.note||''}))};
+  const eodNow=new Date();const eod={agent:ME,team:MY_TEAM,date:eodNow.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}),timestamp:Date.now(),rdv_ih:rdv_ih_count,rdv_og:rdv_og_count,notes_ih,notes_og,vente_ih:S.ventes.filter(v=>v.nom).length,vente_og:0,total_vente:totalV,total_pos:totalPos,ac:S.ac,instal:S.ins,leads_fu:S.fu,noshow:S.noshow||0,outlook:S.ol,crm:S.cr,mot_jour:document.getElementById('mot').value,score:sc,ventes_detail,fu_list:fuList.map(f=>({nom:f.nom,cat:f.cat,type:f.type,note:f.note||''}))};
   setSd('ld');
   let sent=false;
   try{
