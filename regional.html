@@ -228,7 +228,10 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- AUJOURD HUI -->
     <div id="s-today" class="scr on">
-      <button class="rf" onclick="loadData()"><i class="ti ti-refresh" style="font-size:13px"></i> Actualiser</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <button class="rf" onclick="loadData()"><i class="ti ti-refresh" style="font-size:13px"></i> Actualiser</button>
+        <div id="date-nav" style="display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.05);border-radius:20px;padding:2px 4px"></div>
+      </div>
       <div class="kgrid" id="today-kpi"></div>
       <div id="teams-today"></div>
     </div>
@@ -348,7 +351,7 @@ var ALL_AGENTS = Object.values(TEAMS).flat().filter(function(a,i,arr){return arr
 var SB='https://twjtdrggjvhvlkhhybgq.supabase.co';
 var SK='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR3anRkcmdnanZodmxraGh5YmdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyMjAyMjMsImV4cCI6MjA5Njc5NjIyM30.I-E8aPS5VEH02jpu-XyuAaJWis_y7zv7ef3-udoNmOs';
 
-var now=new Date(),ME=null,MY_TEAMS=[],REPORTS=[],PENDING=null;
+var now=new Date(),ME=null,MY_TEAMS=[],REPORTS=[],PENDING=null,viewDate=null;
 var mgrFilter='jean',teamFilterV='all',typeFilter='all',fuTeamFilter='all';
 var REACT_EMOJIS={goat:'\uD83D\uDC10'};
 var REACTS=['goat'];
@@ -462,17 +465,44 @@ function getMyAgents(){
 }
 
 function getToday(name){
+  var ref=viewDate||now;
   return REPORTS.find(function(r){
     var d=new Date(r.timestamp);
-    return r.agent===name&&d.getDate()===now.getDate()&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+    return r.agent===name&&d.getDate()===ref.getDate()&&d.getMonth()===ref.getMonth()&&d.getFullYear()===ref.getFullYear();
   })||null;
+}
+function navDay(delta){
+  var ref=viewDate?new Date(viewDate):new Date(now);
+  ref.setDate(ref.getDate()+delta);
+  // Ne pas aller au-dela d'aujourd'hui
+  var today=new Date(now);today.setHours(23,59,59,999);
+  if(ref>today)return;
+  viewDate=ref;
+  renderDateNav();
+  renderToday();
+}
+function resetDay(){
+  viewDate=null;
+  renderDateNav();
+  renderToday();
+}
+function renderDateNav(){
+  var nav=document.getElementById('date-nav');
+  if(!nav)return;
+  var ref=viewDate||now;
+  var isToday=!viewDate||ref.toDateString()===now.toDateString();
+  var label=isToday?'Aujourd'hui':ref.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  nav.innerHTML='<button onclick="navDay(-1)" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:6px 10px;font-size:18px;">&#8249;</button>'+
+    '<span style="font-size:13px;font-weight:700;color:'+(isToday?'#E8FF3A':'#fff')+'">'+label+'</span>'+
+    (isToday?'':'<button onclick="resetDay()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:6px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Ajd</button>')+
+    '<button onclick="navDay(1)" style="background:none;border:none;color:'+(isToday?'rgba(255,255,255,.2)':'rgba(255,255,255,.5)')+';cursor:pointer;padding:6px 10px;font-size:18px;'+(isToday?'pointer-events:none':'')+'">&#8250;</button>';
 }
 function getMonth(name,month){
   var m=month||now.toISOString().slice(0,7);
   return REPORTS.filter(function(r){return r.agent===name&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===m;});
 }
 
-function renderAll(){renderToday();renderMgrView();renderMur();}
+function renderAll(){renderDateNav();renderToday();renderMgrView();renderMur();}
 
 function renderToday(){
   var agents=getMyAgents();
