@@ -340,6 +340,7 @@ var PENDING = null;
 var teamFilter = 'own';
 var salesFilter = 'all';
 var typeFilter = 'all';
+var viewDate = null;
 
 function spk(k,v){try{localStorage.setItem(k,v);}catch(e){}document.cookie=k+'='+encodeURIComponent(v)+';path=/;max-age=31536000';}
 function gpk(k){try{var v=localStorage.getItem(k);if(v)return v;}catch(e){}var m=document.cookie.match('(?:^|;)\\s*'+k+'=([^;]*)');return m?decodeURIComponent(m[1]):null;}
