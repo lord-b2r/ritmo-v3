@@ -491,7 +491,7 @@ function renderDateNav(){
   if(!nav)return;
   var ref=viewDate||now;
   var isToday=!viewDate||ref.toDateString()===now.toDateString();
-  var label=isToday?'Aujourd'hui':ref.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+  var label=isToday?"Aujourd'hui":ref.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"});
   nav.innerHTML='<button onclick="navDay(-1)" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:6px 10px;font-size:18px;">&#8249;</button>'+
     '<span style="font-size:13px;font-weight:700;color:'+(isToday?'#E8FF3A':'#fff')+'">'+label+'</span>'+
     (isToday?'':'<button onclick="resetDay()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:6px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Ajd</button>')+
