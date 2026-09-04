@@ -490,14 +490,13 @@ function renderDateNav(){
   var nav=document.getElementById('date-nav');
   if(!nav)return;
   var ref=viewDate||now;
-  var val=ref.toISOString().slice(0,10);
-  var maxVal=now.toISOString().slice(0,10);
-  nav.innerHTML='<input type="date" value="'+val+'" max="'+maxVal+'" onchange="onDatePick(this.value)" style="border:none;border-radius:20px;padding:6px 12px;font-size:13px;font-weight:600;background:var(--g1);color:var(--t);cursor:pointer;outline:none">';
-}
-function onDatePick(val){
-  var d=new Date(val+'T12:00:00');
-  viewDate=d.toDateString()===now.toDateString()?null:d;
-  renderToday();
+  var isToday=!viewDate||ref.toDateString()===now.toDateString();
+  var label=isToday?"Aujourd'hui":ref.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"});
+  var chevStyle="font-size:22px;font-weight:300;padding:0 12px;cursor:pointer;color:var(--b);background:none;border:none;line-height:1;";
+  nav.innerHTML=
+    '<button onclick="navDay(-1)" style="'+chevStyle+'">&#8249;</button>'+
+    '<span style="font-size:14px;font-weight:700;min-width:130px;text-align:center;color:var(--t)">'+label+'</span>'+
+    '<button onclick="navDay(1)" style="'+chevStyle+(isToday?'opacity:.2;pointer-events:none':'')+'">&#8250;</button>';
 }
 function getMonth(name,month){
   var m=month||now.toISOString().slice(0,7);
