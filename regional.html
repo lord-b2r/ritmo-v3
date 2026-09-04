@@ -492,10 +492,12 @@ function renderDateNav(){
   var ref=viewDate||now;
   var isToday=!viewDate||ref.toDateString()===now.toDateString();
   var label=isToday?"Aujourd'hui":ref.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"});
-  nav.innerHTML='<button onclick="navDay(-1)" style="background:none;border:none;color:rgba(255,255,255,.5);cursor:pointer;padding:6px 10px;font-size:18px;">&#8249;</button>'+
-    '<span style="font-size:13px;font-weight:700;color:'+(isToday?'#E8FF3A':'#fff')+'">'+label+'</span>'+
-    (isToday?'':'<button onclick="resetDay()" style="background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;padding:6px 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Ajd</button>')+
-    '<button onclick="navDay(1)" style="background:none;border:none;color:'+(isToday?'rgba(255,255,255,.2)':'rgba(255,255,255,.5)')+';cursor:pointer;padding:6px 10px;font-size:18px;'+(isToday?'pointer-events:none':'')+'">&#8250;</button>';
+  var btnBase='width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;font-size:16px;font-weight:900;';
+  nav.innerHTML=
+    '<button onclick="navDay(-1)" style="'+btnBase+'background:#1a1a1a;color:#fff;">&#8592;</button>'+
+    '<span style="font-size:13px;font-weight:700;color:#1a1a1a;padding:0 6px">'+label+'</span>'+
+    (isToday?'':'<button onclick="resetDay()" style="height:28px;padding:0 10px;border-radius:8px;background:#1a1a1a;border:none;color:#fff;cursor:pointer;font-size:11px;font-weight:800;">Auj.</button>')+
+    '<button onclick="navDay(1)" style="'+btnBase+'background:'+(isToday?'#ccc':'#1a1a1a')+';color:'+(isToday?'#999':'#fff')+';'+(isToday?'pointer-events:none':'')+'">&#8594;</button>';
 }
 function getMonth(name,month){
   var m=month||now.toISOString().slice(0,7);
