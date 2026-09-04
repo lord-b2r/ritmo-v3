@@ -697,7 +697,7 @@ function renderVentes(){
   var avgTaux=filtered.length?filtered.reduce(function(s,v){return s+(parseFloat(v.taux)||0);},0)/filtered.length:0;
   var totalUp=filtered.reduce(function(s,v){return s+(parseInt(v.upfront)||0);},0);
   var posV=filtered.filter(function(v){return (v.type||v.ty||'POS')==='POS';});
-  var avgUpPos=posV.length?posV.reduce(function(s,v){return s+(parseInt(v.upfront)||0);},0)/posV.length:0;
+  var avgUpPos=posV.length?Math.round(posV.reduce(function(s,v){return s+(parseInt(v.upfront)||0);},0)/posV.length):0;
   var kpi=document.getElementById('ventes-kpi');kpi.innerHTML='';
   [['TPV total',formatK(totalTPV)+' EUR',''],['Taux moyen',avgTaux?avgTaux.toFixed(2)+'%':'---','Sur '+filtered.length+' ventes'],
    ['Upfront total',formatK(totalUp)+' EUR',''],['Upfront moy. POS',avgUpPos?formatK(avgUpPos)+' EUR':'0','Par vente POS']].forEach(function(c){
