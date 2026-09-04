@@ -900,7 +900,21 @@ function renderVentesForm(){
     var g3=document.createElement('div');g3.className='vfg';
     var l3=document.createElement('div');l3.className='vfl';l3.textContent='Taux (%)';
     var i3=document.createElement('input');i3.className='vfi';i3.type='number';i3.placeholder='1.29';i3.step='0.01';i3.value=v.taux;
-    (function(ii){i3.oninput=function(){S.ventes[ii].taux=this.value;};})(i);
+    i3.max='1.69';i3.min='0';
+    (function(ii){i3.oninput=function(){
+      var val=parseFloat(this.value);
+      if(this.value&&val>1.69){
+        this.style.border='2px solid #f87171';
+        this.title='Taux maximum : 1.69%';
+        var err=document.getElementById('taux-err-'+ii);
+        if(!err){err=document.createElement('div');err.id='taux-err-'+ii;err.style.cssText='color:#f87171;font-size:11px;margin-top:3px';g3.appendChild(err);}
+        err.textContent='Taux max : 1.69%';
+      } else {
+        this.style.border='';
+        var err=document.getElementById('taux-err-'+ii);if(err)err.textContent='';
+      }
+      S.ventes[ii].taux=this.value;
+    };})(i);
     g3.appendChild(l3);g3.appendChild(i3);
     r1.appendChild(g2);r1.appendChild(g3);
     var r2=document.createElement('div');r2.className='vfr';
