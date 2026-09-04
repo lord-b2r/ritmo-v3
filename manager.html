@@ -217,7 +217,10 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- AUJOURD HUI -->
     <div id="s-today" class="scr on">
-      <button class="rf" onclick="loadData()"><i class="ti ti-refresh" style="font-size:13px"></i> Actualiser</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <button class="rf" onclick="loadData()"><i class="ti ti-refresh" style="font-size:13px"></i> Actualiser</button>
+        <div id="date-nav" style="display:flex;align-items:center;gap:4px"></div>
+      </div>
       <div id="today-kpis"></div>
       <div id="miss-banner" style="display:none"></div>
       <div class="sec-lbl">Equipe - EOD du jour</div>
@@ -457,10 +460,33 @@ function getTeamAgents(teamKey){
 }
 
 function getToday(name){
+  var ref=viewDate||now;
   return REPORTS.find(function(r){
     var d=new Date(r.timestamp);
-    return r.agent===name&&d.getDate()===now.getDate()&&d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+    return r.agent===name&&d.getDate()===ref.getDate()&&d.getMonth()===ref.getMonth()&&d.getFullYear()===ref.getFullYear();
   })||null;
+}
+function navDay(delta){
+  var ref=viewDate?new Date(viewDate):new Date(now);
+  ref.setDate(ref.getDate()+delta);
+  var today=new Date(now);today.setHours(23,59,59,999);
+  if(ref>today)return;
+  viewDate=ref;
+  renderDateNav();
+  renderToday();
+}
+function resetDay(){viewDate=null;renderDateNav();renderToday();}
+function renderDateNav(){
+  var nav=document.getElementById('date-nav');
+  if(!nav)return;
+  var ref=viewDate||now;
+  var isToday=!viewDate||ref.toDateString()===now.toDateString();
+  var label=isToday?"Aujourd'hui":ref.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long"});
+  var chevStyle="font-size:22px;font-weight:300;padding:0 12px;cursor:pointer;color:var(--b);background:none;border:none;line-height:1;";
+  nav.innerHTML=
+    '<button onclick="navDay(-1)" style="'+chevStyle+'">&#8249;</button>'+
+    '<span style="font-size:14px;font-weight:700;min-width:130px;text-align:center;color:var(--t)">'+label+'</span>'+
+    '<button onclick="navDay(1)" style="'+chevStyle+(isToday?'opacity:.2;pointer-events:none':'')+'">&#8250;</button>';
 }
 function getMonth(name,month){
   var m=month||now.toISOString().slice(0,7);
@@ -471,7 +497,7 @@ function getMonth(name,month){
 
 function renderAll(){renderToday();renderMonth();renderVentes();renderMur();}
 
-function renderToday(){
+function renderToday(){renderDateNav();
   var agents=getTeamAgents('own');
   var reps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
   var tv=reps.reduce(function(s,r){return s+(r.total_vente||0);},0);
