@@ -442,7 +442,13 @@ function setTypeFilter(t){
 
 function setSd(s){document.getElementById('sd').className='sd '+s;}
 function scC(s){return s>=4?'blue':s>=3?'grn':s>=2?'ora':'red';}
-function scCMonth(score){var avg=score/20;return avg>2?'blue':avg>=2?'grn':avg>=1.5?'ora':'red';}
+function workedDaysElapsed(){
+  var d=new Date(now);var start=new Date(d.getFullYear(),d.getMonth(),1);var count=0;
+  var cur=new Date(start);
+  while(cur<=d){var dow=cur.getDay();if(dow!==0&&dow!==6)count++;cur.setDate(cur.getDate()+1);}
+  return Math.max(count,1);
+}
+function scCMonth(score){var avg=score/workedDaysElapsed();return avg>2?'blue':avg>=2?'grn':avg>=1.5?'ora':'red';}
 
 async function loadData(){
   setSd('ld');
