@@ -442,6 +442,7 @@ function setTypeFilter(t){
 
 function setSd(s){document.getElementById('sd').className='sd '+s;}
 function scC(s){return s>=4?'blue':s>=3?'grn':s>=2?'ora':'red';}
+function scCMonth(score){var avg=score/20;return avg>3?'blue':avg>=2?'grn':avg>=1.5?'ora':'red';}
 
 async function loadData(){
   setSd('ld');
@@ -690,7 +691,7 @@ function renderMonth(){
   var mx=Math.max(sorted[0]?sorted[0].s:1,1);
   var rk=document.getElementById('ranking');rk.innerHTML='';
   sorted.forEach(function(a,i){
-    var cls=scC(a.s===0?0:a.s<=3?1:2);
+    var cls=scCMonth(a.s);
     var posS=a.v>0?Math.round(a.pos/a.v*100):0;
     var row=document.createElement('div');row.className='rr';
     row.onclick=(function(ag,sts){return function(){openAgentDetail(ag,sts);};})(a.ag,a);
