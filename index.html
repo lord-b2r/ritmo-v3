@@ -848,7 +848,7 @@ function addVenteFromRdv(type,rdvIdx){
 function stepVentes(d){
   var cur=S.ventes.length;
   var next=Math.max(0,cur+d);
-  if(next>cur){S.ventes.push({nom:'',tpv:'',taux:'',ty:'POS',src:'ih',sig:'quick',upfront:''});renderVentesForm();}
+  if(next>cur){S.ventes.push({nom:'',tpv:'',taux:'',ty:'',src:'ih',sig:'quick',upfront:''});renderVentesForm();}
   else if(next<cur){S.ventes.pop();renderVentesForm();}
   var el=document.getElementById('sv-ventes');
   if(el){el.textContent=next;el.className='sv '+(next>0?'ok':'nu');}
@@ -912,14 +912,14 @@ function renderVentesForm(){
     r1.appendChild(g2);r1.appendChild(g3);
     var r2=document.createElement('div');r2.className='vfr';
     var g4=document.createElement('div');g4.className='vfg';
-    var l4=document.createElement('div');l4.className='vfl';l4.textContent='Type caisse';
+    var l4=document.createElement('div');l4.className='vfl';l4.textContent='Type caisse';if(!v.ty){l4.style.color='#f87171';l4.textContent='Type caisse *';}
     var tg=document.createElement('div');tg.className='vft';
     var tp=document.createElement('div');tp.className='vfo'+(v.ty==='POS'?' on':'');tp.textContent='POS';
     var tt=document.createElement('div');tt.className='vfo'+(v.ty==='TPE'?' on':'');tt.textContent='TPE';
     (function(ii){tp.onclick=function(){S.ventes[ii].ty='POS';renderVentesForm();};tt.onclick=function(){S.ventes[ii].ty='TPE';renderVentesForm();};})(i);
     tg.appendChild(tp);tg.appendChild(tt);g4.appendChild(l4);g4.appendChild(tg);
     var g5=document.createElement('div');g5.className='vfg';
-    var l5=document.createElement('div');l5.className='vfl';l5.textContent='Upfront (EUR)';
+    var l5=document.createElement('div');l5.className='vfl';l5.textContent=v.ty==='POS'?'Upfront (EUR) *':'Upfront (EUR)';if(v.ty==='POS'){l5.style.color='#f87171';}
     var i5=document.createElement('input');i5.className='vfi';i5.type='number';i5.placeholder='1000';i5.value=v.upfront;
     (function(ii){i5.oninput=function(){S.ventes[ii].upfront=this.value;};})(i);
     g5.appendChild(l5);g5.appendChild(i5);
@@ -931,7 +931,20 @@ function renderVentesForm(){
 
 // -- SEND EOD --
 async function sendEOD(){
-  const btn=document.getElementById('send-btn');btn.disabled=true;btn.textContent='Envoi...';
+  const btn=document.getElementById('send-btn');
+  // Validation ventes
+  for(var vi=0;vi<S.ventes.length;vi++){
+    var vv=S.ventes[vi];
+    if(!vv.ty){
+      btn.disabled=false;btn.textContent='Envoyer';
+      showToast('Vente '+(vi+1)+' : choisis TPE ou POS');return;
+    }
+    if(vv.ty==='POS'&&(!vv.upfront||parseInt(vv.upfront)===0)){
+      btn.disabled=false;btn.textContent='Envoyer';
+      showToast('Vente '+(vi+1)+' : upfront obligatoire pour un POS');return;
+    }
+  }
+  btn.disabled=true;btn.textContent='Envoi...';
   const totalV=S.ventes.length;
   const totalPos=S.ventes.filter(v=>v.ty==='POS').length;
   const sc=calcScore();
