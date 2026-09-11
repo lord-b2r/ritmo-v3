@@ -311,7 +311,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
 <script>
 var REGIONAL_MANAGERS = {
-  baptiste: {name:'Baptiste',       initials:'BA', pin:'3001', teams:['jean','romeo','quentin','idris','arsena','axel_l','alex_g'], label:'Region Baptiste'},
+  baptiste: {name:'Baptiste',       initials:'BA', pin:'3001', teams:['jean','romeo','quentin','idris','arsena','axel_l','alex_g','salim','zinedine'], label:'Region Baptiste'},
   louis:    {name:'Louis STEINCKER',initials:'LS', pin:'3003', teams:['julien_r'],                                                 label:'Region Louis Steincker'},
   mohamed:  {name:'Mohamed SATA',   initials:'MS', pin:'3002', teams:['cem','benjamin'],                                           label:'Region Mohamed Sata'}
 };
@@ -342,10 +342,12 @@ var TEAMS = {
   axel_l:  [{n:'Quentin LARTIGUE',i:'QL'},{n:'Arnaud ROCHETTE',i:'AR'},{n:'Lydiane ROUDAUT',i:'LY'},{n:'Jorys TUEUR',i:'JT'},{n:'Nicolas GENTIL',i:'NI'},{n:'Julian DEL BOSQUE',i:'JD'}],
   julien_r:[{n:'Jean SARBACHER',i:'JS'},{n:'Louis PLUVINAGE',i:'LU'},{n:'Oceane JURQUET',i:'OJ'},{n:'Julien DUPROIX',i:'JD'},{n:'Melih AYDIN',i:'ME'},{n:'Tom MARECHAL',i:'TM'},{n:'Ilhan BABAYAGIT',i:'IB'},{n:'Thomas RENDA',i:'TR'}],
   benjamin:[{n:'Gregoire QUELLIER',i:'GQ'},{n:'Matteo VEILLON',i:'MV'},{n:'Bel MOUYENI',i:'BL'},{n:'Matteo LESIEN',i:'MT'},{n:'Pauline DUCAMP',i:'PD'},{n:'Vianney DE CASLOU',i:'VC'},{n:'Jonathan POUILLE',i:'JP'}],
+  salim:    [{n:'Alexis PAVY',i:'AP'},{n:'David DUCOS',i:'DD'},{n:'Gwenael HUBERT',i:'GH'},{n:'Maxime ANTUNES',i:'MA'},{n:'Michael BIANTI',i:'MB'},{n:'Morgan FARRUGIA',i:'MF'},{n:'Sylvain PIATTI',i:'SP'}],
+  zinedine: [{n:'Antonin RAUCH',i:'AR'},{n:'Garance WOJCIK',i:'GW'},{n:'Husein GUN',i:'HG'},{n:'Mathieu BLEUET',i:'MB'},{n:'Maxime MARTIN',i:'MM'}],
   alex_g: [{n:'Corentin EUSTACHE',i:'CE'},{n:'Anthony DOUARCHE',i:'AD'},{n:'Axel GUILLEVIC',i:'AX'},{n:'Floryan LEMOINE',i:'FL'},{n:'Leo PEYRARD',i:'LP'},{n:'Esteban DUVERNAY',i:'ED'},{n:'Frederic COELHO',i:'FC'},{n:'Ijlal AGGA',i:'IA'}]
 };
 
-var TEAM_COLORS = {jean:'#3b82f6',romeo:'#ec4899',quentin:'#10b981',cem:'#f59e0b',idris:'#8b5cf6',arsena:'#ef4444',milan:'#06b6d4',axel_l:'#84cc16',julien_r:'#f97316',benjamin:'#64748b',alex_g:'#06b6d4'};
+var TEAM_COLORS = {jean:'#3b82f6',romeo:'#ec4899',quentin:'#10b981',cem:'#f59e0b',idris:'#8b5cf6',arsena:'#ef4444',milan:'#06b6d4',axel_l:'#84cc16',julien_r:'#f97316',benjamin:'#64748b',salim:'#8b5cf6',zinedine:'#ec4899',alex_g:'#06b6d4'};
 var ALL_AGENTS = Object.values(TEAMS).flat().filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
 
 var SB='https://twjtdrggjvhvlkhhybgq.supabase.co';
