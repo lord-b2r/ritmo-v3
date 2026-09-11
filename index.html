@@ -1040,7 +1040,8 @@ function renderFu(){
     const tp=document.createElement('div');tp.className='fu-type';tp.textContent=(f.type==='ih'?'IH':'OG')+(f.note?'  -  '+f.note:'');
     info.appendChild(nm);info.appendChild(tp);
     const del=document.createElement('button');del.className='fu-del';del.innerHTML='<i class="ti ti-x" style="font-size:12px;color:var(--g4)"></i>';del.onclick=(function(id){return function(){delFu(id);};})(f.id);
-    d.appendChild(cat);d.appendChild(info);d.appendChild(del);list.appendChild(d);
+    const editFu=document.createElement('button');editFu.className='fu-del';editFu.innerHTML='<i class="ti ti-pencil" style="font-size:12px;color:var(--g4)"></i>';(function(fu){editFu.onclick=function(){openEditFu(fu);};})(f);
+    d.appendChild(cat);d.appendChild(info);d.appendChild(editFu);d.appendChild(del);list.appendChild(d);
   });
 }
 
@@ -1200,6 +1201,77 @@ function renderStEq(){
 
 // -- VENTES --
 function setVFilter(f){vFilter=f;document.querySelectorAll('#s-vt .filter-btn').forEach((b,i)=>{b.className='filter-btn'+(['all','POS','TPE'][i]===f?' on':'');});renderVentes();}
+function openEditVente(v){
+  var m=document.createElement('div');m.id='edit-vente-modal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  m.innerHTML='<div style="background:var(--w);border-radius:var(--rl);width:100%;max-width:380px">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--g2)">'+
+    '<div style="font-size:14px;font-weight:700">Modifier la vente</div>'+
+    '<button onclick="closeEditVente()" style="background:var(--g1);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;color:var(--t)">x</button></div>'+
+    '<div style="padding:16px;display:flex;flex-direction:column;gap:10px">'+
+    '<input id="ev-nom" type="text" placeholder="Nom du commerce" value="'+(v.nom||'')+'" style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%">'+
+    '<input id="ev-tpv" type="number" placeholder="TPV" value="'+(v.tpv||v.tp||'')+'" style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%">'+
+    '<input id="ev-taux" type="number" step="0.01" max="1.69" placeholder="Taux (%)" value="'+(v.taux||v.tx||'')+'" style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%">'+
+    '<input id="ev-up" type="number" placeholder="Upfront" value="'+(v.upfront||v.up||0)+'" style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%">'+
+    '<div id="ev-err" style="color:#f87171;font-size:12px;display:none"></div>'+
+    '<button onclick="saveEditVente()" style="background:var(--b);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">Enregistrer</button>'+
+    '</div></div>';
+  m.dataset.venteId=v.id||'';
+  document.body.appendChild(m);
+}
+function closeEditVente(){var m=document.getElementById('edit-vente-modal');if(m)m.remove();}
+async function saveEditVente(){
+  var m=document.getElementById('edit-vente-modal');if(!m)return;
+  var nom=document.getElementById('ev-nom').value.trim();
+  var tpv=parseInt(document.getElementById('ev-tpv').value)||0;
+  var taux=parseFloat(document.getElementById('ev-taux').value)||0;
+  var up=parseInt(document.getElementById('ev-up').value)||0;
+  var err=document.getElementById('ev-err');
+  if(taux>1.69){err.textContent='Taux max : 1.69%';err.style.display='block';return;}
+  err.style.display='none';
+  var vid=m.dataset.venteId;
+  // Mettre à jour dans S.ventes
+  var sv=S.ventes.find(function(x){return String(x.id)===String(vid);});
+  if(sv){sv.nom=nom;sv.tpv=tpv;sv.taux=taux;sv.upfront=up;}
+  // Mettre à jour dans allReports
+  allReports.forEach(function(r){if(r.ventes)r.ventes.forEach(function(x){if(String(x.id)===String(vid)){x.nom=nom;x.tpv=tpv;x.taux=taux;x.upfront=up;}});});
+  renderVentes();closeEditVente();showToast('Vente mise a jour');
+}
+function openEditFu(f){
+  var m=document.createElement('div');m.id='edit-fu-modal';
+  m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  m.innerHTML='<div style="background:var(--w);border-radius:var(--rl);width:100%;max-width:380px">'+
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--g2)">'+
+    '<div style="font-size:14px;font-weight:700">Modifier le FU</div>'+
+    '<button onclick="closeEditFu()" style="background:var(--g1);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;color:var(--t)">x</button></div>'+
+    '<div style="padding:16px;display:flex;flex-direction:column;gap:10px">'+
+    '<input id="efu-nom" type="text" placeholder="Nom du commerce" value="'+(f.nom||'')+'" style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%">'+
+    '<textarea id="efu-note" placeholder="Note..." style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%;min-height:80px;resize:none">'+(f.note||'')+'</textarea>'+
+    '<button onclick="saveEditFu()" style="background:var(--b);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">Enregistrer</button>'+
+    '</div></div>';
+  m.dataset.fuId=f.id||'';
+  document.body.appendChild(m);
+}
+function closeEditFu(){var m=document.getElementById('edit-fu-modal');if(m)m.remove();}
+async function saveEditFu(){
+  var m=document.getElementById('edit-fu-modal');if(!m)return;
+  var nom=document.getElementById('efu-nom').value.trim();
+  var note=document.getElementById('efu-note').value;
+  var fid=m.dataset.fuId;
+  // Mettre à jour dans fuList
+  var fu=fuList.find(function(x){return String(x.id)===String(fid);});
+  if(fu){fu.nom=nom;fu.note=note;}
+  saveFuLocal();
+  // Mettre à jour dans Supabase
+  try{
+    await fetch(SB+'/rest/v1/fu_items?id=eq.'+encodeURIComponent(fid),{
+      method:'PATCH',
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({nom:nom,note:note})
+    });
+  }catch(e){console.error('FU update error',e);}
+  renderFu();closeEditFu();showToast('FU mis a jour');
+}
 function renderVentes(){
   const month=now.toISOString().slice(0,7);
   const myReps=allReports.filter(r=>r.agent===ME&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month);
@@ -1223,7 +1295,11 @@ function renderVentes(){
     const top=document.createElement('div');top.className='vi-top';
     const nm=document.createElement('span');nm.className='vi-nm';nm.textContent=v.nom;
     const tyEl=document.createElement('span');tyEl.className='pill '+(ty==='POS'?'ok':'bl');tyEl.textContent=ty;
-    top.appendChild(nm);top.appendChild(tyEl);
+    const editBtn=document.createElement('button');
+    editBtn.innerHTML='&#9998;';
+    editBtn.style.cssText='background:none;border:none;color:var(--g4);cursor:pointer;font-size:14px;padding:2px 6px;margin-left:auto;';
+    (function(vente){editBtn.onclick=function(e){e.stopPropagation();openEditVente(vente);};})(v);
+    top.appendChild(nm);top.appendChild(tyEl);top.appendChild(editBtn);
     const dt=document.createElement('div');dt.className='vi-dt';dt.textContent=v.date;
     const g=document.createElement('div');g.className='vi-grid';
     [['TPV',tp?formatK(tp)+' EUR':'---'],['Taux',(v.taux||v.tx)?(v.taux||v.tx)+'%':'---'],['Upfront',up?formatK(up)+' EUR':'0']].forEach(c=>{const vc=document.createElement('div');vc.className='vc';const vcl=document.createElement('div');vcl.className='vcl';vcl.textContent=c[0];const vcv=document.createElement('div');vcv.className='vcv';vcv.textContent=c[1];vc.appendChild(vcl);vc.appendChild(vcv);g.appendChild(vc);});
