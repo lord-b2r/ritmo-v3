@@ -1083,9 +1083,10 @@ function renderMur(){
     const av=document.createElement('div');av.className='mur-av';av.textContent=ag?ag.i:'?';
     const info=document.createElement('div');info.className='mur-info';
     const nm=document.createElement('div');nm.className='mur-name';nm.textContent=r.agent.split(' ')[0];
-    const mt=document.createElement('div');mt.className='mur-meta';mt.textContent=r.date+' - '+sc+' pts';
+    const mt=document.createElement('div');mt.className='mur-meta';mt.textContent=r.date;
     info.appendChild(nm);info.appendChild(mt);
-    top.appendChild(av);top.appendChild(info);
+    const scEl=document.createElement('div');scEl.className='mur-score '+cls;scEl.textContent=sc+' pts';
+    top.appendChild(av);top.appendChild(info);top.appendChild(scEl);
     const txt=document.createElement('div');txt.className='mur-text';txt.textContent='"'+r.mot_jour+'"';
     // Reactions
     const reactRow=document.createElement('div');reactRow.style.cssText='display:flex;gap:6px;margin-top:10px;flex-wrap:wrap';
