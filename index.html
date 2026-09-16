@@ -1028,6 +1028,30 @@ async function sendEOD(){
     });
     if(res.ok){
       sent=true;setSd('ok');
+      // Sauvegarder instal_items dans Supabase
+      if(S.instalList&&S.instalList.length>0){
+        var today=new Date();
+        var dateStr=today.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+        var items=S.instalList.filter(function(il){return il.nom;}).map(function(il){
+          var venteTrouvee=S.ventes.find(function(v){return v.nom===il.vente_nom;});
+          return {
+            agent:ME,team:MY_TEAMS[0]||'',
+            nom_commerce:il.nom,
+            vente_nom:il.vente_nom||'',
+            date_vente:venteTrouvee?eod.date:'',
+            date_instal:eod.date,
+            status:'declared',
+            timestamp:eod.timestamp
+          };
+        });
+        if(items.length>0){
+          fetch(SB+'/rest/v1/instal_items',{
+            method:'POST',
+            headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
+            body:JSON.stringify(items)
+          }).catch(function(e){console.warn('instal_items save',e);});
+        }
+      }
     } else {
       const errTxt=await res.text();
       console.error('Supabase error',res.status,errTxt);
@@ -1293,6 +1317,28 @@ function openEditVente(v){
   document.body.appendChild(m);
 }
 function closeEditVente(){var m=document.getElementById('edit-vente-modal');if(m)m.remove();}
+async function toggleInstalStatus(vente,el){
+  // Trouver l'instal dans Supabase pour la mettre à jour
+  try{
+    var res=await fetch(SB+'/rest/v1/instal_items?agent=eq.'+encodeURIComponent(ME)+'&vente_nom=eq.'+encodeURIComponent(vente.nom),{
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+    });
+    var items=await res.json();
+    if(items&&items.length>0){
+      var item=items[0];
+      var newStatus=item.status==='validated'?'declared':'validated';
+      await fetch(SB+'/rest/v1/instal_items?id=eq.'+item.id,{
+        method:'PATCH',
+        headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
+        body:JSON.stringify({status:newStatus})
+      });
+      var isV=newStatus==='validated';
+      el.style.cssText='margin-top:8px;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;text-align:center;'+(isV?'background:rgba(74,222,128,.15);border:1.5px solid #4ade80;color:#4ade80':'background:rgba(251,146,60,.15);border:1.5px solid #fb923c;color:#fb923c');
+      el.textContent=isV?'✓ Installation validée 💰':'⏳ Installation déclarée';
+      showToast(isV?'Installation validée 💰':'Retour en déclarée');
+    }
+  }catch(e){console.error('Toggle instal',e);}
+}
 async function saveEditVente(){
   var m=document.getElementById('edit-vente-modal');if(!m)return;
   var nom=document.getElementById('ev-nom').value.trim();
@@ -1376,6 +1422,23 @@ function renderVentes(){
     const dt=document.createElement('div');dt.className='vi-dt';dt.textContent=v.date;
     const g=document.createElement('div');g.className='vi-grid';
     [['TPV',tp?formatK(tp)+' EUR':'---'],['Taux',(v.taux||v.tx)?(v.taux||v.tx)+'%':'---'],['Upfront',up?formatK(up)+' EUR':'0']].forEach(c=>{const vc=document.createElement('div');vc.className='vc';const vcl=document.createElement('div');vcl.className='vcl';vcl.textContent=c[0];const vcv=document.createElement('div');vcv.className='vcv';vcv.textContent=c[1];vc.appendChild(vcl);vc.appendChild(vcv);g.appendChild(vc);});
+    // Statut instal
+    var instalMatch=null;
+    allReports.filter(function(r){return r.agent===ME;}).forEach(function(r){
+      if(r.instal_list&&Array.isArray(r.instal_list)){
+        r.instal_list.forEach(function(il){
+          if(il.vente_nom&&il.vente_nom===v.nom)instalMatch=il;
+        });
+      }
+    });
+    if(instalMatch){
+      var statusEl=document.createElement('div');
+      var isValidated=instalMatch.status==='validated';
+      statusEl.style.cssText='margin-top:8px;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;text-align:center;'+(isValidated?'background:rgba(74,222,128,.15);border:1.5px solid #4ade80;color:#4ade80':'background:rgba(251,146,60,.15);border:1.5px solid #fb923c;color:#fb923c');
+      statusEl.textContent=isValidated?'✓ Installation validée 💰':'⏳ Installation déclarée';
+      (function(vente,el){el.onclick=function(){toggleInstalStatus(vente,el);};})(v,statusEl);
+      d.appendChild(statusEl);
+    }
     d.appendChild(top);d.appendChild(dt);d.appendChild(g);list.appendChild(d);
   });
 }
