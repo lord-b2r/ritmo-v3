@@ -189,6 +189,19 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .tc-julien_r{background:rgba(249,115,22,.15);color:var(--julien_r)}
 .tc-benjamin{background:rgba(100,116,139,.15);color:var(--benjamin)}
 .tc-alex_g{background:rgba(6,182,212,.15);color:var(--alex_g)}
+
+/* BURGER MENU */
+.burger-btn{position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:200;width:38px;height:38px;border-radius:50%;background:var(--b);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+.burger-btn span{display:block;width:16px;height:2px;background:#fff;border-radius:2px;transition:all .2s}
+.burger-panel{position:fixed;right:0;top:0;height:100%;width:220px;background:var(--w);border-left:1px solid var(--g2);z-index:300;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;padding:60px 0 20px}
+.burger-panel.open{transform:translateX(0)}
+.burger-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:299;display:none}
+.burger-overlay.open{display:block}
+.burger-nav-item{padding:14px 22px;font-size:14px;font-weight:600;color:var(--t);cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+.burger-nav-item:hover{background:var(--g1)}
+.burger-nav-item.on{color:var(--b);border-left-color:var(--b);background:var(--g1)}
+.burger-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--g4)}
+.burger-section{font-size:10px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.8px;padding:16px 22px 6px}
 </style>
 </head>
 <body>
@@ -217,6 +230,24 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
       <div class="top-av" id="top-av" onclick="logout()"></div>
     </div>
   </div>
+
+  <!-- BURGER MENU -->
+  <div class="burger-overlay" id="burger-overlay" onclick="closeBurger()"></div>
+  <button class="burger-btn" id="burger-btn" onclick="toggleBurger()">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="burger-panel" id="burger-panel">
+    <button class="burger-close" onclick="closeBurger()">×</button>
+    <div class="burger-section">Navigation</div>
+    <div class="burger-nav-item on" id="b-today" onclick="swBurger('today')">Aujourd hui</div>
+    <div class="burger-nav-item" id="b-managers" onclick="swBurger('managers')">Managers</div>
+    <div class="burger-nav-item" id="b-stats" onclick="swBurger('stats')">Stats</div>
+    <div class="burger-nav-item" id="b-ventes" onclick="swBurger('ventes')">Ventes</div>
+    <div class="burger-nav-item" id="b-mur" onclick="swBurger('mur')">Mur</div>
+    <div class="burger-section">Suivi</div>
+    <div class="burger-nav-item" id="b-instals" onclick="swBurger('instals')">Installations</div>
+  </div>
+
   <div class="slide-tabs">
     <div class="slide-tab on" id="t-today" onclick="sw('today')">Aujourd hui</div>
     <div class="slide-tab" id="t-managers" onclick="sw('managers')">Managers</div>
