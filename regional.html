@@ -611,9 +611,9 @@ function renderInstals(){
 
   // KPIs
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
-  html+='<div class="kcard" style="'+(instalTab==='declared'?'border:1.5px solid #fb923c;background:rgba(251,146,60,.07)':'')+'" onclick="setInstalTab('declared')" style="cursor:pointer">';
+  html+='<div class="kcard" style="cursor:pointer;'+(instalTab==="declared"?"border:1.5px solid #fb923c;background:rgba(251,146,60,.07)":"")+'" id="ikpi-decl">';
   html+='<div class="kv" style="color:#fb923c">'+totalDecl+'</div><div class="kl">⏳ Installées</div></div>';
-  html+='<div class="kcard" style="'+(instalTab==='validated'?'border:1.5px solid #4ade80;background:rgba(74,222,128,.07)':'')+'" onclick="setInstalTab('validated')">';
+  html+='<div class="kcard" style="cursor:pointer;'+(instalTab==="validated"?"border:1.5px solid #4ade80;background:rgba(74,222,128,.07)":"")+'" id="ikpi-vali">';
   html+='<div class="kv" style="color:#4ade80">'+totalVali+'</div><div class="kl">💰 Validées</div></div>';
   html+='</div>';
 
@@ -660,6 +660,8 @@ function renderInstals(){
 
   if(!totalDecl&&!totalVali)html='<div class="empty">Aucune installation déclarée</div>';
   el.innerHTML=html;
+  var kd=document.getElementById('ikpi-decl');if(kd)kd.onclick=function(){setInstalTab('declared');};
+  var kv=document.getElementById('ikpi-vali');if(kv)kv.onclick=function(){setInstalTab('validated');};
 }
 
 function setInstalTab(tab){instalTab=tab;renderInstals();}
