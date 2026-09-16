@@ -223,6 +223,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <div class="slide-tab" id="t-stats" onclick="sw('stats')">Stats</div>
     <div class="slide-tab" id="t-ventes" onclick="sw('ventes')">Ventes</div>
     <div class="slide-tab" id="t-mur" onclick="sw('mur')">Mur</div>
+    <div class="slide-tab" id="t-instals" onclick="sw('instals')">Instals</div>
   </div>
   <div class="screens">
 
@@ -234,6 +235,11 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
       </div>
       <div class="kgrid" id="today-kpi"></div>
       <div id="teams-today"></div>
+    </div>
+
+    <!-- INSTALS -->
+    <div id="s-instals" class="scr">
+      <div id="instals-content"></div>
     </div>
 
     <!-- MANAGERS -->
@@ -458,7 +464,7 @@ async function loadData(){
     REPORTS=await res.json();
     setSd('ok');
   }catch(e){setSd('err');}
-  renderAll();
+  renderAll();loadInstalItems();
 }
 
 function getMyAgents(){
@@ -507,6 +513,78 @@ function getMonth(name,month){
 
 function renderAll(){renderDateNav();renderToday();renderMgrView();renderMur();}
 
+
+var INSTAL_ITEMS = [];
+
+async function loadInstalItems(){
+  try{
+    var agents=getMyAgents().map(function(a){return '"'+a.n+'"';}).join(',');
+    var res=await fetch(SB+'/rest/v1/instal_items?agent=in.('+agents+')&order=timestamp.desc&limit=200',{
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+    });
+    INSTAL_ITEMS=await res.json();
+  }catch(e){console.error('loadInstalItems',e);INSTAL_ITEMS=[];}
+  renderInstals();
+}
+
+function renderInstals(){
+  var el=document.getElementById('instals-content');
+  if(!el)return;
+  if(!INSTAL_ITEMS.length){el.innerHTML='<div class="empty">Aucune installation déclarée</div>';return;}
+
+  // ── Délai moyen vente → instal ──
+  var withDelay=INSTAL_ITEMS.filter(function(i){return i.date_vente&&i.date_instal&&i.date_vente!==i.date_instal;});
+  var avgDelay=0;
+  if(withDelay.length){
+    // On ne peut pas parser facilement les dates FR, on utilise timestamp comme proxy
+    avgDelay=Math.round(withDelay.length/2); // placeholder jusqu'à avoir de vraies données
+  }
+
+  var html='';
+  // ── KPIs ──
+  var declared=INSTAL_ITEMS.filter(function(i){return i.status==='declared';}).length;
+  var validated=INSTAL_ITEMS.filter(function(i){return i.status==='validated';}).length;
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">';
+  html+='<div class="kcard"><div class="kv">'+INSTAL_ITEMS.length+'</div><div class="kl">Total instals</div></div>';
+  html+='<div class="kcard"><div class="kv" style="color:#fb923c">'+declared+'</div><div class="kl">Déclarées</div></div>';
+  html+='<div class="kcard"><div class="kv" style="color:#4ade80">'+validated+'</div><div class="kl">Validées 💰</div></div>';
+  html+='</div>';
+
+  // ── Par commercial ──
+  var byAgent={};
+  INSTAL_ITEMS.forEach(function(i){
+    if(!byAgent[i.agent])byAgent[i.agent]={declared:0,validated:0,items:[]};
+    byAgent[i.agent][i.status==='validated'?'validated':'declared']++;
+    byAgent[i.agent].items.push(i);
+  });
+
+  html+='<div style="font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Par commercial</div>';
+  Object.keys(byAgent).sort(function(a,b){
+    return (byAgent[b].declared+byAgent[b].validated)-(byAgent[a].declared+byAgent[a].validated);
+  }).forEach(function(agent){
+    var ag=byAgent[agent];
+    var total=ag.declared+ag.validated;
+    html+='<div style="background:var(--g1);border-radius:12px;padding:14px;margin-bottom:8px">';
+    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+    html+='<div style="font-size:14px;font-weight:700">'+agent.split(' ')[0]+' '+agent.split(' ')[1]+'</div>';
+    html+='<div style="display:flex;gap:6px">';
+    if(ag.declared)html+='<span style="background:rgba(251,146,60,.15);color:#fb923c;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">'+ag.declared+' décl.</span>';
+    if(ag.validated)html+='<span style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">'+ag.validated+' valid. 💰</span>';
+    html+='</div></div>';
+    // Liste des commerces
+    ag.items.forEach(function(item){
+      var isV=item.status==='validated';
+      html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--g2)">';
+      html+='<div style="width:8px;height:8px;border-radius:50%;background:'+(isV?'#4ade80':'#fb923c')+';flex-shrink:0"></div>';
+      html+='<div style="flex:1;font-size:13px">'+item.nom_commerce+'</div>';
+      html+='<div style="font-size:11px;color:var(--g4)">'+item.date_instal+'</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+
+  el.innerHTML=html;
+}
 function renderToday(){
   var agents=getMyAgents();
   var reps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
