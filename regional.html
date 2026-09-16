@@ -625,7 +625,6 @@ function renderInstals(){
   html+='</div>';
 
   // Par équipe
-  console.log('byTeam',JSON.stringify(Object.keys(byTeam).map(function(t){return {t:t,d:byTeam[t].declared.length,v:byTeam[t].validated.length};})));
   Object.keys(byTeam).forEach(function(team){
     var items=byTeam[team][instalTab==='validated'?'validated':'declared'];
     if(!items.length)return;
@@ -1200,13 +1199,16 @@ function swSub(t){
 }
 
 function sw(t){
-  ['today','managers','stats','ventes','mur'].forEach(function(s){
-    document.getElementById('s-'+s).className='scr'+(t===s?' on':'');
-    document.getElementById('t-'+s).className='slide-tab'+(t===s?' on':'');
+  ['today','managers','stats','ventes','mur','instals'].forEach(function(s){
+    var scr=document.getElementById('s-'+s);
+    var tab=document.getElementById('t-'+s);
+    if(scr)scr.className='scr'+(t===s?' on':'');
+    if(tab)tab.className='slide-tab'+(t===s?' on':'');
   });
   if(t==='stats')renderStats();
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
+  if(t==='instals')loadInstalItems();
 }
 
 function setTypeFilter(t){
