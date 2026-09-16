@@ -557,8 +557,9 @@ async function loadInstalItems(){
     INSTAL_ITEMS=await res.json();
   }catch(e){INSTAL_ITEMS=[];}
 
-  // Enrichir avec les ventes_detail qui ont un instal_status
+  // Construire INSTAL_ITEMS depuis ventes_detail des rapports (source de vérité)
   var agentNames=getMyAgents().map(function(a){return a.n;});
+  var instalFromReports=[];
   REPORTS.forEach(function(r){
     if(!r.ventes_detail||!r.agent)return;
     if(!agentNames.includes(r.agent))return;
@@ -567,20 +568,20 @@ async function loadInstalItems(){
       var status=v.instal_status;
       if(!status||status==='none')return;
       var nom=(v.nom||'').trim();
-      // Vérifier si déjà dans INSTAL_ITEMS
-      var exists=INSTAL_ITEMS.find(function(x){return (x.nom_commerce||'').trim()===nom&&x.agent===r.agent;});
+      var exists=instalFromReports.find(function(x){return x.nom_commerce===nom&&x.agent===r.agent;});
       if(!exists){
-        INSTAL_ITEMS.push({
-          agent:r.agent,team:r.team||'',
-          nom_commerce:nom,
-          status:status,
-          date_instal:r.date,
-          timestamp:r.timestamp
+        instalFromReports.push({
+          agent:r.agent,team:r.team||getTeamForAgent(r.agent)||'',
+          nom_commerce:nom,status:status,
+          date_instal:r.date,timestamp:r.timestamp
         });
-      } else if(status==='validated'){
-        exists.status='validated';
-      }
+      } else if(status==='validated'){exists.status='validated';}
     });
+  });
+  // Fusionner avec instal_items Supabase (priorité aux statuts Supabase)
+  instalFromReports.forEach(function(item){
+    var inSupa=INSTAL_ITEMS.find(function(x){return (x.nom_commerce||'').trim()===item.nom_commerce&&x.agent===item.agent;});
+    if(!inSupa)INSTAL_ITEMS.push(item);
   });
 
   renderInstals();
