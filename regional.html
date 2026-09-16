@@ -476,7 +476,7 @@ function scC(s){return s>=4?'blue':s>=3?'grn':s>=2?'ora':'red';}
 async function loadData(){
   setSd('ld');
   try{
-    var res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
+    var res=await fetch(SB+'/rest/v1/eod_reports?select=*&order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
     REPORTS=await res.json();
     setSd('ok');
   }catch(e){setSd('err');}
