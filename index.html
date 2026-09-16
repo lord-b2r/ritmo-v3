@@ -1363,8 +1363,12 @@ function openEditVente(v,venteIdx){
   saveBtn.style.cssText='background:var(--b);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer';
   saveBtn.onclick=saveEditVente;
 
+  var delBtn=document.createElement('button');delBtn.textContent='Supprimer la vente';
+  delBtn.style.cssText='background:none;border:none;color:#f87171;font-size:13px;font-weight:600;cursor:pointer;padding:8px;text-align:center;width:100%';
+  delBtn.onclick=deleteEditVente;
+
   body.appendChild(inNom);body.appendChild(inTpv);body.appendChild(inTaux);body.appendChild(inUp);
-  body.appendChild(stLbl);body.appendChild(stRow);body.appendChild(err);body.appendChild(saveBtn);
+  body.appendChild(stLbl);body.appendChild(stRow);body.appendChild(err);body.appendChild(saveBtn);body.appendChild(delBtn);
   box.appendChild(hd);box.appendChild(body);m.appendChild(box);
   document.body.appendChild(m);
 
@@ -1383,6 +1387,24 @@ function evSetStatus(status){
   });
 }
 function closeEditVente(){var m=document.getElementById('edit-vente-modal');if(m)m.remove();}
+function deleteEditVente(){
+  var m=document.getElementById('edit-vente-modal');if(!m)return;
+  var nom=(document.getElementById('ev-nom').value||'').trim();
+  var vIdx=m.dataset.venteIdx!==''?parseInt(m.dataset.venteIdx):-1;
+  if(!confirm('Supprimer la vente "'+nom+'" ?'))return;
+  // Supprimer de S.ventes
+  if(vIdx>=0&&vIdx<S.ventes.length)S.ventes.splice(vIdx,1);
+  else S.ventes=S.ventes.filter(function(x){return (x.nom||'').trim()!==nom;});
+  // Supprimer du cache
+  delete INSTAL_STATUS_CACHE[nom];
+  // Mettre à jour le compteur
+  var el=document.getElementById('sv-ventes');
+  if(el){el.textContent=S.ventes.length;el.className='sv '+(S.ventes.length>0?'ok':'nu');}
+  closeEditVente();
+  renderVentes();
+  updateAll();
+  showToast('Vente supprimée');
+}
 async function toggleInstalStatus(vente,el){
   // Trouver l'instal dans Supabase pour la mettre à jour
   try{
