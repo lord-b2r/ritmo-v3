@@ -625,6 +625,7 @@ function renderInstals(){
   html+='</div>';
 
   // Par équipe
+  console.log('byTeam',JSON.stringify(Object.keys(byTeam).map(function(t){return {t:t,d:byTeam[t].declared.length,v:byTeam[t].validated.length};})));
   Object.keys(byTeam).forEach(function(team){
     var items=byTeam[team][instalTab==='validated'?'validated':'declared'];
     if(!items.length)return;
