@@ -870,8 +870,22 @@ function renderInstalForm(){
   if(!container)return;
   container.innerHTML='';
   S.instalList.forEach(function(inst,i){
-    var ventesDisponibles=S.ventes.filter(function(v){
-      return !S.instalList.some(function(x,j){return j!==i&&x.vente_nom===v.nom&&v.nom;});
+    // Ventes du formulaire actuel avec un nom saisi
+    var ventesForm=S.ventes.filter(function(v){return v.nom&&v.nom.trim();});
+    // Ventes des rapports passés (ce mois et mois précédents) pas encore installées
+    var installedNames=S.instalList.map(function(x){return x.vente_nom;}).filter(Boolean);
+    var ventesPast=[];
+    allReports.filter(function(r){return r.agent===ME&&r.ventes;}).forEach(function(r){
+      (r.ventes||[]).forEach(function(v){
+        if(v.nom&&!ventesPast.find(function(x){return x.nom===v.nom;}))ventesPast.push(v);
+      });
+    });
+    // Fusion sans doublons, exclure celles déjà choisies dans d'autres champs
+    var allVentes=ventesForm.concat(ventesPast.filter(function(v){
+      return !ventesForm.find(function(x){return x.nom===v.nom;});
+    }));
+    var ventesDisponibles=allVentes.filter(function(v){
+      return !S.instalList.some(function(x,j){return j!==i&&x.vente_nom===v.nom;});
     });
     var wrap=document.createElement('div');
     wrap.style.cssText='margin-bottom:10px;background:var(--g1);border-radius:10px;padding:12px';
