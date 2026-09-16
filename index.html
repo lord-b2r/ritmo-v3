@@ -1318,30 +1318,59 @@ function renderStEq(){
 // -- VENTES --
 function setVFilter(f){vFilter=f;document.querySelectorAll('#s-vt .filter-btn').forEach((b,i)=>{b.className='filter-btn'+(['all','POS','TPE'][i]===f?' on':'');});renderVentes();}
 function openEditVente(v){
+  var existing=document.getElementById('edit-vente-modal');if(existing)existing.remove();
   var m=document.createElement('div');m.id='edit-vente-modal';
   m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
-  m.innerHTML='<div style="background:var(--w);border-radius:var(--rl);width:100%;max-width:380px">'+
-    '<div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--g2)">'+
-    '<div style="font-size:14px;font-weight:700">Modifier la vente</div>'+
-    '<button onclick="closeEditVente()" style="background:var(--g1);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;color:var(--t)">x</button></div>'+
-    '<div style="padding:16px;display:flex;flex-direction:column;gap:10px">'+
-    '<input id="ev-nom" type="text" placeholder="Nom du commerce" value="'+(v.nom||'')+'" style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%">'+
-    '<input id="ev-tpv" type="number" placeholder="TPV" value="'+(v.tpv||v.tp||'')+'" style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%">'+
-    '<input id="ev-taux" type="number" step="0.01" max="1.69" placeholder="Taux (%)" value="'+(v.taux||v.tx||'')+'" style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%">'+
-    '<input id="ev-up" type="number" placeholder="Upfront" value="'+(v.upfront||v.up||0)+'" style="background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%">'+
-    '<div style="font-size:11px;font-weight:700;color:var(--g4);margin-top:4px">Statut</div>'+
-    '<div style="display:flex;gap:8px">'+
-      '<div id="ev-st-none" onclick="evSetStatus(\"none\")" style="flex:1;padding:10px;border-radius:8px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--g2);background:'+((!v.instal_status||v.instal_status==='none')?'var(--g2)':'var(--g1)')+';color:var(--t)">—</div>'+
-      '<div id="ev-st-declared" onclick="evSetStatus(\"declared\")" style="flex:1;padding:10px;border-radius:8px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid '+(v.instal_status==='declared'?'#fb923c':'var(--g2)')+';background:'+(v.instal_status==='declared'?'rgba(251,146,60,.15)':'var(--g1)')+';color:'+(v.instal_status==='declared'?'#fb923c':'var(--g4)')+'">⏳ Installée</div>'+
-      '<div id="ev-st-validated" onclick="evSetStatus(\"validated\")" style="flex:1;padding:10px;border-radius:8px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid '+(v.instal_status==='validated'?'#4ade80':'var(--g2)')+';background:'+(v.instal_status==='validated'?'rgba(74,222,128,.15)':'var(--g1)')+';color:'+(v.instal_status==='validated'?'#4ade80':'var(--g4)')+'">💰 Validée</div>'+
-    '</div>'+
-    '<div id="ev-err" style="color:#f87171;font-size:12px;display:none"></div>'+
-    '<button onclick="saveEditVente()" style="background:var(--b);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer">Enregistrer</button>'+
-    '</div></div>';
   m.dataset.venteId=v.id||'';
   m.dataset.instalStatus=v.instal_status||'none';
+
+  var box=document.createElement('div');box.style.cssText='background:var(--w);border-radius:var(--rl);width:100%;max-width:380px';
+
+  // Header
+  var hd=document.createElement('div');hd.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--g2)';
+  var title=document.createElement('div');title.style.cssText='font-size:14px;font-weight:700';title.textContent='Modifier la vente';
+  var cls=document.createElement('button');cls.style.cssText='background:var(--g1);border:none;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:18px;color:var(--t)';cls.textContent='x';cls.onclick=closeEditVente;
+  hd.appendChild(title);hd.appendChild(cls);
+
+  // Body
+  var body=document.createElement('div');body.style.cssText='padding:16px;display:flex;flex-direction:column;gap:10px';
+
+  function mkInput(ph,val,type){var i=document.createElement('input');i.type=type||'text';i.placeholder=ph;i.value=val||'';i.style.cssText='background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);width:100%';return i;}
+  var inNom=mkInput('Nom du commerce',v.nom);inNom.id='ev-nom';
+  var inTpv=mkInput('TPV',v.tpv||v.tp,'number');inTpv.id='ev-tpv';
+  var inTaux=mkInput('Taux (%)',v.taux||v.tx,'number');inTaux.id='ev-taux';inTaux.step='0.01';inTaux.max='1.69';
+  var inUp=mkInput('Upfront',v.upfront||v.up||0,'number');inUp.id='ev-up';
+
+  // Statut
+  var stLbl=document.createElement('div');stLbl.style.cssText='font-size:11px;font-weight:700;color:var(--g4)';stLbl.textContent='Statut installation';
+  var stRow=document.createElement('div');stRow.style.cssText='display:flex;gap:8px';
+
+  function mkStBtn(id,label,status){
+    var btn=document.createElement('div');btn.id='ev-st-'+status;
+    btn.style.cssText='flex:1;padding:10px;border-radius:8px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid var(--g2);background:var(--g1);color:var(--g4)';
+    btn.textContent=label;
+    btn.onclick=function(){evSetStatus(status);};
+    return btn;
+  }
+  var btnNone=mkStBtn('none','— Aucun','none');
+  var btnDecl=mkStBtn('declared','⏳ Installée','declared');
+  var btnVali=mkStBtn('validated','💰 Validée','validated');
+  stRow.appendChild(btnNone);stRow.appendChild(btnDecl);stRow.appendChild(btnVali);
+
+  var err=document.createElement('div');err.id='ev-err';err.style.cssText='color:#f87171;font-size:12px;display:none';
+  var saveBtn=document.createElement('button');saveBtn.textContent='Enregistrer';
+  saveBtn.style.cssText='background:var(--b);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer';
+  saveBtn.onclick=saveEditVente;
+
+  body.appendChild(inNom);body.appendChild(inTpv);body.appendChild(inTaux);body.appendChild(inUp);
+  body.appendChild(stLbl);body.appendChild(stRow);body.appendChild(err);body.appendChild(saveBtn);
+  box.appendChild(hd);box.appendChild(body);m.appendChild(box);
   document.body.appendChild(m);
+
+  // Initialiser le statut visuel
+  evSetStatus(v.instal_status||'none');
 }
+
 function evSetStatus(status){
   var m=document.getElementById('edit-vente-modal');
   if(m)m.dataset.instalStatus=status;
