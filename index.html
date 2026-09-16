@@ -1468,7 +1468,7 @@ async function saveEditFu(){
 function renderVentes(){
   const month=now.toISOString().slice(0,7);
   const myReps=allReports.filter(r=>r.agent===ME&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month);
-  const allV=myReps.flatMap(r=>(r.ventes_detail||[]).filter(v=>v&&v.nom).map(v=>({...v,date:r.date})));
+  const allV=myReps.flatMap(r=>(r.ventes_detail||[]).filter(v=>v&&v.nom).map(v=>({...v,date:r.date,instal_status:INSTAL_STATUS_CACHE[v.nom]||v.instal_status||'none'})));
   const filtered=vFilter==='all'?allV:allV.filter(v=>(v.type||v.ty||'POS')===vFilter);
   // KPIs
   const totalTPV=filtered.reduce((s,v)=>s+(parseInt(v.tpv||v.tp)||0),0);
