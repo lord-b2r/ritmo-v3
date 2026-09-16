@@ -1479,7 +1479,7 @@ function renderVentes(){
   kpi.innerHTML='<div class="vk"><div class="vkl">TPV total</div><div class="vkv">'+formatK(totalTPV)+'</div><div class="vks">EUR</div></div><div class="vk"><div class="vkl">Taux moyen</div><div class="vkv">'+(avgTaux?avgTaux.toFixed(2)+'%':'---')+'</div><div class="vks">Sur '+filtered.length+' vente'+(filtered.length!==1?'s':'')+'</div></div><div class="vk"><div class="vkl">Upfront total</div><div class="vkv">'+formatK(totalUp)+'</div><div class="vks">EUR</div></div><div class="vk"><div class="vkl">Upfront moyen POS</div><div class="vkv">'+(avgUpPos?formatK(avgUpPos):'0')+'</div><div class="vks">Par vente POS</div></div>';
   const list=document.getElementById('ventes-list');list.innerHTML='';
   if(!filtered.length){list.innerHTML='<div class="empty">Aucune vente'+(vFilter!=='all'?' '+vFilter:'')+'</div>';return;}
-  filtered.forEach(v=>{
+  filtered.forEach((v,i)=>{
     const tp=parseInt(v.tpv||v.tp)||0;const up=parseInt(v.upfront||v.up)||0;const ty=v.type||v.ty||'POS';
     const ist=v.instal_status||'none';
     const d=document.createElement('div');d.className='vente-item';
