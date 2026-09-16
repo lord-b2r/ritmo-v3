@@ -877,8 +877,8 @@ function renderInstalForm(){
     var ventesPast=[];
     // Chercher dans allReportsGlobal pour avoir tous les rapports de ME
     var sourceReps=allReportsGlobal.length?allReportsGlobal:allReports;
-    sourceReps.filter(function(r){return r.agent===ME&&r.ventes&&r.ventes.length;}).forEach(function(r){
-      (r.ventes||[]).forEach(function(v){
+    sourceReps.filter(function(r){return r.agent===ME&&(r.ventes_detail||r.ventes)&&(r.ventes_detail||r.ventes).length;}).forEach(function(r){
+      ((r.ventes_detail||r.ventes)||[]).forEach(function(v){
         var nom=v.nom||(v.tpv?'Vente '+v.tpv+'€':'');
         if(nom&&!ventesPast.find(function(x){return x.nom===nom;})){
           ventesPast.push({nom:nom,type:v.type||v.ty||'POS',tpv:v.tpv||v.tp||0});
@@ -1052,7 +1052,7 @@ async function sendEOD(){
         var today=new Date();
         var dateStr=today.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
         var items=S.instalList.filter(function(il){return il.nom;}).map(function(il){
-          var venteTrouvee=S.ventes.find(function(v){return v.nom===il.vente_nom;});
+          var venteTrouvee=(S.ventes||[]).find(function(v){return v.nom===il.vente_nom;});
           return {
             agent:ME,team:MY_TEAMS[0]||'',
             nom_commerce:il.nom,
