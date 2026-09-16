@@ -548,74 +548,132 @@ function renderAll(){renderDateNav();renderToday();renderMgrView();renderMur();}
 var INSTAL_ITEMS = [];
 
 async function loadInstalItems(){
+  // Lire les instals depuis instal_items ET depuis ventes_detail des rapports
   try{
     var agents=getMyAgents().map(function(a){return '"'+a.n+'"';}).join(',');
-    var res=await fetch(SB+'/rest/v1/instal_items?agent=in.('+agents+')&order=timestamp.desc&limit=200',{
+    var res=await fetch(SB+'/rest/v1/instal_items?agent=in.('+agents+')&order=timestamp.desc&limit=500',{
       headers:{'apikey':SK,'Authorization':'Bearer '+SK}
     });
     INSTAL_ITEMS=await res.json();
-  }catch(e){console.error('loadInstalItems',e);INSTAL_ITEMS=[];}
+  }catch(e){INSTAL_ITEMS=[];}
+
+  // Enrichir avec les ventes_detail qui ont un instal_status
+  var agentNames=getMyAgents().map(function(a){return a.n;});
+  REPORTS.forEach(function(r){
+    if(!r.ventes_detail||!r.agent)return;
+    if(!agentNames.includes(r.agent))return;
+    (r.ventes_detail||[]).forEach(function(v){
+      if(!v||!v.nom)return;
+      var status=v.instal_status;
+      if(!status||status==='none')return;
+      var nom=(v.nom||'').trim();
+      // Vérifier si déjà dans INSTAL_ITEMS
+      var exists=INSTAL_ITEMS.find(function(x){return (x.nom_commerce||'').trim()===nom&&x.agent===r.agent;});
+      if(!exists){
+        INSTAL_ITEMS.push({
+          agent:r.agent,team:r.team||'',
+          nom_commerce:nom,
+          status:status,
+          date_instal:r.date,
+          timestamp:r.timestamp
+        });
+      } else if(status==='validated'){
+        exists.status='validated';
+      }
+    });
+  });
+
   renderInstals();
 }
+
+var instalTab='declared';
 
 function renderInstals(){
   var el=document.getElementById('instals-content');
   if(!el)return;
-  if(!INSTAL_ITEMS.length){el.innerHTML='<div class="empty">Aucune installation déclarée</div>';return;}
 
-  // ── Délai moyen vente → instal ──
-  var withDelay=INSTAL_ITEMS.filter(function(i){return i.date_vente&&i.date_instal&&i.date_vente!==i.date_instal;});
-  var avgDelay=0;
-  if(withDelay.length){
-    // On ne peut pas parser facilement les dates FR, on utilise timestamp comme proxy
-    avgDelay=Math.round(withDelay.length/2); // placeholder jusqu'à avoir de vraies données
-  }
+  // Construire les données par équipe et par commercial
+  var byTeam={};
+  var myTeams=MY_TEAMS||[];
+  myTeams.forEach(function(t){byTeam[t]={declared:[],validated:[]};});
 
-  var html='';
-  // ── KPIs ──
-  var declared=INSTAL_ITEMS.filter(function(i){return i.status==='declared';}).length;
-  var validated=INSTAL_ITEMS.filter(function(i){return i.status==='validated';}).length;
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">';
-  html+='<div class="kcard"><div class="kv">'+INSTAL_ITEMS.length+'</div><div class="kl">Total instals</div></div>';
-  html+='<div class="kcard"><div class="kv" style="color:#fb923c">'+declared+'</div><div class="kl">Déclarées</div></div>';
-  html+='<div class="kcard"><div class="kv" style="color:#4ade80">'+validated+'</div><div class="kl">Validées 💰</div></div>';
-  html+='</div>';
-
-  // ── Par commercial ──
-  var byAgent={};
-  INSTAL_ITEMS.forEach(function(i){
-    if(!byAgent[i.agent])byAgent[i.agent]={declared:0,validated:0,items:[]};
-    byAgent[i.agent][i.status==='validated'?'validated':'declared']++;
-    byAgent[i.agent].items.push(i);
+  INSTAL_ITEMS.forEach(function(item){
+    var team=item.team||getTeamForAgent(item.agent)||'';
+    if(!byTeam[team])byTeam[team]={declared:[],validated:[]};
+    if(item.status==='validated')byTeam[team].validated.push(item);
+    else byTeam[team].declared.push(item);
   });
 
-  html+='<div style="font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Par commercial</div>';
-  Object.keys(byAgent).sort(function(a,b){
-    return (byAgent[b].declared+byAgent[b].validated)-(byAgent[a].declared+byAgent[a].validated);
-  }).forEach(function(agent){
-    var ag=byAgent[agent];
-    var total=ag.declared+ag.validated;
-    html+='<div style="background:var(--g1);border-radius:12px;padding:14px;margin-bottom:8px">';
-    html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
-    html+='<div style="font-size:14px;font-weight:700">'+agent.split(' ')[0]+' '+agent.split(' ')[1]+'</div>';
-    html+='<div style="display:flex;gap:6px">';
-    if(ag.declared)html+='<span style="background:rgba(251,146,60,.15);color:#fb923c;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">'+ag.declared+' décl.</span>';
-    if(ag.validated)html+='<span style="background:rgba(74,222,128,.15);color:#4ade80;border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">'+ag.validated+' valid. 💰</span>';
-    html+='</div></div>';
-    // Liste des commerces
-    ag.items.forEach(function(item){
-      var isV=item.status==='validated';
-      html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--g2)">';
-      html+='<div style="width:8px;height:8px;border-radius:50%;background:'+(isV?'#4ade80':'#fb923c')+';flex-shrink:0"></div>';
-      html+='<div style="flex:1;font-size:13px">'+item.nom_commerce+'</div>';
-      html+='<div style="font-size:11px;color:var(--g4)">'+item.date_instal+'</div>';
+  var totalDecl=INSTAL_ITEMS.filter(function(i){return i.status!=='validated';}).length;
+  var totalVali=INSTAL_ITEMS.filter(function(i){return i.status==='validated';}).length;
+
+  var html='';
+
+  // KPIs
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">';
+  html+='<div class="kcard" style="'+(instalTab==='declared'?'border:1.5px solid #fb923c;background:rgba(251,146,60,.07)':'')+'" onclick="setInstalTab('declared')" style="cursor:pointer">';
+  html+='<div class="kv" style="color:#fb923c">'+totalDecl+'</div><div class="kl">⏳ Installées</div></div>';
+  html+='<div class="kcard" style="'+(instalTab==='validated'?'border:1.5px solid #4ade80;background:rgba(74,222,128,.07)':'')+'" onclick="setInstalTab('validated')">';
+  html+='<div class="kv" style="color:#4ade80">'+totalVali+'</div><div class="kl">💰 Validées</div></div>';
+  html+='</div>';
+
+  // Onglets
+  html+='<div style="display:flex;gap:8px;margin-bottom:16px">';
+  html+='<div onclick="setInstalTab('declared')" style="flex:1;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;'+(instalTab==='declared'?'background:rgba(251,146,60,.15);color:#fb923c;border:1.5px solid #fb923c':'background:var(--g1);color:var(--g4);border:1.5px solid var(--g2)')+'">⏳ Installées</div>';
+  html+='<div onclick="setInstalTab('validated')" style="flex:1;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;'+(instalTab==='validated'?'background:rgba(74,222,128,.15);color:#4ade80;border:1.5px solid #4ade80':'background:var(--g1);color:var(--g4);border:1.5px solid var(--g2)')+'">💰 Validées</div>';
+  html+='</div>';
+
+  // Par équipe
+  Object.keys(byTeam).forEach(function(team){
+    var items=byTeam[team][instalTab==='validated'?'validated':'declared'];
+    if(!items.length)return;
+
+    // Grouper par commercial
+    var byAgent={};
+    items.forEach(function(item){
+      if(!byAgent[item.agent])byAgent[item.agent]=[];
+      byAgent[item.agent].push(item);
+    });
+
+    var teamLabel=TEAM_LABELS&&TEAM_LABELS[team]?TEAM_LABELS[team]:team;
+    html+='<div style="margin-bottom:16px">';
+    html+='<div style="font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">'+teamLabel+' · '+items.length+' instal'+(items.length>1?'s':'')+'</div>';
+
+    Object.keys(byAgent).forEach(function(agent){
+      var agItems=byAgent[agent];
+      html+='<div style="background:var(--g1);border-radius:12px;padding:12px;margin-bottom:8px">';
+      html+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">';
+      html+='<div style="font-size:14px;font-weight:700">'+agent.split(' ')[0]+' '+(agent.split(' ')[1]||'')+'</div>';
+      html+='<span style="background:'+(instalTab==='validated'?'rgba(74,222,128,.15)':'rgba(251,146,60,.15)')+';color:'+(instalTab==='validated'?'#4ade80':'#fb923c')+';border-radius:6px;padding:3px 8px;font-size:12px;font-weight:700">'+agItems.length+'</span>';
+      html+='</div>';
+      agItems.forEach(function(item){
+        html+='<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--g2)">';
+        html+='<div style="width:7px;height:7px;border-radius:50%;background:'+(instalTab==='validated'?'#4ade80':'#fb923c')+';flex-shrink:0"></div>';
+        html+='<div style="flex:1;font-size:13px">'+item.nom_commerce+'</div>';
+        html+='<div style="font-size:11px;color:var(--g4)">'+item.date_instal+'</div>';
+        html+='</div>';
+      });
       html+='</div>';
     });
     html+='</div>';
   });
 
+  if(!totalDecl&&!totalVali)html='<div class="empty">Aucune installation déclarée</div>';
   el.innerHTML=html;
 }
+
+function setInstalTab(tab){instalTab=tab;renderInstals();}
+function getTeamForAgent(agent){
+  var found='';
+  if(typeof TEAMS==='object'){
+    Object.keys(TEAMS).forEach(function(t){
+      if(TEAMS[t].agents&&TEAMS[t].agents.some(function(a){return a.n===agent;}))found=t;
+    });
+  }
+  return found;
+}
+
+
 function renderToday(){
   var agents=getMyAgents();
   var reps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
