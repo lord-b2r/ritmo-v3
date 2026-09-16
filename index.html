@@ -414,6 +414,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
         <div class="card-body" id="body-ac" style="padding-top:12px">
           <div class="row"><span class="rl">AC</span><div class="stp"><button class="sb" onclick="step('ac',-1)">-</button><span class="sv er" id="sv-ac">0</span><button class="sb" onclick="step('ac',1)">+</button></div></div>
           <div class="row"><span class="rl">INSTAL</span><div class="stp"><button class="sb" onclick="step('ins',-1)">-</button><span class="sv er" id="sv-ins">0</span><button class="sb" onclick="step('ins',1)">+</button></div></div>
+          <div id="instal-form-list" style="margin-top:8px"></div>
           <div class="row" style="border-bottom:0"><span class="rl">No show / Impossible</span><div class="stp"><button class="sb" onclick="step('noshow',-1)">-</button><span class="sv nu" id="sv-noshow">0</span><button class="sb" onclick="step('noshow',1)">+</button></div></div>
         </div>
       </div>
@@ -610,7 +611,7 @@ function backToForm(){
   document.getElementById('form-send').style.display='flex';
   showToast('Tu peux modifier et renvoyer');
 }
-function freshS(){return {rdv_ih:[], rdv_og:[], ventes:[], ac:0, ins:0, fu:0, noshow:0, ol:false, cr:false, mot:''};};
+function freshS(){return {rdv_ih:[], rdv_og:[], ventes:[], instalList:[], ac:0, ins:0, fu:0, noshow:0, ol:false, cr:false, mot:''};};
 function saveS(){
   if(!ME)return;
   var today=new Date().toISOString().slice(0,10);
@@ -793,7 +794,15 @@ function updateAll(){
   saveS();
 }
 
-function step(k,d){S[k]=Math.max(0,S[k]+d);updateAll();}
+function step(k,d){
+  S[k]=Math.max(0,S[k]+d);
+  if(k==='ins'){
+    while(S.instalList.length<S.ins)S.instalList.push({nom:'',vente_nom:'',autre:false});
+    while(S.instalList.length>S.ins)S.instalList.pop();
+    renderInstalForm();
+  }
+  updateAll();
+}
 function chk(k){S[k]=!S[k];document.getElementById('k-'+k).className='kc'+(S[k]?' on':'');const done=(S.ol?1:0)+(S.cr?1:0);const p=document.getElementById('pill-rt');p.textContent=done+' / 2';p.className='pill '+(done===2?'ok':done>0?'wn':'nu');}
 function tog(id){
   openB[id]=!openB[id];
@@ -855,6 +864,48 @@ function stepVentes(d){
   updateAll();
 }
 function addVente(){stepVentes(1);}
+
+function renderInstalForm(){
+  var container=document.getElementById('instal-form-list');
+  if(!container)return;
+  container.innerHTML='';
+  S.instalList.forEach(function(inst,i){
+    var ventesDisponibles=S.ventes.filter(function(v){
+      return !S.instalList.some(function(x,j){return j!==i&&x.vente_nom===v.nom&&v.nom;});
+    });
+    var wrap=document.createElement('div');
+    wrap.style.cssText='margin-bottom:10px;background:var(--g1);border-radius:10px;padding:12px';
+    var lbl=document.createElement('div');
+    lbl.style.cssText='font-size:11px;font-weight:700;color:var(--g4);margin-bottom:8px';
+    lbl.textContent='Installation '+(i+1);
+    var sel=document.createElement('select');
+    sel.style.cssText='width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t);margin-bottom:6px';
+    var optVide=document.createElement('option');optVide.value='';optVide.textContent='-- Choisir une vente --';sel.appendChild(optVide);
+    ventesDisponibles.forEach(function(v){
+      var opt=document.createElement('option');opt.value=v.nom||'';opt.textContent=(v.nom||'Commerce')+' ('+(v.type||v.ty||'POS')+')';
+      if(inst.vente_nom===v.nom)opt.selected=true;
+      sel.appendChild(opt);
+    });
+    var optAutre=document.createElement('option');optAutre.value='__autre__';optAutre.textContent='Autre / Non listé';
+    if(inst.autre)optAutre.selected=true;
+    sel.appendChild(optAutre);
+    (function(idx){sel.onchange=function(){
+      if(this.value==='__autre__'){S.instalList[idx].autre=true;S.instalList[idx].vente_nom='';}
+      else{S.instalList[idx].autre=false;S.instalList[idx].vente_nom=this.value;S.instalList[idx].nom=this.value;}
+      renderInstalForm();
+    };})(i);
+    wrap.appendChild(lbl);wrap.appendChild(sel);
+    if(inst.autre){
+      var txt=document.createElement('input');
+      txt.type='text';txt.placeholder='Nom du commerce...';
+      txt.style.cssText='width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t)';
+      txt.value=inst.nom||'';
+      (function(idx){txt.oninput=function(){S.instalList[idx].nom=this.value;};})(i);
+      wrap.appendChild(txt);
+    }
+    container.appendChild(wrap);
+  });
+}
 function renderVentesForm(){
   var list=document.getElementById('ventes-form-list');list.innerHTML='';
   S.ventes.forEach(function(v,i){
@@ -958,7 +1009,7 @@ async function sendEOD(){
   S.rdv_og.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV OG',cat:'rdv',type:'og',note:r.note,ts:Date.now()});});
   saveFuLocal();
   fuList.forEach(f=>{if(!f._synced){syncFuToSupabase(f);f._synced=true;}});
-  const eodNow=new Date();const eod={agent:ME,team:MY_TEAM,date:eodNow.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}),timestamp:Date.now(),rdv_ih:rdv_ih_count,rdv_og:rdv_og_count,notes_ih,notes_og,vente_ih:S.ventes.filter(v=>v.nom).length,vente_og:0,total_vente:totalV,total_pos:totalPos,ac:S.ac,instal:S.ins,leads_fu:S.fu,noshow:S.noshow||0,outlook:S.ol,crm:S.cr,mot_jour:document.getElementById('mot').value,score:sc,ventes_detail,fu_list:fuList.map(f=>({nom:f.nom,cat:f.cat,type:f.type,note:f.note||''}))};
+  const eodNow=new Date();const eod={agent:ME,team:MY_TEAM,date:eodNow.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}),timestamp:Date.now(),rdv_ih:rdv_ih_count,rdv_og:rdv_og_count,notes_ih,notes_og,vente_ih:S.ventes.filter(v=>v.nom).length,vente_og:0,total_vente:totalV,total_pos:totalPos,ac:S.ac,instal:S.ins,instal_list:S.instalList,leads_fu:S.fu,noshow:S.noshow||0,outlook:S.ol,crm:S.cr,mot_jour:document.getElementById('mot').value,score:sc,ventes_detail,fu_list:fuList.map(f=>({nom:f.nom,cat:f.cat,type:f.type,note:f.note||''}))};
   setSd('ld');
   let sent=false;
   try{
