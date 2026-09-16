@@ -591,6 +591,7 @@ let S = freshS();
 let openB = {rdv:true, vt:true, ac:true};
 let allReports = [];
 let allReportsGlobal = [];
+let INSTAL_STATUS_CACHE = {}; // {nom: 'declared'|'validated'|'none'}
 let fuList = [];
 let fuFilter = 'all';
 let vFilter = 'all';
@@ -1322,7 +1323,7 @@ function openEditVente(v,venteIdx){
   var m=document.createElement('div');m.id='edit-vente-modal';
   m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
   m.dataset.venteId=v.id||'';m.dataset.venteIdx=venteIdx!==undefined?String(venteIdx):'';
-  m.dataset.instalStatus=v.instal_status||'none';
+  m.dataset.instalStatus=v.instal_status||INSTAL_STATUS_CACHE[v.nom]||'none';
 
   var box=document.createElement('div');box.style.cssText='background:var(--w);border-radius:var(--rl);width:100%;max-width:380px';
 
@@ -1368,7 +1369,7 @@ function openEditVente(v,venteIdx){
   document.body.appendChild(m);
 
   // Initialiser le statut visuel
-  evSetStatus(v.instal_status||'none');
+  evSetStatus(v.instal_status||INSTAL_STATUS_CACHE[v.nom]||'none');
 }
 
 function evSetStatus(status){
@@ -1415,16 +1416,18 @@ async function saveEditVente(){
   if(taux>1.69){err.textContent='Taux max : 1.69%';err.style.display='block';return;}
   err.style.display='none';
   var vid=m.dataset.venteId;
-  var vIdx=m.dataset.venteIdx!==''?parseInt(m.dataset.venteIdx):-1;
-  // Mettre à jour dans S.ventes par index (plus fiable que id)
-  if(vIdx>=0&&vIdx<S.ventes.length){
-    S.ventes[vIdx].nom=nom;S.ventes[vIdx].tpv=tpv;S.ventes[vIdx].taux=taux;S.ventes[vIdx].upfront=up;S.ventes[vIdx].instal_status=instalStatus;
-  } else {
-    var sv=S.ventes.find(function(x){return String(x.id)===String(vid)||x.nom===nom;});
-    if(sv){sv.nom=nom;sv.tpv=tpv;sv.taux=taux;sv.upfront=up;sv.instal_status=instalStatus;}
-  }
-  // Mettre à jour dans allReports
-  allReports.forEach(function(r){if(r.ventes)r.ventes.forEach(function(x){if(String(x.id)===String(vid)||x.nom===nom){x.nom=nom;x.tpv=tpv;x.taux=taux;x.upfront=up;x.instal_status=instalStatus;}});});
+  // Mettre à jour le cache statut par nom
+  if(nom)INSTAL_STATUS_CACHE[nom]=instalStatus;
+  // Mettre à jour dans S.ventes
+  S.ventes.forEach(function(x){if(x.nom===nom){x.nom=nom;x.tpv=tpv;x.taux=taux;x.upfront=up;x.instal_status=instalStatus;}});
+  // Mettre à jour dans allReports.ventes_detail
+  allReports.forEach(function(r){
+    if(r.ventes_detail)r.ventes_detail.forEach(function(x){if(x.nom===nom){x.instal_status=instalStatus;}});
+    if(r.ventes)r.ventes.forEach(function(x){if(x.nom===nom){x.instal_status=instalStatus;}});
+  });
+  allReportsGlobal.forEach(function(r){
+    if(r.ventes_detail)r.ventes_detail.forEach(function(x){if(x.nom===nom){x.instal_status=instalStatus;}});
+  });
   renderVentes();closeEditVente();showToast('Vente mise a jour');
 }
 function openEditFu(f){
@@ -1481,7 +1484,7 @@ function renderVentes(){
   if(!filtered.length){list.innerHTML='<div class="empty">Aucune vente'+(vFilter!=='all'?' '+vFilter:'')+'</div>';return;}
   filtered.forEach((v,i)=>{
     const tp=parseInt(v.tpv||v.tp)||0;const up=parseInt(v.upfront||v.up)||0;const ty=v.type||v.ty||'POS';
-    const ist=v.instal_status||'none';
+    const ist=v.instal_status||INSTAL_STATUS_CACHE[v.nom]||'none';
     const d=document.createElement('div');d.className='vente-item';
     if(ist==='declared')d.style.cssText='border:1.5px solid #fb923c;background:rgba(251,146,60,.07)';
     else if(ist==='validated')d.style.cssText='border:1.5px solid #4ade80;background:rgba(74,222,128,.07)';
