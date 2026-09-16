@@ -875,9 +875,14 @@ function renderInstalForm(){
     // Ventes des rapports passés (ce mois et mois précédents) pas encore installées
     var installedNames=S.instalList.map(function(x){return x.vente_nom;}).filter(Boolean);
     var ventesPast=[];
-    allReports.filter(function(r){return r.agent===ME&&r.ventes;}).forEach(function(r){
+    // Chercher dans allReportsGlobal pour avoir tous les rapports de ME
+    var sourceReps=allReportsGlobal.length?allReportsGlobal:allReports;
+    sourceReps.filter(function(r){return r.agent===ME&&r.ventes&&r.ventes.length;}).forEach(function(r){
       (r.ventes||[]).forEach(function(v){
-        if(v.nom&&!ventesPast.find(function(x){return x.nom===v.nom;}))ventesPast.push(v);
+        var nom=v.nom||(v.tpv?'Vente '+v.tpv+'€':'');
+        if(nom&&!ventesPast.find(function(x){return x.nom===nom;})){
+          ventesPast.push({nom:nom,type:v.type||v.ty||'POS',tpv:v.tpv||v.tp||0});
+        }
       });
     });
     // Fusion sans doublons, exclure celles déjà choisies dans d'autres champs
