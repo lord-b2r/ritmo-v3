@@ -231,22 +231,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     </div>
   </div>
 
-  <!-- BURGER MENU -->
-  <div class="burger-overlay" id="burger-overlay" onclick="closeBurger()"></div>
-  <button class="burger-btn" id="burger-btn" onclick="toggleBurger()">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="burger-panel" id="burger-panel">
-    <button class="burger-close" onclick="closeBurger()">×</button>
-    <div class="burger-section">Navigation</div>
-    <div class="burger-nav-item on" id="b-today" onclick="swBurger('today')">Aujourd hui</div>
-    <div class="burger-nav-item" id="b-managers" onclick="swBurger('managers')">Managers</div>
-    <div class="burger-nav-item" id="b-stats" onclick="swBurger('stats')">Stats</div>
-    <div class="burger-nav-item" id="b-ventes" onclick="swBurger('ventes')">Ventes</div>
-    <div class="burger-nav-item" id="b-mur" onclick="swBurger('mur')">Mur</div>
-    <div class="burger-section">Suivi</div>
-    <div class="burger-nav-item" id="b-instals" onclick="swBurger('instals')">Installations</div>
-  </div>
+
 
   <div class="slide-tabs">
     <div class="slide-tab on" id="t-today" onclick="sw('today')">Aujourd hui</div>
@@ -1172,5 +1157,22 @@ function formatK(n){return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(r){r.forEach(function(s){s.unregister();});});}
 document.addEventListener('DOMContentLoaded',function(){init();});
 </script>
+<!-- BURGER MENU -->
+  <div class="burger-overlay" id="burger-overlay" onclick="closeBurger()"></div>
+  <button class="burger-btn" id="burger-btn" onclick="toggleBurger()">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="burger-panel" id="burger-panel">
+    <button class="burger-close" onclick="closeBurger()">×</button>
+    <div class="burger-section">Navigation</div>
+    <div class="burger-nav-item on" id="b-today" onclick="swBurger('today')">Aujourd hui</div>
+    <div class="burger-nav-item" id="b-managers" onclick="swBurger('managers')">Managers</div>
+    <div class="burger-nav-item" id="b-stats" onclick="swBurger('stats')">Stats</div>
+    <div class="burger-nav-item" id="b-ventes" onclick="swBurger('ventes')">Ventes</div>
+    <div class="burger-nav-item" id="b-mur" onclick="swBurger('mur')">Mur</div>
+    <div class="burger-section">Suivi</div>
+    <div class="burger-nav-item" id="b-instals" onclick="swBurger('instals')">Installations</div>
+  </div>
+
 </body>
 </html>
