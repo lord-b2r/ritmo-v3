@@ -636,7 +636,7 @@ function renderInstals(){
       byAgent[item.agent].push(item);
     });
 
-    var teamLabel=TEAM_LABELS&&TEAM_LABELS[team]?TEAM_LABELS[team]:team;
+    var mgr=Object.values(MANAGERS||{}).find(function(m){return m.team===team;});var teamLabel=mgr?mgr.label:team;
     html+='<div style="margin-bottom:16px">';
     html+='<div style="font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">'+teamLabel+' · '+items.length+' instal'+(items.length>1?'s':'')+'</div>';
 
