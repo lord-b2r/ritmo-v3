@@ -525,6 +525,21 @@ function resetDay(){
   renderDateNav();
   renderToday();
 }
+
+function toggleBurger(){
+  document.getElementById('burger-panel').classList.toggle('open');
+  document.getElementById('burger-overlay').classList.toggle('open');
+}
+function closeBurger(){
+  document.getElementById('burger-panel').classList.remove('open');
+  document.getElementById('burger-overlay').classList.remove('open');
+}
+function swBurger(id){
+  sw(id);
+  document.querySelectorAll('.burger-nav-item').forEach(function(el){el.classList.remove('on');});
+  var el=document.getElementById('b-'+id);if(el)el.classList.add('on');
+  closeBurger();
+}
 function renderDateNav(){
   var nav=document.getElementById('date-nav');
   if(!nav)return;
