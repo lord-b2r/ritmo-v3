@@ -1317,11 +1317,11 @@ function renderStEq(){
 
 // -- VENTES --
 function setVFilter(f){vFilter=f;document.querySelectorAll('#s-vt .filter-btn').forEach((b,i)=>{b.className='filter-btn'+(['all','POS','TPE'][i]===f?' on':'');});renderVentes();}
-function openEditVente(v){
+function openEditVente(v,venteIdx){
   var existing=document.getElementById('edit-vente-modal');if(existing)existing.remove();
   var m=document.createElement('div');m.id='edit-vente-modal';
   m.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
-  m.dataset.venteId=v.id||'';
+  m.dataset.venteId=v.id||'';m.dataset.venteIdx=venteIdx!==undefined?String(venteIdx):'';
   m.dataset.instalStatus=v.instal_status||'none';
 
   var box=document.createElement('div');box.style.cssText='background:var(--w);border-radius:var(--rl);width:100%;max-width:380px';
@@ -1415,11 +1415,16 @@ async function saveEditVente(){
   if(taux>1.69){err.textContent='Taux max : 1.69%';err.style.display='block';return;}
   err.style.display='none';
   var vid=m.dataset.venteId;
-  // Mettre à jour dans S.ventes
-  var sv=S.ventes.find(function(x){return String(x.id)===String(vid);});
-  if(sv){sv.nom=nom;sv.tpv=tpv;sv.taux=taux;sv.upfront=up;sv.instal_status=instalStatus;}
+  var vIdx=m.dataset.venteIdx!==''?parseInt(m.dataset.venteIdx):-1;
+  // Mettre à jour dans S.ventes par index (plus fiable que id)
+  if(vIdx>=0&&vIdx<S.ventes.length){
+    S.ventes[vIdx].nom=nom;S.ventes[vIdx].tpv=tpv;S.ventes[vIdx].taux=taux;S.ventes[vIdx].upfront=up;S.ventes[vIdx].instal_status=instalStatus;
+  } else {
+    var sv=S.ventes.find(function(x){return String(x.id)===String(vid)||x.nom===nom;});
+    if(sv){sv.nom=nom;sv.tpv=tpv;sv.taux=taux;sv.upfront=up;sv.instal_status=instalStatus;}
+  }
   // Mettre à jour dans allReports
-  allReports.forEach(function(r){if(r.ventes)r.ventes.forEach(function(x){if(String(x.id)===String(vid)){x.nom=nom;x.tpv=tpv;x.taux=taux;x.upfront=up;x.instal_status=instalStatus;}});});
+  allReports.forEach(function(r){if(r.ventes)r.ventes.forEach(function(x){if(String(x.id)===String(vid)||x.nom===nom){x.nom=nom;x.tpv=tpv;x.taux=taux;x.upfront=up;x.instal_status=instalStatus;}});});
   renderVentes();closeEditVente();showToast('Vente mise a jour');
 }
 function openEditFu(f){
@@ -1486,7 +1491,7 @@ function renderVentes(){
     const editBtn=document.createElement('button');
     editBtn.innerHTML='&#9998;';
     editBtn.style.cssText='background:none;border:none;color:var(--g4);cursor:pointer;font-size:14px;padding:2px 6px;margin-left:auto;';
-    (function(vente){editBtn.onclick=function(e){e.stopPropagation();openEditVente(vente);};})(v);
+    (function(vente,idx){editBtn.onclick=function(e){e.stopPropagation();openEditVente(vente,idx);};})(v,i);
     top.appendChild(nm);top.appendChild(tyEl);top.appendChild(editBtn);
     const dt=document.createElement('div');dt.className='vi-dt';dt.textContent=v.date;
     const g=document.createElement('div');g.className='vi-grid';
