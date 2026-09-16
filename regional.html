@@ -619,8 +619,8 @@ function renderInstals(){
 
   // Onglets
   html+='<div style="display:flex;gap:8px;margin-bottom:16px">';
-  html+='<div onclick="setInstalTab('declared')" style="flex:1;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;'+(instalTab==='declared'?'background:rgba(251,146,60,.15);color:#fb923c;border:1.5px solid #fb923c':'background:var(--g1);color:var(--g4);border:1.5px solid var(--g2)')+'">⏳ Installées</div>';
-  html+='<div onclick="setInstalTab('validated')" style="flex:1;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;'+(instalTab==='validated'?'background:rgba(74,222,128,.15);color:#4ade80;border:1.5px solid #4ade80':'background:var(--g1);color:var(--g4);border:1.5px solid var(--g2)')+'">💰 Validées</div>';
+  html+='<div id="itab-decl" style="flex:1;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;'+(instalTab==='declared'?'background:rgba(251,146,60,.15);color:#fb923c;border:1.5px solid #fb923c':'background:var(--g1);color:var(--g4);border:1.5px solid var(--g2)')+'">⏳ Installées</div>';
+  html+='<div id="itab-vali" style="flex:1;text-align:center;padding:9px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;'+(instalTab==='validated'?'background:rgba(74,222,128,.15);color:#4ade80;border:1.5px solid #4ade80':'background:var(--g1);color:var(--g4);border:1.5px solid var(--g2)')+'">💰 Validées</div>';
   html+='</div>';
 
   // Par équipe
@@ -662,6 +662,8 @@ function renderInstals(){
   el.innerHTML=html;
   var kd=document.getElementById('ikpi-decl');if(kd)kd.onclick=function(){setInstalTab('declared');};
   var kv=document.getElementById('ikpi-vali');if(kv)kv.onclick=function(){setInstalTab('validated');};
+  var td=document.getElementById('itab-decl');if(td)td.onclick=function(){setInstalTab('declared');};
+  var tv=document.getElementById('itab-vali');if(tv)tv.onclick=function(){setInstalTab('validated');};
 }
 
 function setInstalTab(tab){instalTab=tab;renderInstals();}
