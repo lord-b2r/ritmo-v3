@@ -1397,6 +1397,13 @@ function deleteEditVente(){
   else S.ventes=S.ventes.filter(function(x){return (x.nom||'').trim()!==nom;});
   // Supprimer du cache
   delete INSTAL_STATUS_CACHE[nom];
+  // Supprimer aussi de allReports pour que renderVentes soit cohérent
+  allReports.forEach(function(r){
+    if(r.ventes_detail)r.ventes_detail=r.ventes_detail.filter(function(v){return (v.nom||'').trim()!==nom;});
+  });
+  allReportsGlobal.forEach(function(r){
+    if(r.ventes_detail)r.ventes_detail=r.ventes_detail.filter(function(v){return (v.nom||'').trim()!==nom;});
+  });
   // Mettre à jour le compteur
   var el=document.getElementById('sv-ventes');
   if(el){el.textContent=S.ventes.length;el.className='sv '+(S.ventes.length>0?'ok':'nu');}
