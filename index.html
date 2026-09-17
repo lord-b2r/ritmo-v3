@@ -1033,13 +1033,21 @@ async function sendEOD(){
   setSd('ld');
   let sent=false;
   try{
-    // Supprimer l'EOD existante du même jour avant d'insérer
+    // Supprimer TOUTES les EODs existantes du même jour avant d'insérer
     try{
       const todayDate=eod.date;
-      const delRes=await fetch(SB+'/rest/v1/eod_reports?agent=eq.'+encodeURIComponent(ME)+'&date=eq.'+encodeURIComponent(todayDate),{
-        method:'DELETE',
-        headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json'}
+      // D'abord récupérer les IDs existants
+      const existRes=await fetch(SB+'/rest/v1/eod_reports?select=id&agent=eq.'+encodeURIComponent(ME)+'&date=eq.'+encodeURIComponent(todayDate),{
+        headers:{'apikey':SK,'Authorization':'Bearer '+SK}
       });
+      const existReps=await existRes.json();
+      // Supprimer un par un pour s'assurer que tout est supprimé
+      for(var di=0;di<existReps.length;di++){
+        await fetch(SB+'/rest/v1/eod_reports?id=eq.'+existReps[di].id,{
+          method:'DELETE',
+          headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+        });
+      }
     }catch(e){console.warn('Delete existing EOD failed',e);}
     const res=await fetch(SB+'/rest/v1/eod_reports',{
       method:'POST',
