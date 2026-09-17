@@ -1084,7 +1084,7 @@ async function sendEOD(){
       const errTxt=await res.text();
       console.error('Supabase error',res.status,errTxt);
       // Retry sans fu_list si la colonne pose probleme
-      const eodSafe={...eod};delete eodSafe.fu_list;
+      const eodSafe={...eod};delete eodSafe.fu_list;delete eodSafe.instal_list;
       const res2=await fetch(SB+'/rest/v1/eod_reports',{
         method:'POST',
         headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
