@@ -871,17 +871,18 @@ function renderInstalForm(){
   if(!container)return;
   container.innerHTML='';
   S.instalList.forEach(function(inst,i){
-    // Ventes du formulaire actuel avec un nom saisi
-    var ventesForm=S.ventes.filter(function(v){return v.nom&&v.nom.trim();});
-    // Ventes des rapports passés (ce mois et mois précédents) pas encore installées
-    var installedNames=S.instalList.map(function(x){return x.vente_nom;}).filter(Boolean);
+    // Ventes du formulaire actuel avec un nom saisi et sans statut
+    var ventesForm=S.ventes.filter(function(v){return v.nom&&v.nom.trim()&&(!v.instal_status||v.instal_status==='none');});
+    // Ventes des rapports passés sans statut d'installation
     var ventesPast=[];
-    // Chercher dans allReportsGlobal pour avoir tous les rapports de ME
     var sourceReps=allReportsGlobal.length?allReportsGlobal:allReports;
     sourceReps.filter(function(r){return r.agent===ME&&(r.ventes_detail||r.ventes)&&(r.ventes_detail||r.ventes).length;}).forEach(function(r){
       ((r.ventes_detail||r.ventes)||[]).forEach(function(v){
-        var nom=v.nom||(v.tpv?'Vente '+v.tpv+'€':'');
-        if(nom&&!ventesPast.find(function(x){return x.nom===nom;})){
+        var nom=(v.nom||'').trim();
+        var status=v.instal_status||INSTAL_STATUS_CACHE[nom]||'none';
+        // Exclure les ventes déjà installées ou validées
+        if(!nom||status==='declared'||status==='validated')return;
+        if(!ventesPast.find(function(x){return x.nom===nom;})){
           ventesPast.push({nom:nom,type:v.type||v.ty||'POS',tpv:v.tpv||v.tp||0});
         }
       });
@@ -891,7 +892,7 @@ function renderInstalForm(){
       return !ventesForm.find(function(x){return x.nom===v.nom;});
     }));
     var ventesDisponibles=allVentes.filter(function(v){
-      return !S.instalList.some(function(x,j){return j!==i&&x.vente_nom===v.nom;});
+      return !S.instalList.some(function(x,j){return j!==i&&x.vente_nom===(v.nom||'').trim();});
     });
     var wrap=document.createElement('div');
     wrap.style.cssText='margin-bottom:10px;background:var(--g1);border-radius:10px;padding:12px';
@@ -1099,10 +1100,14 @@ async function sendEOD(){
                   body:JSON.stringify({ventes_detail:newDetail})
                 }).catch(function(e){console.warn('ventes_detail instal patch',e);});
                 rep.ventes_detail=newDetail;
+                // Mettre à jour le cache pour que renderVentes reflète immédiatement
+                INSTAL_STATUS_CACHE[venteName]='declared';
                 break;
               }
             }
           });
+          // Forcer le refresh de l'onglet ventes si visible
+          renderVentes();
         }
       }
     } else {
