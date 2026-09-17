@@ -1415,7 +1415,7 @@ function deleteEditVente(){
   // Mettre à jour le compteur
   var el=document.getElementById('sv-ventes');
   if(el){el.textContent=S.ventes.length;el.className='sv '+(S.ventes.length>0?'ok':'nu');}
-  // Persister dans Supabase
+  // Persister dans Supabase + recalculer score et total_vente
   (async function(){
     try{
       var reps=allReports.filter(function(r){return r.agent===ME&&r.ventes_detail&&r.ventes_detail.length;});
@@ -1424,12 +1424,17 @@ function deleteEditVente(){
         var found=rep.ventes_detail.some(function(v){return (v.nom||'').trim()===nom;});
         if(found){
           var newDetail=rep.ventes_detail.filter(function(v){return (v.nom||'').trim()!==nom;});
+          // Recalculer total_vente et score
+          var newTotalVente=newDetail.length;
+          var newScore=newTotalVente+(rep.instal||0);
           await fetch(SB+'/rest/v1/eod_reports?id=eq.'+rep.id,{
             method:'PATCH',
             headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
-            body:JSON.stringify({ventes_detail:newDetail})
+            body:JSON.stringify({ventes_detail:newDetail,total_vente:newTotalVente,score:newScore})
           });
           rep.ventes_detail=newDetail;
+          rep.total_vente=newTotalVente;
+          rep.score=newScore;
           break;
         }
       }
