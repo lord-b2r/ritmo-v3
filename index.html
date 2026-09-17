@@ -1030,6 +1030,7 @@ async function sendEOD(){
   saveFuLocal();
   fuList.forEach(f=>{if(!f._synced){syncFuToSupabase(f);f._synced=true;}});
   const eodNow=new Date();const eod={agent:ME,team:MY_TEAM,date:eodNow.toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'}),timestamp:Date.now(),rdv_ih:rdv_ih_count,rdv_og:rdv_og_count,notes_ih,notes_og,vente_ih:S.ventes.filter(v=>v.nom).length,vente_og:0,total_vente:totalV,total_pos:totalPos,ac:S.ac,instal:S.ins,leads_fu:S.fu,noshow:S.noshow||0,outlook:S.ol,crm:S.cr,mot_jour:document.getElementById('mot').value,score:sc,ventes_detail,fu_list:fuList.map(f=>({nom:f.nom,cat:f.cat,type:f.type,note:f.note||''}))};
+  delete eod.instalList;
   setSd('ld');
   let sent=false;
   try{
