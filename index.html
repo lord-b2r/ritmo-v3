@@ -1079,6 +1079,30 @@ async function sendEOD(){
             headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
             body:JSON.stringify(items)
           }).catch(function(e){console.warn('instal_items save',e);});
+          // Mettre a jour instal_status dans ventes_detail du rapport correspondant
+          items.forEach(function(il){
+            if(!il.vente_nom)return;
+            var venteName=(il.vente_nom||'').trim();
+            // Chercher dans allReports le rapport qui contient cette vente
+            var reps=(allReports||[]).filter(function(r){return r.agent===ME&&r.ventes_detail&&r.ventes_detail.length;});
+            for(var ri=0;ri<reps.length;ri++){
+              var rep=reps[ri];
+              var found=rep.ventes_detail.some(function(v){return (v.nom||'').trim()===venteName;});
+              if(found){
+                var newDetail=rep.ventes_detail.map(function(v){
+                  if((v.nom||'').trim()===venteName)return Object.assign({},v,{instal_status:'declared'});
+                  return v;
+                });
+                fetch(SB+'/rest/v1/eod_reports?id=eq.'+rep.id,{
+                  method:'PATCH',
+                  headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
+                  body:JSON.stringify({ventes_detail:newDetail})
+                }).catch(function(e){console.warn('ventes_detail instal patch',e);});
+                rep.ventes_detail=newDetail;
+                break;
+              }
+            }
+          });
         }
       }
     } else {
