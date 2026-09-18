@@ -755,8 +755,8 @@ function renderVentes(){
   mHdr.style.cssText='font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer';
   mHdr.innerHTML='<span>Ce mois · '+filtered.length+' vente'+(filtered.length!==1?'s':'')+'</span><span style="font-size:10px">▲</span>';
   var mBody=document.createElement('div');
-  var mExp=true;
-  mHdr.onclick=function(){mExp=!mExp;mBody.style.display=mExp?'block':'none';mHdr.querySelector('span:last-child').textContent=mExp?'▲':'▼';};
+  var mExp=true;mBody.style.cssText='overflow:hidden;max-height:9999px;transition:max-height .35s ease';
+  mHdr.onclick=function(){mExp=!mExp;mBody.style.maxHeight=mExp?mBody.scrollHeight+'px':'0';mHdr.querySelector('span:last-child').textContent=mExp?'▲':'▼';};
   if(!filtered.length){mBody.innerHTML='<div class="empty">Aucune vente ce mois</div>';}
   else{filtered.forEach(function(v){
     var tp=parseInt(v.tpv)||0,up=parseInt(v.upfront)||0,ty=v.type||v.ty||'POS';
