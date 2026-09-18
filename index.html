@@ -1065,7 +1065,7 @@ async function sendEOD(){
         var items=S.instalList.filter(function(il){return il.nom;}).map(function(il){
           var venteTrouvee=(S.ventes||[]).find(function(v){return v.nom===il.vente_nom;});
           return {
-            agent:ME,team:MY_TEAMS[0]||'',
+            agent:ME,team:MY_TEAM||'',
             nom_commerce:il.nom,
             vente_nom:il.vente_nom||'',
             date_vente:venteTrouvee?eod.date:'',
