@@ -1055,23 +1055,25 @@ async function sendEOD(){
   setSd('ld');
   let sent=false;
   try{
-    // Supprimer TOUTES les EODs du même jour calendaire avant d'insérer
+    // Supprimer les EODs existantes du même jour (non bloquant)
     try{
-      // Calculer le range timestamp du jour (minuit→minuit)
       var dayStart=new Date();dayStart.setHours(0,0,0,0);
       var dayEnd=new Date();dayEnd.setHours(23,59,59,999);
-      const existRes=await fetch(SB+'/rest/v1/eod_reports?select=id&agent=eq.'+encodeURIComponent(ME)+'&timestamp=gte.'+dayStart.getTime()+'&timestamp=lte.'+dayEnd.getTime(),{
-        headers:{'apikey':SK,'Authorization':'Bearer '+SK}
-      });
-      const existReps=await existRes.json();
-      for(var di=0;di<existReps.length;di++){
-        await fetch(SB+'/rest/v1/eod_reports?id=eq.'+existReps[di].id,{
-          method:'DELETE',
+      const existRes=await Promise.race([
+        fetch(SB+'/rest/v1/eod_reports?select=id&agent=eq.'+encodeURIComponent(ME)+'&timestamp=gte.'+dayStart.getTime()+'&timestamp=lte.'+dayEnd.getTime(),{
           headers:{'apikey':SK,'Authorization':'Bearer '+SK}
-        });
+        }),
+        new Promise(function(resolve){setTimeout(function(){resolve({ok:false,json:function(){return Promise.resolve([]);}});},3000);})
+      ]);
+      if(existRes.ok){
+        const existReps=await existRes.json();
+        await Promise.all(existReps.map(function(rep){
+          return fetch(SB+'/rest/v1/eod_reports?id=eq.'+rep.id,{
+            method:'DELETE',headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+          }).catch(function(){});
+        }));
       }
-      if(existReps.length>0)console.log('Deleted',existReps.length,'existing EOD(s) for today');
-    }catch(e){console.warn('Delete existing EOD failed',e);}
+    }catch(e){console.warn('Delete existing EOD failed (non-bloquant)',e);}
     const res=await fetch(SB+'/rest/v1/eod_reports',{
       method:'POST',
       headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
