@@ -610,6 +610,11 @@ function showToast(msg){
 function backToForm(){
   document.getElementById('sent').style.display='none';
   document.getElementById('form-send').style.display='flex';
+  // Recharger S depuis le draft pour préremplir le formulaire
+  loadS();
+  renderVentesForm();
+  renderInstalForm();
+  updateAll();
   showToast('Tu peux modifier et renvoyer');
 }
 function freshS(){return {rdv_ih:[], rdv_og:[], ventes:[], instalList:[], ac:0, ins:0, fu:0, noshow:0, ol:false, cr:false, mot:''};};
