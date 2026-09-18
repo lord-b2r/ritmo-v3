@@ -1645,57 +1645,105 @@ async function saveEditFu(){
 }
 function renderVentes(){
   const month=now.toISOString().slice(0,7);
+  // ── Ventes mois en cours ──
   const myReps=allReports.filter(r=>r.agent===ME&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month);
-  const allV=myReps.flatMap(r=>(r.ventes_detail||[]).filter(v=>v&&v.nom).map(v=>({...v,nom:(v.nom||'').trim(),date:r.date,instal_status:INSTAL_STATUS_CACHE[(v.nom||'').trim()]||v.instal_status||'none'})));
+  const allV=myReps.flatMap(r=>(r.ventes_detail||[]).filter(v=>v&&v.nom).map(v=>({...v,nom:(v.nom||'').trim(),date:r.date,repId:r.id,timestamp:r.timestamp,instal_status:INSTAL_STATUS_CACHE[(v.nom||'').trim()]||v.instal_status||'none'})));
+  // ── Ventes pipe (hors mois en cours) ──
+  const pipeReps=allReports.filter(r=>r.agent===ME&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)!==month);
+  const pipeV=pipeReps.flatMap(r=>(r.ventes_detail||[]).filter(v=>v&&v.nom).map(v=>({...v,nom:(v.nom||'').trim(),date:r.date,repId:r.id,timestamp:r.timestamp,instal_status:INSTAL_STATUS_CACHE[(v.nom||'').trim()]||v.instal_status||'none'})));
+  // Filtre type
   const filtered=vFilter==='all'?allV:allV.filter(v=>(v.type||v.ty||'POS')===vFilter);
-  // KPIs
+  const filteredPipe=vFilter==='all'?pipeV:pipeV.filter(v=>(v.type||v.ty||'POS')===vFilter);
+  // ── KPIs (mois en cours) ──
   const totalTPV=filtered.reduce((s,v)=>s+(parseInt(v.tpv||v.tp)||0),0);
   const avgTaux=filtered.length?filtered.reduce((s,v)=>s+(parseFloat(v.taux||v.tx)||0),0)/filtered.length:0;
   const totalUp=filtered.reduce((s,v)=>s+(parseInt(v.upfront||v.up)||0),0);
-  const avgUp=filtered.length?totalUp/filtered.length:0;
-  const kpi=document.getElementById('ventes-kpi');
   const posVentes=filtered.filter(v=>(v.type||v.ty||'POS')==='POS');
   const totalUpPos=posVentes.reduce((s,v)=>s+(parseInt(v.upfront||v.up)||0),0);
-  const avgUpPos=posVentes.length?totalUpPos/posVentes.length:0;
+  const avgUpPos=posVentes.length?Math.round(totalUpPos/posVentes.length):0;
+  const kpi=document.getElementById('ventes-kpi');
   kpi.innerHTML='<div class="vk"><div class="vkl">TPV total</div><div class="vkv">'+formatK(totalTPV)+'</div><div class="vks">EUR</div></div><div class="vk"><div class="vkl">Taux moyen</div><div class="vkv">'+(avgTaux?avgTaux.toFixed(2)+'%':'---')+'</div><div class="vks">Sur '+filtered.length+' vente'+(filtered.length!==1?'s':'')+'</div></div><div class="vk"><div class="vkl">Upfront total</div><div class="vkv">'+formatK(totalUp)+'</div><div class="vks">EUR</div></div><div class="vk"><div class="vkl">Upfront moyen POS</div><div class="vkv">'+(avgUpPos?formatK(avgUpPos):'0')+'</div><div class="vks">Par vente POS</div></div>';
   const list=document.getElementById('ventes-list');list.innerHTML='';
-  if(!filtered.length){list.innerHTML='<div class="empty">Aucune vente'+(vFilter!=='all'?' '+vFilter:'')+'</div>';return;}
-  filtered.forEach((v,i)=>{
-    const tp=parseInt(v.tpv||v.tp)||0;const up=parseInt(v.upfront||v.up)||0;const ty=v.type||v.ty||'POS';
-    const ist=v.instal_status||INSTAL_STATUS_CACHE[v.nom]||'none';
-    const d=document.createElement('div');d.className='vente-item';
-    if(ist==='declared')d.style.cssText='border:1.5px solid #fb923c;background:rgba(251,146,60,.07)';
-    else if(ist==='validated')d.style.cssText='border:1.5px solid #4ade80;background:rgba(74,222,128,.07)';
-    const top=document.createElement('div');top.className='vi-top';
-    const nm=document.createElement('span');nm.className='vi-nm';nm.textContent=v.nom;
-    const tyEl=document.createElement('span');tyEl.className='pill '+(ty==='POS'?'ok':'bl');tyEl.textContent=ty;
-    const editBtn=document.createElement('button');
-    editBtn.innerHTML='&#9998;';
-    editBtn.style.cssText='background:none;border:none;color:var(--g4);cursor:pointer;font-size:14px;padding:2px 6px;margin-left:auto;';
-    (function(vente,idx){editBtn.onclick=function(e){e.stopPropagation();openEditVente(vente,idx);};})(v,i);
-    top.appendChild(nm);top.appendChild(tyEl);top.appendChild(editBtn);
-    const dt=document.createElement('div');dt.className='vi-dt';dt.textContent=v.date;
-    const g=document.createElement('div');g.className='vi-grid';
-    [['TPV',tp?formatK(tp)+' EUR':'---'],['Taux',(v.taux||v.tx)?(v.taux||v.tx)+'%':'---'],['Upfront',up?formatK(up)+' EUR':'0']].forEach(c=>{const vc=document.createElement('div');vc.className='vc';const vcl=document.createElement('div');vcl.className='vcl';vcl.textContent=c[0];const vcv=document.createElement('div');vcv.className='vcv';vcv.textContent=c[1];vc.appendChild(vcl);vc.appendChild(vcv);g.appendChild(vc);});
-    // Statut instal
-    var instalMatch=null;
-    allReports.filter(function(r){return r.agent===ME;}).forEach(function(r){
-      if(r.instal_list&&Array.isArray(r.instal_list)){
-        r.instal_list.forEach(function(il){
-          if(il.vente_nom&&il.vente_nom===v.nom)instalMatch=il;
-        });
-      }
+  // ── Section mois en cours ──
+  var secMonth=document.createElement('div');
+  var secMonthHdr=document.createElement('div');
+  secMonthHdr.style.cssText='font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer';
+  var monthLabel=document.createElement('span');monthLabel.textContent='Ce mois · '+filtered.length+' vente'+(filtered.length!==1?'s':'');
+  var monthToggle=document.createElement('span');monthToggle.textContent='▲';monthToggle.style.fontSize='10px';
+  secMonthHdr.appendChild(monthLabel);secMonthHdr.appendChild(monthToggle);
+  var monthBody=document.createElement('div');monthBody.id='ventes-month-body';
+  var monthExpanded=true;
+  secMonthHdr.onclick=function(){monthExpanded=!monthExpanded;monthBody.style.display=monthExpanded?'block':'none';monthToggle.textContent=monthExpanded?'▲':'▼';};
+  if(!filtered.length){monthBody.innerHTML='<div class="empty">Aucune vente ce mois</div>';}
+  else{
+    filtered.forEach(function(v,i){
+      var card=makeVenteCard(v,i,false);
+      monthBody.appendChild(card);
     });
-    if(instalMatch){
-      var statusEl=document.createElement('div');
-      var isValidated=instalMatch.status==='validated';
-      statusEl.style.cssText='margin-top:8px;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;text-align:center;'+(isValidated?'background:rgba(74,222,128,.15);border:1.5px solid #4ade80;color:#4ade80':'background:rgba(251,146,60,.15);border:1.5px solid #fb923c;color:#fb923c');
-      statusEl.textContent=isValidated?'✓ Installation validée 💰':'⏳ Installation déclarée';
-      (function(vente,el){el.onclick=function(){toggleInstalStatus(vente,el);};})(v,statusEl);
-      d.appendChild(statusEl);
+  }
+  secMonth.appendChild(secMonthHdr);secMonth.appendChild(monthBody);
+  list.appendChild(secMonth);
+  // ── Section PIPE ──
+  if(filteredPipe.length>0){
+    var secPipe=document.createElement('div');secPipe.style.marginTop='20px';
+    var pipeHdr=document.createElement('div');
+    pipeHdr.style.cssText='font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer';
+    var pipeLabel=document.createElement('span');pipeLabel.textContent='Pipe · '+filteredPipe.length+' vente'+(filteredPipe.length!==1?'s':'');
+    var pipeToggle=document.createElement('span');pipeToggle.textContent='▼';pipeToggle.style.fontSize='10px';
+    pipeHdr.appendChild(pipeLabel);pipeHdr.appendChild(pipeToggle);
+    var pipeBody=document.createElement('div');pipeBody.style.display='none';
+    var pipeExpanded=false;
+    pipeHdr.onclick=function(){pipeExpanded=!pipeExpanded;pipeBody.style.display=pipeExpanded?'block':'none';pipeToggle.textContent=pipeExpanded?'▲':'▼';};
+    // 3 colonnes par statut
+    var pipeNone=filteredPipe.filter(function(v){return !v.instal_status||v.instal_status==='none';}).sort(function(a,b){return (a.timestamp||0)-(b.timestamp||0);});
+    var pipeDeclared=filteredPipe.filter(function(v){return v.instal_status==='declared';}).sort(function(a,b){return (b.timestamp||0)-(a.timestamp||0);});
+    var pipeValidated=filteredPipe.filter(function(v){return v.instal_status==='validated';}).sort(function(a,b){return (b.timestamp||0)-(a.timestamp||0);});
+    var cols=document.createElement('div');
+    cols.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px';
+    function makeCol(title,items,color,borderColor){
+      var col=document.createElement('div');
+      var colHdr=document.createElement('div');
+      colHdr.style.cssText='font-size:11px;font-weight:700;color:'+color+';margin-bottom:8px;text-align:center;padding:6px;background:'+borderColor+'22;border-radius:8px';
+      colHdr.textContent=title+' ('+items.length+')';
+      col.appendChild(colHdr);
+      items.forEach(function(v,i){
+        var chip=document.createElement('div');
+        chip.style.cssText='padding:8px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:6px;border:1.5px solid '+borderColor+';background:'+borderColor+'15;color:'+color+';text-overflow:ellipsis;overflow:hidden;white-space:nowrap';
+        chip.textContent=v.nom;
+        chip.title=v.nom+' · '+v.date;
+        (function(vente,idx){chip.onclick=function(){openEditVente(vente,idx,'pipe');};})(v,i);
+        col.appendChild(chip);
+      });
+      return col;
     }
-    d.appendChild(top);d.appendChild(dt);d.appendChild(g);list.appendChild(d);
-  });
+    cols.appendChild(makeCol('Aucune',pipeNone,'var(--g4)','var(--g3)'));
+    cols.appendChild(makeCol('Installées',pipeDeclared,'#fb923c','#fb923c'));
+    cols.appendChild(makeCol('Validées',pipeValidated,'#4ade80','#4ade80'));
+    pipeBody.appendChild(cols);
+    secPipe.appendChild(pipeHdr);secPipe.appendChild(pipeBody);
+    list.appendChild(secPipe);
+  }
+}
+
+function makeVenteCard(v,i,isPipe){
+  var tp=parseInt(v.tpv||v.tp)||0;var up=parseInt(v.upfront||v.up)||0;var ty=v.type||v.ty||'POS';
+  var ist=v.instal_status||INSTAL_STATUS_CACHE[v.nom]||'none';
+  var card=document.createElement('div');card.className='vente-item';
+  if(ist==='declared')card.style.cssText='border:1.5px solid #fb923c;background:rgba(251,146,60,.07)';
+  else if(ist==='validated')card.style.cssText='border:1.5px solid #4ade80;background:rgba(74,222,128,.07)';
+  var top=document.createElement('div');top.className='vi-top';
+  var nm=document.createElement('span');nm.className='vi-nm';nm.textContent=v.nom;
+  var tyEl=document.createElement('span');tyEl.className='pill '+(ty==='POS'?'ok':'bl');tyEl.textContent=ty;
+  var editBtn=document.createElement('button');
+  editBtn.innerHTML='&#9998;';
+  editBtn.style.cssText='background:none;border:none;color:var(--g4);cursor:pointer;font-size:14px;padding:2px 6px;margin-left:auto;';
+  (function(vente,idx){editBtn.onclick=function(e){e.stopPropagation();openEditVente(vente,idx);};})(v,i);
+  top.appendChild(nm);top.appendChild(tyEl);top.appendChild(editBtn);
+  var dt=document.createElement('div');dt.className='vi-dt';dt.textContent=v.date;
+  var g=document.createElement('div');g.className='vi-grid';
+  [['TPV',tp?formatK(tp)+' EUR':'---'],['Taux',(v.taux||v.tx)?(v.taux||v.tx)+'%':'---'],['Upfront',up?formatK(up)+' EUR':'0']].forEach(function(c){var vc=document.createElement('div');vc.className='vc';var vcl=document.createElement('div');vcl.className='vcl';vcl.textContent=c[0];var vcv=document.createElement('div');vcv.className='vcv';vcv.textContent=c[1];vc.appendChild(vcl);vc.appendChild(vcv);g.appendChild(vc);});
+  card.appendChild(top);card.appendChild(dt);card.appendChild(g);
+  return card;
 }
 function formatK(n){n=Math.round(n);return n>=1000000?(n/1000000).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'K':String(n);}
 
