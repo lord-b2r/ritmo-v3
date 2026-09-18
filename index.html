@@ -1674,8 +1674,8 @@ function renderVentes(){
   var monthToggle=document.createElement('span');monthToggle.textContent='▲';monthToggle.style.fontSize='10px';
   secMonthHdr.appendChild(monthLabel);secMonthHdr.appendChild(monthToggle);
   var monthBody=document.createElement('div');monthBody.id='ventes-month-body';
-  var monthExpanded=true;
-  secMonthHdr.onclick=function(){monthExpanded=!monthExpanded;monthBody.style.display=monthExpanded?'block':'none';monthToggle.textContent=monthExpanded?'▲':'▼';};
+  var monthExpanded=true;monthBody.style.cssText='overflow:hidden;max-height:9999px;transition:max-height .35s ease';
+  secMonthHdr.onclick=function(){monthExpanded=!monthExpanded;monthBody.style.maxHeight=monthExpanded?monthBody.scrollHeight+'px':'0';monthToggle.textContent=monthExpanded?'▲':'▼';};
   if(!filtered.length){monthBody.innerHTML='<div class="empty">Aucune vente ce mois</div>';}
   else{
     filtered.forEach(function(v,i){
@@ -1693,9 +1693,9 @@ function renderVentes(){
     var pipeLabel=document.createElement('span');pipeLabel.textContent='Pipe · '+filteredPipe.length+' vente'+(filteredPipe.length!==1?'s':'');
     var pipeToggle=document.createElement('span');pipeToggle.textContent='▼';pipeToggle.style.fontSize='10px';
     pipeHdr.appendChild(pipeLabel);pipeHdr.appendChild(pipeToggle);
-    var pipeBody=document.createElement('div');pipeBody.style.display='none';
+    var pipeBody=document.createElement('div');pipeBody.style.cssText='overflow:hidden;max-height:0;transition:max-height .35s ease';
     var pipeExpanded=false;
-    pipeHdr.onclick=function(){pipeExpanded=!pipeExpanded;pipeBody.style.display=pipeExpanded?'block':'none';pipeToggle.textContent=pipeExpanded?'▲':'▼';};
+    pipeHdr.onclick=function(){pipeExpanded=!pipeExpanded;pipeBody.style.maxHeight=pipeExpanded?pipeBody.scrollHeight+'px':'0';pipeToggle.textContent=pipeExpanded?'▲':'▼';};
     // 3 colonnes par statut
     var pipeNone=filteredPipe.filter(function(v){return !v.instal_status||v.instal_status==='none';}).sort(function(a,b){return (a.timestamp||0)-(b.timestamp||0);});
     var pipeDeclared=filteredPipe.filter(function(v){return v.instal_status==='declared';}).sort(function(a,b){return (b.timestamp||0)-(a.timestamp||0);});
