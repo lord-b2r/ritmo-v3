@@ -1075,12 +1075,12 @@ function renderVentes(){
     var cols=document.createElement('div');cols.style.cssText='display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none';
     function makeCol(title,items,color,bc){
       var col=document.createElement('div');
-      var ch=document.createElement('div');ch.style.cssText='font-size:11px;font-weight:700;color:'+color+';margin-bottom:8px;text-align:center;padding:6px;background:'+bc+'22;border-radius:8px';
+      var ch=document.createElement('div');ch.style.cssText='font-size:10px;font-weight:700;color:'+color+';margin-bottom:6px;text-align:center;padding:4px;background:'+bc+'22;border-radius:6px';
       ch.textContent=title+' ('+items.length+')';col.appendChild(ch);
       items.forEach(function(v){
         var tk2='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===v.agent;}))tk2=k;});
         var chip=document.createElement('div');
-        chip.style.cssText='padding:8px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:6px;border:1.5px solid '+bc+';background:'+bc+'15;color:'+color+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        chip.style.cssText='padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-bottom:4px;border:1px solid '+bc+';background:'+bc+'15;color:'+color+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
         chip.textContent=v.agent.split(' ')[0]+' - '+v.nom;
         chip.title=v.agent+' · '+v.nom+' · '+v.date;
         col.appendChild(chip);
