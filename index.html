@@ -1701,9 +1701,9 @@ function renderVentes(){
     var pipeDeclared=filteredPipe.filter(function(v){return v.instal_status==='declared';}).sort(function(a,b){return (b.timestamp||0)-(a.timestamp||0);});
     var pipeValidated=filteredPipe.filter(function(v){return v.instal_status==='validated';}).sort(function(a,b){return (b.timestamp||0)-(a.timestamp||0);});
     var cols=document.createElement('div');
-    cols.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px';
+    cols.style.cssText='display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none';
     function makeCol(title,items,color,borderColor){
-      var col=document.createElement('div');
+      var col=document.createElement('div');col.style.cssText='min-width:150px;flex:1';
       var colHdr=document.createElement('div');
       colHdr.style.cssText='font-size:11px;font-weight:700;color:'+color+';margin-bottom:8px;text-align:center;padding:6px;background:'+borderColor+'22;border-radius:8px';
       colHdr.textContent=title+' ('+items.length+')';
