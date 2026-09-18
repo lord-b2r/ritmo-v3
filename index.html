@@ -610,6 +610,9 @@ function showToast(msg){
 function backToForm(){
   document.getElementById('sent').style.display='none';
   document.getElementById('form-send').style.display='flex';
+  // Réactiver le bouton d'envoi
+  var btn=document.getElementById('send-btn');
+  if(btn){btn.disabled=false;btn.textContent='Envoyer';}
   // Recharger S depuis le draft pour préremplir le formulaire
   loadS();
   renderVentesForm();
