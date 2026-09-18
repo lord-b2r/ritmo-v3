@@ -1013,9 +1013,16 @@ function renderStats(){
 function renderVentes(){
   var month=now.toISOString().slice(0,7);
   var agents=teamFilterV==='all'?getMyAgents():(TEAMS[teamFilterV]||[]);
+  // Mois en cours
   var reps=REPORTS.filter(function(r){return agents.some(function(a){return a.n===r.agent;})&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month;});
-  var allV=reps.reduce(function(acc,r){return acc.concat((r.ventes_detail||[]).filter(function(v){return v&&v.nom;}).map(function(v){return Object.assign({},v,{date:r.date,agent:r.agent});}));},  []);
+  var allV=reps.reduce(function(acc,r){return acc.concat((r.ventes_detail||[]).filter(function(v){return v&&v.nom;}).map(function(v){return Object.assign({},v,{date:r.date,agent:r.agent,repId:r.id,timestamp:r.timestamp,instal_status:v.instal_status||'none'});}));}, []);
+  // Pipe (hors mois en cours)
+  var pipeReps=REPORTS.filter(function(r){return agents.some(function(a){return a.n===r.agent;})&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)!==month;});
+  var pipeV=pipeReps.reduce(function(acc,r){return acc.concat((r.ventes_detail||[]).filter(function(v){return v&&v.nom;}).map(function(v){return Object.assign({},v,{date:r.date,agent:r.agent,repId:r.id,timestamp:r.timestamp,instal_status:v.instal_status||'none'});}));}, []);
   var filtered=typeFilter==='all'?allV:allV.filter(function(v){return (v.type||v.ty||'POS')===typeFilter;});
+  var allVentes=allV.concat(pipeV);
+  var filteredPipe=typeFilter==='all'?allVentes:allVentes.filter(function(v){return (v.type||v.ty||'POS')===typeFilter;});
+  // KPIs
   var totalTPV=filtered.reduce(function(s,v){return s+(parseInt(v.tpv)||0);},0);
   var avgTaux=filtered.length?filtered.reduce(function(s,v){return s+(parseFloat(v.taux)||0);},0)/filtered.length:0;
   var totalUp=filtered.reduce(function(s,v){return s+(parseInt(v.upfront)||0);},0);
@@ -1027,12 +1034,22 @@ function renderVentes(){
     var vk=document.createElement('div');vk.className='vk';vk.innerHTML='<div class="vkl">'+c[0]+'</div><div class="vkv">'+c[1]+'</div><div class="vks">'+c[2]+'</div>';kpi.appendChild(vk);
   });
   var list=document.getElementById('ventes-list');list.innerHTML='';
-  if(!filtered.length){list.innerHTML='<div class="empty">Aucune vente</div>';return;}
-  filtered.forEach(function(v){
+  // ── Section mois en cours ──
+  var secMonth=document.createElement('div');
+  var mHdr=document.createElement('div');
+  mHdr.style.cssText='font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer';
+  mHdr.innerHTML='<span>Ce mois · '+filtered.length+' vente'+(filtered.length!==1?'s':'')+'</span><span style="font-size:10px">▲</span>';
+  var mBody=document.createElement('div');var mExp=true;
+  mHdr.onclick=function(){mExp=!mExp;mBody.style.display=mExp?'block':'none';mHdr.querySelector('span:last-child').textContent=mExp?'▲':'▼';};
+  if(!filtered.length){mBody.innerHTML='<div class="empty">Aucune vente ce mois</div>';}
+  else{filtered.forEach(function(v){
     var tp=parseInt(v.tpv)||0,up=parseInt(v.upfront)||0,ty=v.type||v.ty||'POS';
+    var ist=v.instal_status||'none';
     var ag=ALL_AGENTS.find(function(a){return a.n===v.agent;});
     var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===v.agent;}))tk=k;});
-    var d=document.createElement('div');d.className='vi';
+    var card=document.createElement('div');card.className='vi';
+    if(ist==='declared')card.style.cssText='border:1.5px solid #fb923c;background:rgba(251,146,60,.07)';
+    else if(ist==='validated')card.style.cssText='border:1.5px solid #4ade80;background:rgba(74,222,128,.07)';
     var vit=document.createElement('div');vit.className='vit';
     var vin=document.createElement('span');vin.className='vin';vin.textContent=v.nom;
     var ty2=document.createElement('span');ty2.className='pill '+(ty==='POS'?'ok':'bl');ty2.textContent=ty;
@@ -1041,8 +1058,39 @@ function renderVentes(){
     via.innerHTML=(ag?ag.n.split(' ')[0]:v.agent)+' <span class="team-chip tc-'+tk+'">'+MANAGERS[tk].name+'</span> - '+v.date;
     var vg=document.createElement('div');vg.className='vig';
     [['TPV',tp?formatK(tp)+' EUR':'---'],['Taux',v.taux?v.taux+'%':'---'],['Upfront',up?formatK(up)+' EUR':'0']].forEach(function(c){var vc=document.createElement('div');vc.className='vc';var vcl=document.createElement('div');vcl.className='vcl';vcl.textContent=c[0];var vcv=document.createElement('div');vcv.className='vcv';vcv.textContent=c[1];vc.appendChild(vcl);vc.appendChild(vcv);vg.appendChild(vc);});
-    d.appendChild(vit);d.appendChild(via);d.appendChild(vg);list.appendChild(d);
-  });
+    card.appendChild(vit);card.appendChild(via);card.appendChild(vg);mBody.appendChild(card);
+  });}
+  secMonth.appendChild(mHdr);secMonth.appendChild(mBody);list.appendChild(secMonth);
+  // ── Section PIPE ──
+  if(filteredPipe.length>0){
+    var secPipe=document.createElement('div');secPipe.style.marginTop='20px';
+    var pHdr=document.createElement('div');
+    pHdr.style.cssText='font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer';
+    pHdr.innerHTML='<span>Pipe · '+filteredPipe.length+' vente'+(filteredPipe.length!==1?'s':'')+'</span><span style="font-size:10px">▼</span>';
+    var pBody=document.createElement('div');pBody.style.display='none';var pExp=false;
+    pHdr.onclick=function(){pExp=!pExp;pBody.style.display=pExp?'block':'none';pHdr.querySelector('span:last-child').textContent=pExp?'▲':'▼';};
+    var pNone=filteredPipe.filter(function(v){return !v.instal_status||v.instal_status==='none';}).sort(function(a,b){return (a.timestamp||0)-(b.timestamp||0);});
+    var pDecl=filteredPipe.filter(function(v){return v.instal_status==='declared';});
+    var pVali=filteredPipe.filter(function(v){return v.instal_status==='validated';});
+    var cols=document.createElement('div');cols.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px';
+    function makeCol(title,items,color,bc){
+      var col=document.createElement('div');
+      var ch=document.createElement('div');ch.style.cssText='font-size:11px;font-weight:700;color:'+color+';margin-bottom:8px;text-align:center;padding:6px;background:'+bc+'22;border-radius:8px';
+      ch.textContent=title+' ('+items.length+')';col.appendChild(ch);
+      items.forEach(function(v){
+        var tk2='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===v.agent;}))tk2=k;});
+        var chip=document.createElement('div');
+        chip.style.cssText='padding:8px 10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:6px;border:1.5px solid '+bc+';background:'+bc+'15;color:'+color+';overflow:hidden;text-overflow:ellipsis;white-space:nowrap';
+        chip.textContent=v.agent.split(' ')[0]+' - '+v.nom;
+        chip.title=v.agent+' · '+v.nom+' · '+v.date;
+        col.appendChild(chip);
+      });return col;
+    }
+    cols.appendChild(makeCol('Aucune',pNone,'var(--g4)','var(--g3)'));
+    cols.appendChild(makeCol('Installées',pDecl,'#fb923c','#fb923c'));
+    cols.appendChild(makeCol('Validées',pVali,'#4ade80','#4ade80'));
+    pBody.appendChild(cols);secPipe.appendChild(pHdr);secPipe.appendChild(pBody);list.appendChild(secPipe);
+  }
 }
 
 function renderMur(){
