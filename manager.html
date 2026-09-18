@@ -782,9 +782,9 @@ function renderVentes(){
     var pHdr=document.createElement('div');
     pHdr.style.cssText='font-size:11px;font-weight:700;color:var(--g4);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;cursor:pointer';
     pHdr.innerHTML='<span>Pipe · '+filteredPipe.length+' vente'+(filteredPipe.length!==1?'s':'')+'</span><span style="font-size:10px">▼</span>';
-    var pBody=document.createElement('div');pBody.style.display='none';
+    var pBody=document.createElement('div');pBody.style.cssText='overflow:hidden;max-height:0;transition:max-height .35s ease';
     var pExp=false;
-    pHdr.onclick=function(){pExp=!pExp;pBody.style.display=pExp?'block':'none';pHdr.querySelector('span:last-child').textContent=pExp?'▲':'▼';};
+    pHdr.onclick=function(){pExp=!pExp;pBody.style.maxHeight=pExp?pBody.scrollHeight+'px':'0';pHdr.querySelector('span:last-child').textContent=pExp?'▲':'▼';};
     var pipeNone=filteredPipe.filter(function(v){return !v.instal_status||v.instal_status==='none';}).sort(function(a,b){return (a.timestamp||0)-(b.timestamp||0);});
     var pipeDeclared=filteredPipe.filter(function(v){return v.instal_status==='declared';});
     var pipeValidated=filteredPipe.filter(function(v){return v.instal_status==='validated';});
