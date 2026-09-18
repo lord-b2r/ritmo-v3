@@ -1047,7 +1047,7 @@ async function sendEOD(){
   const rdv_og_count=S.rdv_og.length;
   const notes_ih={};S.rdv_ih.forEach((r,i)=>{if(r.note)notes_ih[i+1]=r.note;});
   const notes_og={};S.rdv_og.forEach((r,i)=>{if(r.note)notes_og[i+1]=r.note;});
-  const ventes_detail=S.ventes.map(v=>({nom:v.nom,tpv:v.tpv,taux:v.taux,type:v.ty,upfront:v.upfront}));
+  const ventes_detail=S.ventes.map(v=>({nom:v.nom,tpv:v.tpv,taux:v.taux,type:v.ty||v.type,upfront:v.upfront,instal_status:v.instal_status||INSTAL_STATUS_CACHE[(v.nom||'').trim()]||'none'}));
   // Ajouter les RDV marques FU dans la liste FU
   S.rdv_ih.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV IH',cat:'rdv',type:'ih',note:r.note,ts:Date.now()});});
   S.rdv_og.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV OG',cat:'rdv',type:'og',note:r.note,ts:Date.now()});});
