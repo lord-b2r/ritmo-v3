@@ -1424,6 +1424,18 @@ function evSetStatus(status){
     el.style.borderColor=colors[s].b;el.style.background=colors[s].bg;el.style.color=colors[s].c;
   });
 }
+
+async function patchEODStats(repId, newVentesDetail){
+  var newTotalVente=newVentesDetail.length;
+  var newInstal=newVentesDetail.filter(function(v){return v.instal_status==='declared'||v.instal_status==='validated';}).length;
+  var newScore=newTotalVente+newInstal;
+  await fetch(SB+'/rest/v1/eod_reports?id=eq.'+repId,{
+    method:'PATCH',
+    headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({ventes_detail:newVentesDetail,total_vente:newTotalVente,instal:newInstal,score:newScore})
+  });
+  return {total_vente:newTotalVente,instal:newInstal,score:newScore};
+}
 function closeEditVente(){var m=document.getElementById('edit-vente-modal');if(m)m.remove();}
 function deleteEditVente(){
   var m=document.getElementById('edit-vente-modal');if(!m)return;
@@ -1513,13 +1525,31 @@ async function saveEditVente(){
   // Mettre à jour dans S.ventes
   S.ventes.forEach(function(x){if(x.nom===nom){x.nom=nom;x.tpv=tpv;x.taux=taux;x.upfront=up;x.instal_status=instalStatus;}});
   // Mettre à jour dans allReports.ventes_detail
-  allReports.forEach(function(r){
-    if(r.ventes_detail)r.ventes_detail.forEach(function(x){if((x.nom||'').trim()===nom){x.instal_status=instalStatus;}});
-    if(r.ventes)r.ventes.forEach(function(x){if((x.nom||'').trim()===nom){x.instal_status=instalStatus;}});
-  });
-  allReportsGlobal.forEach(function(r){
-    if(r.ventes_detail)r.ventes_detail.forEach(function(x){if((x.nom||'').trim()===nom){x.instal_status=instalStatus;}});
-  });
+  // Patcher Supabase avec recalcul complet
+  (async function(){
+    try{
+      var reps=allReports.filter(function(r){return r.agent===ME&&r.ventes_detail&&r.ventes_detail.length;});
+      for(var ri=0;ri<reps.length;ri++){
+        var rep=reps[ri];
+        var found=rep.ventes_detail.some(function(v){return (v.nom||'').trim()===nom;});
+        if(found){
+          var newDetail=rep.ventes_detail.map(function(v){
+            if((v.nom||'').trim()===nom)return Object.assign({},v,{nom:nom,tpv:String(tpv),taux:String(taux),upfront:String(up),instal_status:instalStatus});
+            return v;
+          });
+          var stats=await patchEODStats(rep.id,newDetail);
+          rep.ventes_detail=newDetail;
+          rep.total_vente=stats.total_vente;
+          rep.instal=stats.instal;
+          rep.score=stats.score;
+          break;
+        }
+      }
+      allReportsGlobal.forEach(function(r){
+        if(r.ventes_detail)r.ventes_detail.forEach(function(x){if((x.nom||'').trim()===nom){x.instal_status=instalStatus;}});
+      });
+    }catch(e){console.warn('save vente supabase',e);}
+  })();
   // Persister dans Supabase — trouver le rapport qui contient cette vente
   (async function(){
     try{
