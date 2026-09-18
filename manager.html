@@ -734,7 +734,9 @@ function renderVentes(){
   var pipeV=pipeReps.reduce(function(acc,r){return acc.concat((r.ventes_detail||[]).filter(function(v){return v&&v.nom;}).map(function(v){return Object.assign({},v,{date:r.date,agent:r.agent,repId:r.id,timestamp:r.timestamp,instal_status:v.instal_status||'none'});}));}, []);
   // Filtre type
   var filtered=typeFilter==='all'?allV:allV.filter(function(v){return (v.type||v.ty||'POS')===typeFilter;});
-  var filteredPipe=typeFilter==='all'?pipeV:pipeV.filter(function(v){return (v.type||v.ty||'POS')===typeFilter;});
+  // Pipe = toutes les ventes (mois en cours + historique) triées par statut
+  var allVentes=allV.concat(pipeV);
+  var filteredPipe=typeFilter==='all'?allVentes:allVentes.filter(function(v){return (v.type||v.ty||'POS')===typeFilter;});
   // KPIs
   var totalTPV=filtered.reduce(function(s,v){return s+(parseInt(v.tpv)||0);},0);
   var avgTaux=filtered.length?filtered.reduce(function(s,v){return s+(parseFloat(v.taux)||0);},0)/filtered.length:0;
