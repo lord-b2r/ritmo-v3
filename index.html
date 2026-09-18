@@ -614,14 +614,27 @@ function backToForm(){
   loadS();
   renderVentesForm();
   renderInstalForm();
+  if(typeof renderRdvIh==='function')renderRdvIh();
+  if(typeof renderRdvOg==='function')renderRdvOg();
   updateAll();
-  showToast('Tu peux modifier et renvoyer');
+  showToast('Données préremplies — modifie et renvoie');
 }
 function freshS(){return {rdv_ih:[], rdv_og:[], ventes:[], instalList:[], ac:0, ins:0, fu:0, noshow:0, ol:false, cr:false, mot:''};};
 function saveS(){
   if(!ME)return;
   var today=new Date().toISOString().slice(0,10);
-  try{localStorage.setItem('ritmo_draft_'+ME,JSON.stringify({s:S,date:today,mot:document.getElementById('mot')?document.getElementById('mot').value:''}));}catch(e){}
+  try{
+    var motEl=document.getElementById('mot');
+    var olEl=document.getElementById('cb-ol');
+    var crEl=document.getElementById('cb-cr');
+    localStorage.setItem('ritmo_draft_'+ME,JSON.stringify({
+      s:S,
+      date:today,
+      mot:motEl?motEl.value:'',
+      ol:olEl?olEl.checked:S.ol,
+      cr:crEl?crEl.checked:S.cr
+    }));
+  }catch(e){}
 }
 function loadS(){
   if(!ME)return false;
@@ -632,7 +645,9 @@ function loadS(){
     var data=JSON.parse(raw);
     if(data.date!==today)return false;
     S=data.s;
-    if(data.mot&&document.getElementById('mot'))document.getElementById('mot').value=data.mot;
+    if(data.mot!=null&&document.getElementById('mot'))document.getElementById('mot').value=data.mot;
+    if(data.ol!=null){S.ol=data.ol;var olEl=document.getElementById('cb-ol');if(olEl)olEl.checked=data.ol;}
+    if(data.cr!=null){S.cr=data.cr;var crEl=document.getElementById('cb-cr');if(crEl)crEl.checked=data.cr;}
     return true;
   }catch(e){return false;}
 }
@@ -1064,10 +1079,8 @@ async function sendEOD(){
     });
     if(res.ok){
       sent=true;
-      // Préremplir le formulaire avec les données envoyées pour les renvois ultérieurs
-      try{
-        if(typeof loadS==='function')loadS();
-      }catch(e){}
+      // Sauvegarder le draft complet pour préremplissage lors d'un renvoi
+      saveS();
       setSd('ok');
       // Sauvegarder instal_items dans Supabase
       if(S.instalList&&S.instalList.length>0){
