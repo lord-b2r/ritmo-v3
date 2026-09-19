@@ -719,6 +719,49 @@ function backOb(){document.getElementById('ps').classList.remove('show');documen
 function chkPin(){}
 function logout(){if(!confirm('Changer de compte ?'))return;rpk('salesos_me');rpk('ritmo_team');location.reload();}
 
+
+async function loadTodayReport(){
+  if(!ME)return;
+  try{
+    var dayStart=new Date();dayStart.setHours(0,0,0,0);
+    var dayEnd=new Date();dayEnd.setHours(23,59,59,999);
+    var res=await fetch(SB+'/rest/v1/eod_reports?select=*&agent=eq.'+encodeURIComponent(ME)+'&timestamp=gte.'+dayStart.getTime()+'&timestamp=lte.'+dayEnd.getTime()+'&order=timestamp.desc&limit=1',{
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK}
+    });
+    var reps=await res.json();
+    if(!reps||!reps.length)return;
+    var rep=reps[0];
+    // Préremplir S depuis le rapport Supabase
+    S.ins=rep.instal||0;
+    S.ac=rep.ac||0;
+    S.fu=rep.leads_fu||0;
+    S.noshow=rep.noshow||0;
+    S.ol=rep.outlook||false;
+    S.cr=rep.crm||false;
+    // Restaurer les ventes depuis ventes_detail
+    if(rep.ventes_detail&&rep.ventes_detail.length){
+      S.ventes=rep.ventes_detail.map(function(v){
+        return {nom:v.nom||'',tpv:v.tpv||0,taux:v.taux||0,ty:v.type||'POS',upfront:v.upfront||0,instal_status:v.instal_status||'none'};
+      });
+    }
+    // Restaurer le mot du jour
+    if(rep.mot_jour){var motEl=document.getElementById('mot');if(motEl)motEl.value=rep.mot_jour;}
+    // Restaurer les checkboxes
+    var olEl=document.getElementById('cb-ol');if(olEl)olEl.checked=rep.outlook||false;
+    var crEl=document.getElementById('cb-cr');if(crEl)crEl.checked=rep.crm||false;
+    // Mettre à jour le cache instal_status
+    (rep.ventes_detail||[]).forEach(function(v){
+      if(v.nom&&v.instal_status&&v.instal_status!=='none'){
+        INSTAL_STATUS_CACHE[(v.nom||'').trim()]=v.instal_status;
+      }
+    });
+    renderVentesForm();
+    renderInstalForm();
+    updateAll();
+    showToast('EOD du jour chargée — complète et renvoie');
+    console.log('Rapport du jour chargé depuis Supabase',rep.id);
+  }catch(e){console.warn('loadTodayReport',e);}
+}
 function bootApp(){
   if(!OBJECTIVES[ME])OBJECTIVES[ME]={...DEFAULT_OBJ};
   try{fuList=JSON.parse(localStorage.getItem('ritmo_fu_'+ME)||'[]');}catch(e){fuList=[];}
@@ -729,15 +772,16 @@ function bootApp(){
   document.getElementById('sh-agent').textContent=ME;
   document.getElementById('sh-date').textContent=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
   stAgent=ME;
-  buildWeek();updateAll();loadReports();
-  // Restaurer le brouillon du jour si existant
-  if(loadS()){
-    updateAll();
-    // Vérifier si une EOD a déjà été envoyée aujourd'hui
-    var today=new Date().toISOString().slice(0,10);
-    var sentToday=allReports.some(function(r){return r.agent===ME&&r.date&&r.date.includes(today.slice(8,10));});
-    showToast(sentToday?'EOD deja envoyee aujourd hui — tu peux modifier':'Brouillon du jour restaure');
-  }
+  buildWeek();updateAll();
+  loadReports().then(function(){
+    // Charger le rapport du jour depuis Supabase (source de vérité)
+    loadTodayReport().then(function(){
+      // Si pas de rapport du jour, restaurer le brouillon localStorage
+      if(!S.ventes.length&&!S.ins){
+        if(loadS()){updateAll();showToast('Brouillon du jour restauré');}
+      }
+    });
+  });
 }
 
 // -- SYNC --
