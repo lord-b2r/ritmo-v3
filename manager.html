@@ -459,7 +459,7 @@ async function loadData(){
   try{
     var res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
     var data=await res.json();
-    REPORTS=data;
+    REPORTS=dedupReports(data);
     setSd('ok');
   }catch(e){setSd('err');}
   renderAll();
@@ -507,6 +507,16 @@ function getMonth(name,month){
   });
 }
 
+
+function dedupReports(reps){
+  // Garder uniquement le rapport le plus récent par agent et par date
+  var seen={};
+  return reps.filter(function(r){
+    var key=(r.agent||'')+'__'+(r.date||'');
+    if(!seen[key]||r.timestamp>seen[key]){seen[key]=r.timestamp;return true;}
+    return false;
+  });
+}
 function renderAll(){renderToday();renderMonth();renderVentes();renderMur();}
 
 function renderToday(){renderDateNav();
