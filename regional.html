@@ -477,7 +477,7 @@ async function loadData(){
   setSd('ld');
   try{
     var res=await fetch(SB+'/rest/v1/eod_reports?select=*&order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
-    REPORTS=await res.json();
+    REPORTS=dedupReports(await res.json());
     setSd('ok');
   }catch(e){setSd('err');}
   renderAll();loadInstalItems();
@@ -542,6 +542,16 @@ function getMonth(name,month){
   return REPORTS.filter(function(r){return r.agent===name&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===m;});
 }
 
+
+function dedupReports(reps){
+  // Garder uniquement le rapport le plus récent par agent et par date
+  var seen={};
+  return reps.filter(function(r){
+    var key=(r.agent||'')+'__'+(r.date||'');
+    if(!seen[key]||r.timestamp>seen[key]){seen[key]=r.timestamp;return true;}
+    return false;
+  });
+}
 function renderAll(){renderDateNav();renderToday();renderMgrView();renderMur();}
 
 
