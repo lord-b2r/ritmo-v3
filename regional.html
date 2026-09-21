@@ -477,7 +477,7 @@ async function loadData(){
   setSd('ld');
   try{
     var res=await fetch(SB+'/rest/v1/eod_reports?select=*&order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
-    REPORTS=dedupReports(await res.json());
+    REPORTS=await res.json();
     setSd('ok');
   }catch(e){setSd('err');}
   renderAll();loadInstalItems();
