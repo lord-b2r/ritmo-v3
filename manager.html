@@ -459,7 +459,7 @@ async function loadData(){
   try{
     var res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
     var data=await res.json();
-    REPORTS=dedupReports(data);
+    REPORTS=data;
     setSd('ok');
   }catch(e){setSd('err');}
   renderAll();
