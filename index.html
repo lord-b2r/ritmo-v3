@@ -591,6 +591,17 @@ let S = freshS();
 let openB = {rdv:true, vt:true, ac:true};
 let allReports = [];
 let allReportsGlobal = [];
+
+function dedupReports(reps){
+  // Garder uniquement le rapport le plus récent par agent et par date
+  var seen={};
+  return reps.filter(function(r){
+    var key=(r.agent||'')+'__'+(r.date||'');
+    if(!seen[key]||r.timestamp>seen[key]){seen[key]=r.timestamp;return true;}
+    return false;
+  });
+}
+
 let INSTAL_STATUS_CACHE = {}; // {nom: 'declared'|'validated'|'none'}
 let fuList = [];
 let fuFilter = 'all';
