@@ -560,7 +560,7 @@ var INSTAL_ITEMS = [];
 async function loadInstalItems(){
   // Lire les instals depuis instal_items ET depuis ventes_detail des rapports
   try{
-    var agents=getMyAgents().map(function(a){return '"'+a.n+'"';}).join(',');
+    var agents=getMyAgents(true).map(function(a){return '"'+a.n+'"';}).join(',');
     var res=await fetch(SB+'/rest/v1/instal_items?agent=in.('+agents+')&order=timestamp.desc&limit=500',{
       headers:{'apikey':SK,'Authorization':'Bearer '+SK}
     });
@@ -568,7 +568,7 @@ async function loadInstalItems(){
   }catch(e){INSTAL_ITEMS=[];}
 
   // Construire INSTAL_ITEMS depuis ventes_detail des rapports (source de vérité)
-  var agentNames=getMyAgents().map(function(a){return a.n;});
+  var agentNames=getMyAgents(true).map(function(a){return a.n;});
   var instalFromReports=[];
   REPORTS.forEach(function(r){
     if(!r.ventes_detail||!r.agent)return;
@@ -690,7 +690,7 @@ function getTeamForAgent(agent){
 
 
 function renderToday(){
-  var agents=getMyAgents();
+  var agents=getMyAgents(true);
   var reps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
   var miss=agents.length-reps.length;
   var tv=reps.reduce(function(s,r){return s+(r.total_vente||0);},0);
@@ -930,7 +930,7 @@ function renderStats(){
 
   // Chart 2 : Top performers
   if(charts.top){charts.top.destroy();}
-  var allStats=getMyAgents().map(function(ag){
+  var allStats=getMyAgents(true).map(function(ag){
     var r=getMonth(ag.n,month);
     var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
     return{n:ag.n.split(' ')[0],i:ag.i,s:r.reduce(function(x,y){return x+(y.score||0);},0),color:TEAM_COLORS[tk]};
@@ -947,7 +947,7 @@ function renderStats(){
 
   // Chart 3 : Stats cles radar-like (barres horizontales)
   if(charts.statsc){charts.statsc.destroy();}
-  var allReps=getMyAgents().flatMap(function(ag){return getMonth(ag.n,month);});
+  var allReps=getMyAgents(true).flatMap(function(ag){return getMonth(ag.n,month);});
   var sRdvIh=allReps.reduce(function(s,r){return s+(r.rdv_ih||0);},0);
   var sNoshow=allReps.reduce(function(s,r){return s+(r.noshow||0);},0);
   var sIhReel=Math.max(0,sRdvIh-sNoshow);
@@ -974,7 +974,7 @@ function renderStats(){
 
   // Classement global
   var rg=document.getElementById('rank-global');rg.innerHTML='';
-  var globalStats=getMyAgents().map(function(ag){
+  var globalStats=getMyAgents(true).map(function(ag){
     var r=getMonth(ag.n,month);
     var tk='jean';Object.keys(TEAMS).forEach(function(k){if(TEAMS[k].some(function(a){return a.n===ag.n;}))tk=k;});
     return{ag:ag,s:r.reduce(function(x,y){return x+(y.score||0);},0),v:r.reduce(function(x,y){return x+(y.total_vente||0);},0),ins:r.reduce(function(x,y){return x+(y.instal||0);},0),pos:r.reduce(function(x,y){return x+(y.total_pos||0);},0),tk:tk};
@@ -1022,7 +1022,7 @@ function renderStats(){
 
 function renderVentes(){
   var month=now.toISOString().slice(0,7);
-  var agents=teamFilterV==='all'?getMyAgents():(TEAMS[teamFilterV]||[]);
+  var agents=teamFilterV==='all'?getMyAgents(true):(TEAMS[teamFilterV]||[]);
   // Mois en cours
   var reps=REPORTS.filter(function(r){return agents.some(function(a){return a.n===r.agent;})&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month;});
   var allV=reps.reduce(function(acc,r){return acc.concat((r.ventes_detail||[]).filter(function(v){return v&&v.nom;}).map(function(v){return Object.assign({},v,{date:r.date,agent:r.agent,repId:r.id,timestamp:r.timestamp,instal_status:v.instal_status||'none'});}));}, []);
