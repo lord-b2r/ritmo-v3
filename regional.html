@@ -729,8 +729,8 @@ function renderToday(){
     hd.appendChild(lf);hd.appendChild(sc2);
     cont.appendChild(hd);
 
-    var wr=tAgents.filter(function(a){return getToday(a.n);});
-    var wo=tAgents.filter(function(a){return !getToday(a.n);});
+    var wr=tVisibleAgents.filter(function(a){return getToday(a.n);});
+    var wo=tVisibleAgents.filter(function(a){return !getToday(a.n);});
     wr.concat(wo).forEach(function(ag){
       var rep=getToday(ag.n);
       var card=document.createElement('div');card.className='agc'+(rep?'':' ms');
