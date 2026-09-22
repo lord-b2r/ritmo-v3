@@ -1087,7 +1087,11 @@ async function sendEOD(){
     var vv=S.ventes[vi];
     if(!vv.nom||!vv.nom.trim()){
       btn.disabled=false;btn.textContent='Envoyer';
-      showToast('Vente '+(vi+1)+' : nom du commerce obligatoire');return;
+      showToast('Vente '+(vi+1)+' : renseigne le nom du commerce');return;
+    }
+    if(!vv.tpv||parseInt(vv.tpv)===0){
+      btn.disabled=false;btn.textContent='Envoyer';
+      showToast('Vente '+(vi+1)+' : renseigne le TPV');return;
     }
     if(!vv.ty){
       btn.disabled=false;btn.textContent='Envoyer';
