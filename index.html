@@ -805,9 +805,9 @@ async function loadReports(){
   try{
     const res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
     const d=await res.json();
-    allReportsGlobal=dedupReports(d);
+    allReportsGlobal=d;
     const teamAgents=TEAMS[MY_TEAM]?TEAMS[MY_TEAM].agents.map(a=>a.n):[];
-    allReports=dedupReports(d.filter(r=>teamAgents.some(n=>n===r.agent||n.toLowerCase()===r.agent.toLowerCase())));
+    allReports=d.filter(r=>teamAgents.some(n=>n===r.agent||n.toLowerCase()===r.agent.toLowerCase()));
     setSd('ok');buildWeek();
   }catch(e){
     // Utiliser donnees locales en fallback
