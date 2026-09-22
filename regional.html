@@ -691,8 +691,10 @@ function getTeamForAgent(agent){
 
 function renderToday(){
   var agents=getMyAgents(true);
+  var visibleAgents=getMyAgents();
   var reps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
-  var miss=agents.length-reps.length;
+  var visibleReps=reps.filter(function(r){return visibleAgents.some(function(a){return a.n===r.agent;});});
+  var miss=visibleAgents.length-visibleReps.length;
   var tv=reps.reduce(function(s,r){return s+(r.total_vente||0);},0);
   var ti=reps.reduce(function(s,r){return s+(r.instal||0);},0);
   var sc=reps.reduce(function(s,r){return s+(r.score||0);},0);
@@ -702,7 +704,7 @@ function renderToday(){
   var tpos=reps.reduce(function(s,r){return s+(r.total_pos||0);},0);
   var posShare=tv>0?Math.round(tpos/tv*100):0;
   var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
-  [['Rapports',reps.length+'/'+agents.length,miss>0?(miss+' manquant'+(miss>1?'s':'')):'Complet'],
+  [['Rapports',visibleReps.length+'/'+visibleAgents.length,miss>0?(miss+' manquant'+(miss>1?'s':'')):'Complet'],
    ['Ventes',tv,'IH + OG'],['Instals',ti,'Aujourd hui'],['Score',sc,'Toutes equipes'],
    ['RDV IH',trdvIh,''],['RDV OG',trdvOg,''],['No show / Impossible',tnoshow,'red'],['POS share',posShare+'%',tpos+' POS']].forEach(function(item){
     var kc=document.createElement('div');kc.className='kc';
