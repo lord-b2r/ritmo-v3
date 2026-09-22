@@ -714,9 +714,9 @@ function renderToday(){
 
   var cont=document.getElementById('teams-today');cont.innerHTML='';
   MY_TEAMS.forEach(function(tk){
-    var mgr=MANAGERS[tk];if(!mgr)return;var tAgents=TEAMS[tk]||[];
+    var mgr=MANAGERS[tk];if(!mgr)return;var tAgents=TEAMS[tk]||[];var tVisibleAgents=tAgents.filter(function(a){return !a.hidden;});
     var tReps=tAgents.map(function(a){return getToday(a.n);}).filter(Boolean);
-    var tMiss=tAgents.length-tReps.length;
+    var tMiss=tVisibleAgents.length-tReps.filter(function(r){return tVisibleAgents.some(function(a){return a.n===r.agent;});}).length;
     var tSc=tReps.reduce(function(s,r){return s+(r.score||0);},0);
     var tV=tReps.reduce(function(s,r){return s+(r.total_vente||0);},0);
 
