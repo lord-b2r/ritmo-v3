@@ -483,9 +483,9 @@ async function loadData(){
   renderAll();loadInstalItems();
 }
 
-function getMyAgents(){
+function getMyAgents(includeHidden){
   var ag=[];MY_TEAMS.forEach(function(tk){ag=ag.concat(TEAMS[tk]||[]);});
-  return ag.filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
+  return ag.filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i&&(includeHidden||!a.hidden);});
 }
 
 function getToday(name){
