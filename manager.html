@@ -664,7 +664,7 @@ function togAgent(key,rep){
 }
 
 function renderMonth(){
-  var agents=getTeamAgents('own');
+  var agents=getTeamAgents('own',true);
   var month=now.toISOString().slice(0,7);
   var stats=agents.map(function(ag){
     var r=getMonth(ag.n);
@@ -737,7 +737,7 @@ function renderMonth(){
 }
 
 function renderVentes(){
-  var agents=getTeamAgents('own');
+  var agents=getTeamAgents('own',true);
   if(salesFilter!=='all'){agents=agents.filter(function(a){return a.n===salesFilter;});}
   var month=now.toISOString().slice(0,7);
   // Mois en cours
@@ -906,7 +906,7 @@ async function loadFuItems(agents){
   return [];
 }
 function renderFU(){
-  var agents=getTeamAgents('own');
+  var agents=getTeamAgents('own',true);
   var summary=document.getElementById('fu-summary');
   var list=document.getElementById('fu-list-mgr');
   if(!summary||!list)return;
