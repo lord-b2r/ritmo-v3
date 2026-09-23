@@ -457,7 +457,7 @@ function scCMonth(score){var avg=score/workedDaysElapsed();return avg>2?'blue':a
 async function loadData(){
   setSd('ld');
   try{
-    var res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
+    var res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc&limit=2000',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
     var data=await res.json();
     REPORTS=data;
     setSd('ok');
