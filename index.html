@@ -803,7 +803,7 @@ function calcScore(){return S.ventes.length + S.ins;}
 async function loadReports(){
   setSd('ld');
   try{
-    const res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc&limit=2000',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
+    const res=await fetch(SB+'/rest/v1/eod_reports?order=timestamp.desc&limit=2000&_v=2',{headers:{'apikey':SK,'Authorization':'Bearer '+SK}});
     const d=await res.json();
     allReportsGlobal=d;
     const teamAgents=TEAMS[MY_TEAM]?TEAMS[MY_TEAM].agents.map(a=>a.n):[];
