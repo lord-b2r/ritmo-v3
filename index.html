@@ -1121,33 +1121,13 @@ async function sendEOD(){
   setSd('ld');
   let sent=false;
   try{
-    // UPSERT — chercher si un rapport existe déjà aujourd'hui par date textuelle (évite les problèmes UTC)
+    // POST simple — upsert désactivé temporairement
     let existingId=null;
-    try{
-      const todayDateStr=new Date().toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
-      const existRes=await fetch(SB+'/rest/v1/eod_reports?select=id&agent=eq.'+encodeURIComponent(ME)+'&date=eq.'+encodeURIComponent(todayDateStr)+'&order=timestamp.desc&limit=1',{
-        headers:{'apikey':SK,'Authorization':'Bearer '+SK}
-      });
-      if(existRes.ok){
-        const existReps=await existRes.json();
-        if(existReps&&existReps.length>0)existingId=existReps[0].id;
-      }
-    }catch(e){console.warn('Check existing EOD failed',e);}
-    // Si rapport existant → PATCH, sinon → POST
-    let res;
-    if(existingId){
-      res=await fetch(SB+'/rest/v1/eod_reports?id=eq.'+existingId,{
-        method:'PATCH',
-        headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
-        body:JSON.stringify(eod)
-      });
-    } else {
-      res=await fetch(SB+'/rest/v1/eod_reports',{
-        method:'POST',
-        headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
-        body:JSON.stringify(eod)
-      });
-    }
+    const res=await fetch(SB+'/rest/v1/eod_reports',{
+      method:'POST',
+      headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify(eod)
+    });
     if(res.ok){
       sent=true;
       // Sauvegarder le draft complet pour préremplissage lors d'un renvoi
@@ -1210,9 +1190,7 @@ async function sendEOD(){
       console.error('Supabase error',res.status,errTxt);
       // Retry sans fu_list si la colonne pose probleme
       const eodSafe={...eod};delete eodSafe.fu_list;delete eodSafe.instal_list;
-      const res2=existingId?
-        await fetch(SB+'/rest/v1/eod_reports?id=eq.'+existingId,{method:'PATCH',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(eodSafe)}):
-        await fetch(SB+'/rest/v1/eod_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(eodSafe)});
+      const res2=await fetch(SB+'/rest/v1/eod_reports',{method:'POST',headers:{'apikey':SK,'Authorization':'Bearer '+SK,'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(eodSafe)});
       if(res2.ok){sent=true;setSd('ok');console.log('Sent without fu_list');}
       else{setSd('err');console.error('Retry failed',res2.status,await res2.text());}
     }
