@@ -705,26 +705,79 @@ function getTeamOf(name){
   return 'jean';
 }
 
+// Régions
+var REGIONS={
+  'Sud-Est':{teams:['jean','romeo','quentin','idris','arsena','axel_l','alex_g'],color:'#3b82f6'},
+  'Sud-Ouest':{teams:['cem','benjamin','salim'],color:'#f59e0b'},
+  'Nord':{teams:['julien_r','zinedine'],color:'#10b981'}
+};
+
 function buildOb(){
   const g=document.getElementById('ob-grid');g.innerHTML='';
-  Object.keys(TEAMS).forEach(tk=>{
-    const tm=TEAMS[tk];
-    const lbl=document.createElement('div');lbl.className='ob-team-lbl';lbl.textContent=tm.label;g.appendChild(lbl);
-    const grid=document.createElement('div');grid.className='ob-team-grid';
-    const unique=tm.agents.filter((a,i,arr)=>arr.findIndex(x=>x.n===a.n)===i);
-    unique.forEach(a=>{
-      const d=document.createElement('div');d.className='ob-row';
-      const av=document.createElement('div');av.className='ob-av';av.textContent=a.i;
-      const inf=document.createElement('div');
-      const nm=document.createElement('div');nm.className='ob-nm';nm.textContent=a.n;
-      const rl=document.createElement('div');rl.className='ob-rl';rl.textContent=tm.label;
-      inf.appendChild(nm);inf.appendChild(rl);
-      d.appendChild(av);d.appendChild(inf);
-      d.onclick=(function(name,teamk){return function(){selMe(name,teamk);};})(a.n,tk);
-      grid.appendChild(d);
-    });
-    g.appendChild(grid);
-    const sep=document.createElement('div');sep.className='ob-sep';g.appendChild(sep);
+  // Étape 1 : sélection région
+  const title=document.createElement('div');title.className='ob-team-lbl';title.textContent='Sélectionne ta région';g.appendChild(title);
+  Object.entries(REGIONS).forEach(([rname,r])=>{
+    const btn=document.createElement('div');btn.className='ob-row';btn.style.cursor='pointer';
+    const av=document.createElement('div');av.className='ob-av';av.textContent=rname[0];av.style.background=r.color;
+    const inf=document.createElement('div');
+    const nm=document.createElement('div');nm.className='ob-nm';nm.textContent=rname;
+    const rl=document.createElement('div');rl.className='ob-rl';rl.textContent=r.teams.length+' équipes';
+    inf.appendChild(nm);inf.appendChild(rl);
+    btn.appendChild(av);btn.appendChild(inf);
+    btn.onclick=(function(region){return function(){buildObRegion(region);};})(rname);
+    g.appendChild(btn);
+  });
+}
+
+function buildObRegion(rname){
+  const g=document.getElementById('ob-grid');g.innerHTML='';
+  const r=REGIONS[rname];
+  // Bouton retour
+  const back=document.createElement('div');back.className='ob-row';back.style.cursor='pointer';back.style.opacity='0.6';
+  const bav=document.createElement('div');bav.className='ob-av';bav.textContent='←';
+  const binf=document.createElement('div');
+  const bnm=document.createElement('div');bnm.className='ob-nm';bnm.textContent='Retour';
+  binf.appendChild(bnm);back.appendChild(bav);back.appendChild(binf);
+  back.onclick=buildOb;g.appendChild(back);
+  const title=document.createElement('div');title.className='ob-team-lbl';title.textContent=rname+' — Sélectionne ton équipe';g.appendChild(title);
+  r.teams.forEach(tk=>{
+    const tm=TEAMS[tk];if(!tm)return;
+    const btn=document.createElement('div');btn.className='ob-row';btn.style.cursor='pointer';
+    const av=document.createElement('div');av.className='ob-av';av.textContent=tm.label[0];av.style.background=r.color;
+    const inf=document.createElement('div');
+    const nm=document.createElement('div');nm.className='ob-nm';nm.textContent=tm.label;
+    const rl=document.createElement('div');rl.className='ob-rl';
+    const vis=tm.agents.filter(a=>!a.hidden);rl.textContent=vis.length+' commerciaux';
+    inf.appendChild(nm);inf.appendChild(rl);
+    btn.appendChild(av);btn.appendChild(inf);
+    btn.onclick=(function(teamk,region){return function(){buildObTeam(teamk,region);};})(tk,rname);
+    g.appendChild(btn);
+  });
+}
+
+function buildObTeam(tk,rname){
+  const g=document.getElementById('ob-grid');g.innerHTML='';
+  const tm=TEAMS[tk];
+  const r=REGIONS[rname];
+  // Bouton retour
+  const back=document.createElement('div');back.className='ob-row';back.style.cursor='pointer';back.style.opacity='0.6';
+  const bav=document.createElement('div');bav.className='ob-av';bav.textContent='←';
+  const binf=document.createElement('div');
+  const bnm=document.createElement('div');bnm.className='ob-nm';bnm.textContent='Retour';
+  binf.appendChild(bnm);back.appendChild(bav);back.appendChild(binf);
+  back.onclick=(function(region){return function(){buildObRegion(region);};})(rname);g.appendChild(back);
+  const title=document.createElement('div');title.className='ob-team-lbl';title.textContent='Équipe '+tm.label+' — Sélectionne ton prénom';g.appendChild(title);
+  const unique=tm.agents.filter((a,i,arr)=>!a.hidden&&arr.findIndex(x=>x.n===a.n)===i);
+  unique.forEach(a=>{
+    const d=document.createElement('div');d.className='ob-row';
+    const av=document.createElement('div');av.className='ob-av';av.textContent=a.i;av.style.background=r.color;
+    const inf=document.createElement('div');
+    const nm=document.createElement('div');nm.className='ob-nm';nm.textContent=a.n;
+    const rl=document.createElement('div');rl.className='ob-rl';rl.textContent=tm.label;
+    inf.appendChild(nm);inf.appendChild(rl);
+    d.appendChild(av);d.appendChild(inf);
+    d.onclick=(function(name,teamk){return function(){selMe(name,teamk);};})(a.n,tk);
+    g.appendChild(d);
   });
 }
 
