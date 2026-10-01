@@ -1021,9 +1021,16 @@ function renderInstalForm(){
     sourceReps.filter(function(r){return r.agent===ME&&(r.ventes_detail||r.ventes)&&(r.ventes_detail||r.ventes).length;}).forEach(function(r){
       ((r.ventes_detail||r.ventes)||[]).forEach(function(v){
         var nom=(v.nom||'').trim();
-        var status=v.instal_status||INSTAL_STATUS_CACHE[nom]||'none';
-        // Exclure les ventes déjà installées ou validées
-        if(!nom||status==='declared'||status==='validated')return;
+        // Prendre le statut le plus récent depuis tous les rapports (pas juste le cache)
+        var status=v.instal_status||'none';
+        // Vérifier aussi dans le cache et dans les ventes du formulaire actuel
+        var cacheStatus=INSTAL_STATUS_CACHE[nom]||'none';
+        var formStatus=(S.ventes.find(function(x){return (x.nom||'').trim()===nom;})||{}).instal_status||'none';
+        var finalStatus=[status,cacheStatus,formStatus].reduce(function(best,s){
+          var rank={'validated':3,'declared':2,'none':1};
+          return (rank[s]||0)>(rank[best]||0)?s:best;
+        },'none');
+        if(!nom||finalStatus==='declared'||finalStatus==='validated')return;
         if(!ventesPast.find(function(x){return x.nom===nom;})){
           ventesPast.push({nom:nom,type:v.type||v.ty||'POS',tpv:v.tpv||v.tp||0});
         }
