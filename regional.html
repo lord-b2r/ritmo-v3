@@ -341,9 +341,10 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
 <script>
 var REGIONAL_MANAGERS = {
+  romane:   {name:'Romane KESTLER',   initials:'RK', pin:'2142', teams:['maeline','zinedine'], label:'Region Nord-Ouest'},
   nacim:    {name:'Nacim GUECEM',    initials:'NG', pin:'4001', teams:['camille'], label:'Region IDF'},
   baptiste: {name:'Baptiste',       initials:'BA', pin:'3001', teams:['jean','romeo','quentin','idris','arsena','axel_l','alex_g'], label:'Region Baptiste'},
-  louis:    {name:'Louis STEINCKER',initials:'LS', pin:'3003', teams:['louis_p','julien_r','zinedine','guillaume'],                                                 label:'Region Louis Steincker'},
+  louis:    {name:'Louis STEINCKER',initials:'LS', pin:'3003', teams:['louis_p','julien_r','guillaume'],                                                 label:'Region Louis Steincker'},
   mohamed:  {name:'Mohamed SATA',   initials:'MS', pin:'3002', teams:['cem','benjamin','salim'],                                           label:'Region Mohamed Sata'}
 };
 
@@ -368,8 +369,8 @@ var TEAMS = {
   romeo:   [{n:'Kelly HOCHET',i:'KH'},{n:'Bastien GEIGER',i:'BG'},{n:'Lea RECORDIER',i:'LR',hidden:true},{n:'Hugo LAUGIER',i:'HL'},{n:'Raphael BOUTEILLE',i:'RB'},{n:'Linda MEBAREK',i:'LM'}],
   quentin: [{n:'Anisse CAPUTO',i:'AC'},{n:'Ilyas LARABA',i:'IL'},{n:'Adam KANDILL',i:'AK'},{n:'Matis DEROIN',i:'MD'},{n:'Nicolas YAKDI',i:'NY'},{n:'Matteo DIONOT',i:'MD'}],
   cem:     [{n:'Sam PIOGE',i:'SP'},{n:'Gregory BAICHEV',i:'GB'},{n:'William VANDENBUSSCHE',i:'WV'},{n:'Robin HINGRAND',i:'RH'},{n:'Marion GAILLARD',i:'MG'},{n:'Paul DUPUCH',i:'PD'},{n:'Florian BIVENT',i:'FB'},{n:'Alexandre BARCHEMIN',i:'AB'}],
-  idris:   [{n:'Bilal MEZABER',i:'BM'},{n:'Marguerite ALVES',i:'MG'},{n:'Julie CROS',i:'JC'},{n:'Alexis COSTE',i:'AL',hidden:true},{n:'Nicolas GESUALDI',i:'NG'},{n:'Luc PERRIER',i:'LP'},{n:'Yann CARPENTIER',i:'YC'},{n:'Roman LORENTE',i:'RL'},{n:'Adrien CHATELARD',i:'AC'},{n:'Thomas KARAM',i:'TK'},{n:'Kevin BILO',i:'KB'}],
-  arsena:  [{n:'Zakaria CHAJRI',i:'ZC'},{n:'Tanguy BOUCABEILLE',i:'TB'},{n:'Teo BOINET',i:'TO'},{n:'Blaise DE MONTGOLFIER',i:'BD'},{n:'Theo NORGET',i:'TN'},{n:'Xavier BESSON',i:'XB',hidden:true},{n:'Come MENISSIER',i:'CM'},{n:'Hugo CONTORNI',i:'HC'},{n:'Florian SIMON',i:'FS'},{n:'Lea VOVAN',i:'LV'},{n:'Raphael MUKENDI',i:'RM'},{n:'Ludovic LOUISET',i:'LL'}],
+  idris:   [{n:'Bilal MEZABER',i:'BM'},{n:'Marguerite ALVES',i:'MG'},{n:'Julie CROS',i:'JC'},{n:'Alexis COSTE',i:'AL',hidden:true},{n:'Nicolas GESUALDI',i:'NG'},{n:'Luc PERRIER',i:'LP'},{n:'Yann CARPENTIER',i:'YC',hidden:true},{n:'Roman LORENTE',i:'RL'},{n:'Adrien CHATELARD',i:'AC'},{n:'Thomas KARAM',i:'TK'},{n:'Kevin BILO',i:'KB'}],
+  arsena:  [{n:'Zakaria CHAJRI',i:'ZC'},{n:'Tanguy BOUCABEILLE',i:'TB'},{n:'Teo BOINET',i:'TO'},{n:'Blaise DE MONTGOLFIER',i:'BD'},{n:'Theo NORGET',i:'TN'},{n:'Xavier BESSON',i:'XB',hidden:true},{n:'Come MENISSIER',i:'CM'},{n:'Hugo CONTORNI',i:'HC',hidden:true},{n:'Florian SIMON',i:'FS'},{n:'Lea VOVAN',i:'LV'},{n:'Raphael MUKENDI',i:'RM'},{n:'Ludovic LOUISET',i:'LL'}],
 
   axel_l:  [{n:'Quentin LARTIGUE',i:'QL'},{n:'Arnaud ROCHETTE',i:'AR'},{n:'Julian DEL BOSQUE',i:'JB',hidden:true},{n:'Lydiane ROUDAUT',i:'LY',hidden:true},{n:'Jorys TUEUR',i:'JT'},{n:'Oussama BOUSSIMED',i:'OB'},{n:'Nicolas GENTIL',i:'NI',hidden:true}],
   louis_p:[{n:'Thomas RENDA',i:'TR'},{n:'Oceane JURQUET',i:'OJ'},{n:'Julien DUPROIX',i:'JD'}],
@@ -377,9 +378,10 @@ var TEAMS = {
   benjamin:[{n:'Gregoire QUELLIER',i:'GQ'},{n:'Matteo VEILLON',i:'MV'},{n:'Bel MOUYENI',i:'BL'},{n:'Matteo LESIEN',i:'MT'},{n:'Pauline DUCAMP',i:'PD'},{n:'Vianney DE CASLOU',i:'VC'},{n:'Jonathan POUILLE',i:'JP'}],
   salim:    [{n:'Alexis PAVY',i:'AP'},{n:'David DUCOS',i:'DD'},{n:'Gwenael HUBERT',i:'GH'},{n:'Maxime ANTUNES',i:'MA'},{n:'Michael BIANTI',i:'MB'},{n:'Morgan FARRUGIA',i:'MF'},{n:'Sylvain PIATTI',i:'SP'}],
   camille: [{n:'Adrien ROBERT',i:'AR'},{n:'Alexandre DESCHAMPS',i:'AD'},{n:'Corentin CORDIER',i:'CC'},{n:'Gaddiel UZAN',i:'GU'},{n:'Gregoire LEFEBVRE',i:'GL'},{n:'Johan LE FUR',i:'JF'},{n:'Kevin LY',i:'KL'},{n:'Marcelo LEMPEREUR',i:'ML'},{n:'Zakaria-Amine BOUMEDIENE',i:'ZB'}],
-  guillaume: [{n:'Fabrice MOREL',i:'FM'},{n:'Alban HONNET',i:'AH'},{n:'Houssni MZE',i:'HM'},{n:'Yacine CHIGUIER',i:'YC'},{n:'Francois GORON',i:'FG'}],
+  guillaume: [{n:'Fabrice MOREL',i:'FM'},{n:'Alban HONNET',i:'AH'},{n:'Yacine CHIGUIER',i:'YC'},{n:'Francois GORON',i:'FG'},{n:'Maxime VIGNALI',i:'MV'},{n:'Benjamin COUTANT',i:'BC'}],
+  maeline: [],
   zinedine: [{n:'Antonin RAUCH',i:'AR'},{n:'Garance WOJCIK',i:'GW'},{n:'Husein GUN',i:'HG'},{n:'Mathieu BLEUET',i:'MB'},{n:'Maxime MARTIN',i:'MM'}],
-  alex_g: [{n:'Corentin EUSTACHE',i:'CE'},{n:'Anthony DOUARCHE',i:'AD'},{n:'Axel GUILLEVIC',i:'AX'},{n:'Floryan LEMOINE',i:'FL'},{n:'Leo PEYRARD',i:'LP'},{n:'Esteban DUVERNAY',i:'ED'},{n:'Frederic COELHO',i:'FC'},{n:'Ijlal AGGA',i:'IA'},{n:'Remi ZAMPINI',i:'RZ'},{n:'Gauthier SOYER',i:'GS'}]
+  alex_g: [{n:'Corentin EUSTACHE',i:'CE'},{n:'Anthony DOUARCHE',i:'AD'},{n:'Axel GUILLEVIC',i:'AX'},{n:'Floryan LEMOINE',i:'FL',hidden:true},{n:'Leo PEYRARD',i:'LP'},{n:'Esteban DUVERNAY',i:'ED'},{n:'Frederic COELHO',i:'FC'},{n:'Ijlal AGGA',i:'IA'},{n:'Remi ZAMPINI',i:'RZ'},{n:'Gauthier SOYER',i:'GS'}]
 };
 
 var TEAM_COLORS = {jean:'#3b82f6',romeo:'#ec4899',quentin:'#10b981',cem:'#f59e0b',idris:'#8b5cf6',arsena:'#ef4444',milan:'#06b6d4',axel_l:'#84cc16',julien_r:'#f97316',benjamin:'#64748b',salim:'#8b5cf6',zinedine:'#ec4899',alex_g:'#06b6d4'};
