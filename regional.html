@@ -589,7 +589,7 @@ var HOS_DRILL = null;
 
 function isHOS(){return ME==='mathis';}
 
-function renderHOS(){
+function renderHOSMgr(){
   var month=now.toISOString().slice(0,7);
   var cont=document.getElementById('teams-today');cont.innerHTML='';
   var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
@@ -641,7 +641,7 @@ function renderHOS(){
         '<div style="display:flex;justify-content:space-between;align-items:center">'+
         '<div style="font-size:11px;color:rgba(255,255,255,.4)">No-show: '+rns+' · Score ajd: '+tSc+'</div>'+
         '<div style="font-size:11px;color:'+r.color+'">Voir détail →</div></div>';
-      card.onclick=(function(rn){return function(){HOS_DRILL=rn;renderHOS();};})(rname);
+      card.onclick=(function(rn){return function(){HOS_DRILL=rn;renderHOSMgr();};})(rname);
       cont.appendChild(card);
     });
 
@@ -651,7 +651,7 @@ function renderHOS(){
     var back=document.createElement('div');
     back.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 0 12px;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px';
     back.innerHTML='← Toutes les régions';
-    back.onclick=function(){HOS_DRILL=null;renderHOS();};
+    back.onclick=function(){HOS_DRILL=null;renderHOSMgr();};
     cont.appendChild(back);
     var hdr=document.createElement('div');
     hdr.style.cssText='font-size:16px;font-weight:700;color:'+r.color+';margin-bottom:14px';
@@ -705,7 +705,7 @@ function renderHOS(){
   }
 }
 
-function renderAll(){renderDateNav();if(isHOS()){renderHOS();}else{renderToday();}renderMgrView();renderMur();}
+function renderAll(){renderDateNav();renderToday();if(isHOS()){renderHOSMgr();}else{renderMgrView();}renderMur();}
 
 
 var INSTAL_ITEMS = [];
