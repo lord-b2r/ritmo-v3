@@ -722,7 +722,98 @@ function renderHOSMgr(){
   }
 }
 
-function renderAll(){renderDateNav();renderToday();if(!isHOS())renderMgrView();renderMur();}
+function renderHOSToday(){
+  var cont=document.getElementById('teams-today');cont.innerHTML='';
+  var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
+  var openTeams={};
+
+  // KPIs globaux
+  var allAg=Object.values(HOS_REGIONS).flatMap(function(r){return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});});
+  var tAll=allAg.map(function(a){return getToday(a.n);}).filter(Boolean);
+  var tSc=tAll.reduce(function(s,x){return s+(x.score||0);},0);
+  var tMiss=allAg.length-tAll.length;
+  [['EOD ajd',tAll.length+'/'+allAg.length,tMiss>0?tMiss+' manquants':'Complet'],
+   ['Score',tSc,'en temps réel'],
+   ['Ventes',tAll.reduce(function(s,x){return s+(x.total_vente||0);},0),''],
+   ['Instals',tAll.reduce(function(s,x){return s+(x.instal||0);},0),'']
+  ].forEach(function(item){
+    var kc=document.createElement('div');kc.className='kc';
+    kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv '+(tMiss>0&&item[0]==='EOD ajd'?'err':'g')+'">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
+    kpi.appendChild(kc);
+  });
+
+  Object.entries(HOS_REGIONS).forEach(function(entry){
+    var rname=entry[0],r=entry[1];
+    var ragents=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+    var rTday=ragents.map(function(a){return getToday(a.n);}).filter(Boolean);
+    var rSc=rTday.reduce(function(s,x){return s+(x.score||0);},0);
+    var rV=rTday.reduce(function(s,x){return s+(x.total_vente||0);},0);
+    var rI=rTday.reduce(function(s,x){return s+(x.instal||0);},0);
+    var rPos=rTday.reduce(function(s,x){return s+(x.total_pos||0);},0);
+    var rMiss=ragents.length-rTday.length;
+
+    // Bandeau région
+    var sep=document.createElement('div');
+    sep.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px 4px;margin:10px 0 6px;border-bottom:1px solid '+r.color+'44';
+    sep.innerHTML='<div style="font-size:12px;font-weight:700;color:'+r.color+'">'+rname+'</div>'+
+      '<div style="display:flex;gap:10px;font-size:11px;color:rgba(255,255,255,.5)">'+
+      '<span style="color:#4ade80">'+rV+' v</span>'+
+      '<span style="color:#f97316">'+rI+' i</span>'+
+      '<span style="color:#fb923c">'+rPos+' POS</span>'+
+      '<span style="color:'+r.color+';font-weight:700">'+rSc+' pts</span>'+
+      '<span style="color:'+(rMiss>0?'#f87171':'#4ade80')+'">'+(rMiss>0?rMiss+' ❌':'✓')+'</span>'+
+      '</div>';
+    cont.appendChild(sep);
+
+    // Cards managers dépliantes
+    r.teams.forEach(function(tk){
+      var mgr=MANAGERS[tk];if(!mgr)return;
+      var agents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
+      var tReps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
+      var sc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
+      var miss=agents.length-tReps.length;
+      var isOpen=openTeams[tk]||false;
+
+      var wrap=document.createElement('div');
+      wrap.style.cssText='background:var(--b);border-left:3px solid '+r.color+';border-radius:10px;margin-bottom:6px;overflow:hidden';
+
+      // Header cliquable
+      var hd=document.createElement('div');
+      hd.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer';
+      hd.innerHTML=
+        '<div><div style="font-size:13px;font-weight:600;color:#fff">'+mgr.label+'</div>'+
+        '<div style="font-size:11px;color:'+(miss>0?'#f87171':'#4ade80')+'">'+
+        (miss>0?miss+' EOD manquante'+(miss>1?'s':''):'Complet')+
+        '</div></div>'+
+        '<div style="display:flex;align-items:center;gap:12px">'+
+        '<div style="font-size:20px;font-weight:800;color:'+r.color+'">'+sc+'<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,.4)"> pts</span></div>'+
+        '<div style="font-size:16px;color:rgba(255,255,255,.3)" class="hd-chevron-'+tk+'">▶</div></div>';
+
+      // Body
+      var body=document.createElement('div');
+      body.style.cssText='display:'+(isOpen?'block':'none')+';padding:0 14px 10px';
+      body.innerHTML=agents.map(function(a){
+        var rep=getToday(a.n);
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">'+
+          '<div style="font-size:12px;color:'+(rep?'#fff':'rgba(255,255,255,.35)')+'">'+a.n.split(' ')[0]+' '+a.n.split(' ')[1]+'</div>'+
+          '<div style="font-size:12px;color:'+(rep?r.color:'rgba(255,255,255,.2)')+';font-weight:'+(rep?'700':'400')+'">'+
+          (rep?rep.score+' pts · '+rep.total_vente+'v · '+rep.instal+'i':'—')+'</div></div>';
+      }).join('');
+
+      hd.onclick=(function(t,w,b){return function(){
+        var isNowOpen=b.style.display==='none';
+        b.style.display=isNowOpen?'block':'none';
+        openTeams[t]=isNowOpen;
+        var ch=w.querySelector('.hd-chevron-'+t);if(ch)ch.textContent=isNowOpen?'▼':'▶';
+      };})(tk,wrap,body);
+
+      wrap.appendChild(hd);wrap.appendChild(body);
+      cont.appendChild(wrap);
+    });
+  });
+}
+
+function renderAll(){renderDateNav();if(isHOS()){renderHOSToday();}else{renderToday();}if(!isHOS())renderMgrView();renderMur();}
 
 
 var INSTAL_ITEMS = [];
@@ -1436,6 +1527,7 @@ function sw(t){
     if(scr)scr.className='scr'+(t===s?' on':'');
     if(tab)tab.className='slide-tab'+(t===s?' on':'');
   });
+  if(t==='today'&&isHOS())renderHOSToday();
   if(t==='stats')renderStats();
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
