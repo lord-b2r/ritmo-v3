@@ -727,18 +727,17 @@ function renderHOSToday(){
   var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
   var openTeams={};
 
-  // KPIs globaux
   var allAg=Object.values(HOS_REGIONS).flatMap(function(r){return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});});
   var tAll=allAg.map(function(a){return getToday(a.n);}).filter(Boolean);
   var tSc=tAll.reduce(function(s,x){return s+(x.score||0);},0);
   var tMiss=allAg.length-tAll.length;
   [['EOD ajd',tAll.length+'/'+allAg.length,tMiss>0?tMiss+' manquants':'Complet'],
-   ['Score',tSc,'en temps réel'],
+   ['Score',tSc,'temps réel'],
    ['Ventes',tAll.reduce(function(s,x){return s+(x.total_vente||0);},0),''],
    ['Instals',tAll.reduce(function(s,x){return s+(x.instal||0);},0),'']
   ].forEach(function(item){
     var kc=document.createElement('div');kc.className='kc';
-    kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv '+(tMiss>0&&item[0]==='EOD ajd'?'err':'g')+'">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
+    kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv g">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
     kpi.appendChild(kc);
   });
 
@@ -752,66 +751,64 @@ function renderHOSToday(){
     var rPos=rTday.reduce(function(s,x){return s+(x.total_pos||0);},0);
     var rMiss=ragents.length-rTday.length;
 
-    // Bandeau région
+    // Encadré région — fond coloré
     var sep=document.createElement('div');
-    sep.style.cssText='background:'+r.color+';border-radius:12px;padding:12px 16px;margin:12px 0 8px';
-    sep.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center">'+
-      '<div><div style="font-size:14px;font-weight:800;color:#fff">'+rname+'</div>'+
-      '<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px">'+(rMiss>0?rMiss+' manquante'+(rMiss>1?'s':''):'✓ Complet')+'</div></div>'+
-      '<div style="display:flex;gap:12px;text-align:center">'+
+    sep.style.cssText='background:'+r.color+';border-radius:12px;padding:12px 16px;margin:14px 0 8px;display:flex;justify-content:space-between;align-items:center';
+    sep.innerHTML='<div><div style="font-size:14px;font-weight:800;color:#fff">'+rname+'</div>'+
+      '<div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:2px">'+(rMiss>0?rMiss+' manquante'+(rMiss>1?'s':''):'✓ Complet')+'</div></div>'+
+      '<div style="display:flex;gap:14px;text-align:right">'+
       '<div><div style="font-size:18px;font-weight:800;color:#fff">'+rSc+'</div><div style="font-size:9px;color:rgba(255,255,255,.7)">pts</div></div>'+
       '<div><div style="font-size:18px;font-weight:800;color:#fff">'+rV+'</div><div style="font-size:9px;color:rgba(255,255,255,.7)">ventes</div></div>'+
       '<div><div style="font-size:18px;font-weight:800;color:#fff">'+rI+'</div><div style="font-size:9px;color:rgba(255,255,255,.7)">instals</div></div>'+
       '<div><div style="font-size:18px;font-weight:800;color:#fff">'+rPos+'</div><div style="font-size:9px;color:rgba(255,255,255,.7)">POS</div></div>'+
-      '</div></div>';
+      '</div>';
     cont.appendChild(sep);
 
-    // Cards managers dépliantes
+    // Cards managers — style Ritmo (fond sombre, border colorée)
     r.teams.forEach(function(tk){
       var mgr=MANAGERS[tk];if(!mgr)return;
       var agents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
       var tReps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
       var sc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
+      var v=tReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+      var ins=tReps.reduce(function(s,x){return s+(x.instal||0);},0);
       var miss=agents.length-tReps.length;
-      var isOpen=openTeams[tk]||false;
 
       var wrap=document.createElement('div');
-      wrap.style.cssText='background:rgba(255,255,255,.08);border-left:3px solid '+r.color+';border-radius:10px;margin-bottom:6px;overflow:hidden';
+      wrap.style.cssText='background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-left:3px solid '+r.color+';border-radius:12px;margin-bottom:6px;overflow:hidden';
 
-      // Header cliquable
       var hd=document.createElement('div');
-      hd.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer';
+      hd.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer';
       hd.innerHTML=
-        '<div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.95)">'+mgr.label+'</div>'+
-        '<div style="font-size:11px;color:'+(miss>0?'#f87171':'#4ade80')+'">'+
-        (miss>0?miss+' EOD manquante'+(miss>1?'s':''):'Complet')+
-        '</div></div>'+
-        '<div style="display:flex;align-items:center;gap:12px">'+
-        '<div style="font-size:20px;font-weight:800;color:'+r.color+'">'+sc+'<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,.5)"> pts</span></div>'+
-        '<div style="font-size:16px;color:rgba(255,255,255,.5)" class="hd-chevron-'+tk+'">▶</div></div>';
+        '<div><div style="font-size:13px;font-weight:600;color:rgba(255,255,255,.95)">'+mgr.label+'</div>'+
+        '<div style="font-size:11px;margin-top:2px;color:'+(miss>0?'#f87171':'#4ade80')+'">'+(miss>0?miss+' EOD manquante'+(miss>1?'s':''):'✓ Complet')+'</div></div>'+
+        '<div style="display:flex;align-items:center;gap:10px">'+
+        '<div style="text-align:right"><div style="font-size:20px;font-weight:800;color:'+r.color+'">'+sc+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">pts · '+v+'v · '+ins+'i</div></div>'+
+        '<div style="color:rgba(255,255,255,.35);font-size:14px" class="hd-chevron-'+tk+'">▶</div></div>';
 
-      // Body
       var body=document.createElement('div');
-      body.style.cssText='display:'+(isOpen?'block':'none')+';padding:0 14px 10px;background:rgba(0,0,0,.15);border-top:1px solid rgba(255,255,255,.08)';
-      body.innerHTML=agents.map(function(a){
+      body.style.cssText='display:none;border-top:1px solid rgba(255,255,255,.08)';
+      body.innerHTML='<div style="padding:8px 14px">'+agents.map(function(a){
         var rep=getToday(a.n);
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)">'+
-          '<div style="font-size:12px;color:'+(rep?'#fff':'rgba(255,255,255,.3)')+'">'+a.n.split(' ')[0]+' '+a.n.split(' ')[1]+'</div>'+
-          '<div style="font-size:12px;color:'+(rep?r.color:'rgba(255,255,255,.2)')+';font-weight:'+(rep?'700':'400')+'">'+
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">'+
+          '<div style="font-size:12px;color:'+(rep?'rgba(255,255,255,.9)':'rgba(255,255,255,.3)')+'">'+a.n+'</div>'+
+          '<div style="font-size:12px;font-weight:'+(rep?'600':'400')+';color:'+(rep?r.color:'rgba(255,255,255,.2)')+'">'+
           (rep?rep.score+' pts · '+rep.total_vente+'v · '+rep.instal+'i':'—')+'</div></div>';
-      }).join('');
+      }).join('')+'</div>';
 
-      hd.onclick=(function(t,w,b){return function(){
-        var isNowOpen=b.style.display==='none';
-        b.style.display=isNowOpen?'block':'none';
-        openTeams[t]=isNowOpen;
-        var ch=w.querySelector('.hd-chevron-'+t);if(ch)ch.textContent=isNowOpen?'▼':'▶';
-      };})(tk,wrap,body);
+      hd.onclick=(function(t,b){return function(){
+        var open=b.style.display==='none';
+        b.style.display=open?'block':'none';
+        var ch=document.querySelector('.hd-chevron-'+t);if(ch)ch.textContent=open?'▼':'▶';
+      };})(tk,body);
 
       wrap.appendChild(hd);wrap.appendChild(body);
       cont.appendChild(wrap);
     });
   });
+}
+
+
 }
 
 function renderAll(){renderDateNav();if(isHOS()){renderHOSToday();}else{renderToday();}if(!isHOS())renderMgrView();renderMur();}
