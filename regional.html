@@ -591,8 +591,9 @@ function isHOS(){return ME==='mathis';}
 
 function renderHOSMgr(){
   var month=now.toISOString().slice(0,7);
-  var cont=document.getElementById('teams-today');cont.innerHTML='';
-  var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
+  var cont=document.getElementById('mgr-content');if(!cont)return;cont.innerHTML='';
+  var kpiEl=document.getElementById('mgr-overview');if(kpiEl)kpiEl.innerHTML='';
+  var kpi=document.createElement('div');kpi.className='kgrid';if(kpiEl)kpiEl.appendChild(kpi);
 
   if(!HOS_DRILL){
     // KPIs France globaux
@@ -705,7 +706,7 @@ function renderHOSMgr(){
   }
 }
 
-function renderAll(){renderDateNav();renderToday();if(isHOS()){renderHOSMgr();}else{renderMgrView();}renderMur();}
+function renderAll(){renderDateNav();renderToday();if(!isHOS())renderMgrView();renderMur();}
 
 
 var INSTAL_ITEMS = [];
@@ -1423,7 +1424,7 @@ function sw(t){
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
   if(t==='instals')loadInstalItems();
-  if(t==='managers'&&isHOS())renderHOSMgr();
+  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';renderHOSMgr();}else{var f=document.getElementById('mgr-filter');if(f)f.style.display='';renderMgrView();}}
 }
 
 function setTypeFilter(t){
