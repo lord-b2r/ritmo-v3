@@ -728,6 +728,7 @@ function renderHOSToday(){
   var kpi=document.getElementById('today-kpi');
   kpi.innerHTML='';
 
+  // KPIs France globaux
   var allAg=Object.values(HOS_REGIONS).flatMap(function(r){
     return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
   });
@@ -756,6 +757,7 @@ function renderHOSToday(){
     kpi.appendChild(kc);
   });
 
+  // Par région
   Object.entries(HOS_REGIONS).forEach(function(entry){
     var rname=entry[0], r=entry[1];
     var ragents=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
@@ -766,93 +768,62 @@ function renderHOSToday(){
     var rI=rTday.reduce(function(s,x){return s+(x.instal||0);},0);
     var rPos=rTday.reduce(function(s,x){return s+(x.total_pos||0);},0);
 
-    var rHd=document.createElement('div');
-    rHd.style.cssText='display:flex;justify-content:space-between;align-items:center;background:'+r.color+';border-radius:12px;padding:10px 14px;margin:12px 0 6px';
-    rHd.innerHTML=
-      '<div style="font-size:13px;font-weight:800;color:#fff">'+rname+
-        '<span style="font-size:10px;font-weight:400;margin-left:8px;color:rgba(255,255,255,.8)">'+(rMiss>0?rMiss+' manq.':'OK')+'</span>'+
+    // Séparateur région — encadré sombre, texte coloré
+    var sep=document.createElement('div');
+    sep.style.cssText='background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-left:3px solid '+r.color+';border-radius:10px;padding:10px 14px;margin:14px 0 6px;display:flex;justify-content:space-between;align-items:center';
+    sep.innerHTML=
+      '<div style="font-size:13px;font-weight:800;color:'+r.color+'">'+rname+
+        (rMiss>0?'<span style="font-size:10px;font-weight:400;color:var(--err);margin-left:8px">'+rMiss+' manq.</span>':'')+
       '</div>'+
-      '<div style="display:flex;gap:12px;font-size:11px;color:rgba(255,255,255,.9)">'+
-        '<span><b style="font-size:16px;font-weight:800;color:#fff">'+rSc+'</b> pts</span>'+
-        '<span><b style="font-size:16px;font-weight:800;color:#fff">'+rV+'</b> v</span>'+
-        '<span><b style="font-size:16px;font-weight:800;color:#fff">'+rI+'</b> i</span>'+
-        '<span><b style="font-size:16px;font-weight:800;color:#fff">'+rPos+'</b> POS</span>'+
+      '<div style="display:flex;gap:14px;font-size:11px">'+
+        '<span style="color:'+r.color+'"><b style="font-size:16px;font-weight:800">'+rSc+'</b> pts</span>'+
+        '<span style="color:'+r.color+'"><b>'+rV+'</b> v</span>'+
+        '<span style="color:'+r.color+'"><b>'+rI+'</b> i</span>'+
+        '<span style="color:'+r.color+'"><b>'+rPos+'</b> POS</span>'+
       '</div>';
-    cont.appendChild(rHd);
+    cont.appendChild(sep);
 
+    // Vue standard des équipes — même rendu que renderToday
     r.teams.forEach(function(tk){
       var mgr=MANAGERS[tk]; if(!mgr)return;
-      var agents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
-      var tReps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
-      var sc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
-      var v=tReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
-      var ins=tReps.reduce(function(s,x){return s+(x.instal||0);},0);
-      var ih=tReps.reduce(function(s,x){return s+(x.rdv_ih||0);},0);
-      var og=tReps.reduce(function(s,x){return s+(x.rdv_og||0);},0);
-      var ns=tReps.reduce(function(s,x){return s+(x.noshow||0);},0);
-      var pos=tReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
-      var miss=agents.length-tReps.length;
+      var tAgents=TEAMS[tk]||[];
+      var tVisibleAgents=tAgents.filter(function(a){return !a.hidden;});
+      var tReps=tAgents.map(function(a){return getToday(a.n);}).filter(Boolean);
+      var tMissTeam=tVisibleAgents.length-tReps.filter(function(rep){return tVisibleAgents.some(function(a){return a.n===rep.agent;});}).length;
+      var tSc2=tReps.reduce(function(s,x){return s+(x.score||0);},0);
+      var tV2=tReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
 
-      var card=document.createElement('div');
-      card.className='team-hd '+tk;
-      card.style.cssText='border-radius:10px;margin-bottom:5px;overflow:hidden;cursor:pointer';
-
+      // Header équipe
       var hd=document.createElement('div');
-      hd.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 14px';
-      hd.innerHTML=
-        '<div>'+
-          '<div class="team-nm">'+mgr.label+'</div>'+
-          '<div style="font-size:10px;margin-top:2px;color:'+(miss>0?'var(--err)':'var(--g)')+'">'+
-            (miss>0?miss+' manquante'+(miss>1?'s':''):'Complet')+
-          '</div>'+
-        '</div>'+
-        '<div style="display:flex;align-items:center;gap:6px">'+
-          '<div style="text-align:right">'+
-            '<div class="team-sc '+tk+'" style="font-size:24px;font-weight:900;line-height:1;letter-spacing:-1px">'+sc+'<span style="font-size:10px;font-weight:400;color:var(--g4);margin-left:2px">pts</span></div>'+
-            '<div style="font-size:10px;color:var(--g4);margin-top:2px">'+v+'v &middot; '+ins+'i</div>'+
-          '</div>'+
-          '<div id="arr-'+tk+'" style="color:var(--g4);font-size:12px;margin-left:2px">▶</div>'+
-        '</div>';
+      hd.className='team-hd '+tk;
+      var lf=document.createElement('div');
+      var tn=document.createElement('div');tn.className='team-nm';tn.textContent=mgr.label;
+      var ts=document.createElement('div');ts.style.cssText='font-size:11px;color:var(--g4);margin-top:2px';
+      ts.textContent=(tMissTeam>0?tMissTeam+' manquant'+(tMissTeam>1?'s':''):'Complet');
+      lf.appendChild(tn);lf.appendChild(ts);
+      var sc2=document.createElement('div');
+      sc2.className='team-sc '+tk;
+      sc2.textContent=tSc2;
+      if(tMissTeam>0)sc2.style.color='#f87171';
+      hd.appendChild(lf);hd.appendChild(sc2);
+      cont.appendChild(hd);
 
-      var body=document.createElement('div');
-      body.id='body-'+tk;
-      body.style.cssText='display:none;padding:0 14px 8px';
-      body.innerHTML=
-        // Ligne stats équipe
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:4px">'+
-        '<div style="text-align:center"><div class="kv g" style="font-size:14px">'+ns+'</div><div class="ks">No-show</div></div>'+
-        '<div style="text-align:center"><div class="kv g" style="font-size:14px">'+pos+'</div><div class="ks">POS</div></div>'+
-        '<div style="text-align:center"><div class="kv g" style="font-size:14px">'+ih+'</div><div class="ks">RDV IH</div></div>'+
-        '<div style="text-align:center"><div class="kv g" style="font-size:14px">'+og+'</div><div class="ks">RDV OG</div></div>'+
-        '</div>'+
-        // Liste commerciaux
-        agents.map(function(a){
-          var rep=getToday(a.n);
-          return '<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)">'+
-            '<div>'+
-              '<div style="font-size:12px;font-weight:500;color:'+(rep?'var(--f)':'var(--g4)')+'">'+a.n+'</div>'+
-              (rep&&rep.mot_jour?'<div style="font-size:10px;color:var(--g4);margin-top:1px;font-style:italic">"'+rep.mot_jour+'"</div>':'')+
-            '</div>'+
-            '<div style="text-align:right;flex-shrink:0;margin-left:8px">'+
-              (rep?
-                '<div style="font-size:12px;font-weight:600;color:'+r.color+'">'+rep.score+' pts</div>'+
-                '<div style="font-size:10px;color:var(--g4)">'+rep.total_vente+'v &middot; '+rep.instal+'i &middot; '+(rep.rdv_ih||0)+'+'+(rep.rdv_og||0)+' rdv</div>'
-              :'<div style="font-size:11px;color:var(--g4)">— pas de EOD</div>')+
-            '</div>'+
-          '</div>';
-        }).join('');
-
-      card.onclick=(function(t){return function(){
-        var b=document.getElementById('body-'+t);
-        var ar=document.getElementById('arr-'+t);
-        var open=b&&b.style.display==='none';
-        if(b)b.style.display=open?'block':'none';
-        if(ar)ar.textContent=open?'▼':'▶';
-      };})(tk);
-
-      card.appendChild(hd);
-      card.appendChild(body);
-      cont.appendChild(card);
+      // Liste commerciaux
+      var agc=document.createElement('div');agc.className='agc ms';
+      var agh=document.createElement('div');agh.className='agh';
+      tVisibleAgents.forEach(function(a){
+        var rep=getToday(a.n);
+        var ag=document.createElement('div');ag.className='ag'+(rep?' s':'');
+        var dot=document.createElement('div');dot.className='ag-dot';
+        var nm=document.createElement('div');nm.className='ag-n';nm.textContent=a.n.split(' ')[0];
+        var sc3=document.createElement('div');sc3.className='ag-s';
+        if(rep){sc3.textContent=rep.score;sc3.style.color='var(--g)';}
+        else{sc3.textContent='—';sc3.style.color='var(--g4)';}
+        ag.appendChild(dot);ag.appendChild(nm);ag.appendChild(sc3);
+        agh.appendChild(ag);
+      });
+      agc.appendChild(agh);
+      cont.appendChild(agc);
     });
   });
 }
