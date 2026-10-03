@@ -577,7 +577,116 @@ function dedupReports(reps){
     return false;
   });
 }
-function renderAll(){renderDateNav();renderToday();renderMgrView();renderMur();}
+var HOS_REGIONS = {
+  'Sud-Est':    {rm:'baptiste', color:'#3b82f6', teams:['jean','romeo','quentin','idris','arsena','axel_l','alex_g']},
+  'Sud-Ouest':  {rm:'mohamed',  color:'#f59e0b', teams:['cem','benjamin','salim']},
+  'Nord':       {rm:'louis',    color:'#10b981', teams:['louis_p','julien_r','guillaume']},
+  'Nord-Ouest': {rm:'romane',   color:'#ec4899', teams:['maeline','zinedine']},
+  'IDF':        {rm:'nacim',    color:'#8b5cf6', teams:['camille']}
+};
+
+var HOS_DRILL = null; // null=regions, string=region name drilled into
+
+function isHOS(){return ME==='mathis';}
+
+function renderHOS(){
+  var month=now.toISOString().slice(0,7);
+  var cont=document.getElementById('teams-today');cont.innerHTML='';
+  var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
+
+  if(!HOS_DRILL){
+    // Vue régions
+    var totalSc=0,totalV=0,totalI=0,totalAg=0;
+    Object.entries(HOS_REGIONS).forEach(function([rname,r]){
+      var ragents=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+      var rreps=ragents.flatMap(function(a){return getMonth(a.n,month);});
+      var rsc=rreps.reduce(function(s,x){return s+(x.score||0);},0);
+      var rv=rreps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+      var ri=rreps.reduce(function(s,x){return s+(x.instal||0);},0);
+      // Today
+      var tReps=ragents.map(function(a){return getToday(a.n);}).filter(Boolean);
+      var miss=ragents.length-tReps.length;
+      totalSc+=rsc;totalV+=rv;totalI+=ri;totalAg+=ragents.length;
+      var card=document.createElement('div');
+      card.style.cssText='background:rgba(255,255,255,.05);border:1px solid '+r.color+'44;border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:background .15s';
+      card.onmouseover=function(){this.style.background='rgba(255,255,255,.08)';};
+      card.onmouseout=function(){this.style.background='rgba(255,255,255,.05)';};
+      card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<div><div style="font-size:14px;font-weight:700;color:'+r.color+'">'+rname+'</div>'+
+        '<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">'+ragents.length+' commerciaux · '+r.teams.length+' équipes</div></div>'+
+        '<div style="font-size:22px;font-weight:800;color:'+r.color+'">'+rsc+'<span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.4)"> pts</span></div></div>'+
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;color:#4ade80">'+rv+'</div><div style="font-size:10px;color:rgba(255,255,255,.4)">Ventes</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;color:#f97316">'+ri+'</div><div style="font-size:10px;color:rgba(255,255,255,.4)">Instals</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+ragents.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.4)">EOD ajd</div></div>'+
+        '</div>';
+      card.onclick=(function(rn){return function(){HOS_DRILL=rn;renderHOS();};})(rname);
+      cont.appendChild(card);
+    });
+    // KPIs globaux
+    kpi.innerHTML='';
+    [['Score total',totalSc,'France'],['Ventes',totalV,'ce mois'],['Instals',totalI,'ce mois'],['Commerciaux',totalAg,'actifs']].forEach(function(item){
+      var kc=document.createElement('div');kc.className='kc';
+      kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv g">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
+      kpi.appendChild(kc);
+    });
+  } else {
+    // Vue région drillée
+    var r=HOS_REGIONS[HOS_DRILL];
+    // Bouton retour
+    var back=document.createElement('div');
+    back.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;margin-bottom:8px';
+    back.innerHTML='← Toutes les régions';
+    back.onclick=function(){HOS_DRILL=null;renderHOS();};
+    cont.appendChild(back);
+    // Header région
+    var hdr=document.createElement('div');
+    hdr.style.cssText='font-size:16px;font-weight:700;color:'+r.color+';margin-bottom:12px';
+    hdr.textContent=HOS_DRILL;
+    cont.appendChild(hdr);
+    // Cards par manager
+    r.teams.forEach(function(tk){
+      var mgr=MANAGERS[tk];if(!mgr)return;
+      var agents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
+      var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
+      var sc=reps.reduce(function(s,x){return s+(x.score||0);},0);
+      var v=reps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+      var ins=reps.reduce(function(s,x){return s+(x.instal||0);},0);
+      var tReps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
+      var miss=agents.length-tReps.length;
+      var card=document.createElement('div');
+      card.style.cssText='background:rgba(255,255,255,.05);border-left:3px solid '+r.color+';border-radius:10px;padding:12px 14px;margin-bottom:8px';
+      card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
+        '<div><div style="font-size:13px;font-weight:600;color:#fff">'+mgr.label+'</div>'+
+        '<div style="font-size:11px;color:rgba(255,255,255,.4)">'+agents.length+' commerciaux</div></div>'+
+        '<div style="font-size:20px;font-weight:800;color:'+r.color+'">'+sc+'</div></div>'+
+        '<div style="display:flex;gap:12px;font-size:11px;color:rgba(255,255,255,.5)">'+
+        '<span>'+v+' ventes</span><span>'+ins+' instals</span>'+
+        '<span style="color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+agents.length+' EOD</span></div>'+
+        // Commerciaux
+        '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">'+
+        agents.map(function(a){
+          var rep=getToday(a.n);
+          return '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:4px 8px;font-size:11px;color:'+(rep?'#4ade80':'rgba(255,255,255,.35)')+'">'+a.n.split(' ')[0]+(rep?' '+rep.score+'pts':'')+'</div>';
+        }).join('')+'</div>';
+      cont.appendChild(card);
+    });
+    // KPIs région
+    var ragents=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+    var rreps=ragents.flatMap(function(a){return getMonth(a.n,month);});
+    var rsc=rreps.reduce(function(s,x){return s+(x.score||0);},0);
+    var rv=rreps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+    var ri=rreps.reduce(function(s,x){return s+(x.instal||0);},0);
+    kpi.innerHTML='';
+    [['Score',rsc,HOS_DRILL],['Ventes',rv,'ce mois'],['Instals',ri,'ce mois'],['Équipes',r.teams.length,'managers']].forEach(function(item){
+      var kc=document.createElement('div');kc.className='kc';
+      kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv g">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
+      kpi.appendChild(kc);
+    });
+  }
+}
+
+function renderAll(){renderDateNav();if(isHOS()){renderHOS();}else{renderToday();}renderMgrView();renderMur();}
 
 
 var INSTAL_ITEMS = [];
