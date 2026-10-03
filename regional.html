@@ -585,7 +585,7 @@ var HOS_REGIONS = {
   'IDF':        {rm:'nacim',    color:'#8b5cf6', teams:['camille']}
 };
 
-var HOS_DRILL = null; // null=regions, string=region name drilled into
+var HOS_DRILL = null;
 
 function isHOS(){return ME==='mathis';}
 
@@ -595,56 +595,82 @@ function renderHOS(){
   var kpi=document.getElementById('today-kpi');kpi.innerHTML='';
 
   if(!HOS_DRILL){
-    // Vue régions
-    var totalSc=0,totalV=0,totalI=0,totalAg=0;
-    Object.entries(HOS_REGIONS).forEach(function([rname,r]){
+    // KPIs France globaux
+    var allAgents=Object.values(HOS_REGIONS).flatMap(function(r){return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});});
+    var allReps=allAgents.flatMap(function(a){return getMonth(a.n,month);});
+    var gSc=allReps.reduce(function(s,x){return s+(x.score||0);},0);
+    var gV=allReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+    var gI=allReps.reduce(function(s,x){return s+(x.instal||0);},0);
+    var gRdv=allReps.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
+    var gNs=allReps.reduce(function(s,x){return s+(x.noshow||0);},0);
+    var gTday=allAgents.map(function(a){return getToday(a.n);}).filter(Boolean).length;
+    var gPos=allReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
+    var gPosShare=gV>0?Math.round(gPos/gV*100):0;
+    [['Score France',gSc,'ce mois'],['Ventes',gV,'détaillées'],['Instals',gI,'déclarées'],['RDV total',gRdv,'IH + OG'],['No-show',gNs,''],['POS share',gPosShare+'%',gPos+' POS'],['EOD ajd',gTday+'/'+allAgents.length,'commerciaux'],['Actifs',allAgents.length,'commerciaux']].forEach(function(item){
+      var kc=document.createElement('div');kc.className='kc';
+      kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv g">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
+      kpi.appendChild(kc);
+    });
+
+    // Cartes régions
+    Object.entries(HOS_REGIONS).forEach(function(entry){
+      var rname=entry[0],r=entry[1];
       var ragents=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
       var rreps=ragents.flatMap(function(a){return getMonth(a.n,month);});
       var rsc=rreps.reduce(function(s,x){return s+(x.score||0);},0);
       var rv=rreps.reduce(function(s,x){return s+(x.total_vente||0);},0);
       var ri=rreps.reduce(function(s,x){return s+(x.instal||0);},0);
-      // Today
+      var rrdv=rreps.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
+      var rns=rreps.reduce(function(s,x){return s+(x.noshow||0);},0);
       var tReps=ragents.map(function(a){return getToday(a.n);}).filter(Boolean);
       var miss=ragents.length-tReps.length;
-      totalSc+=rsc;totalV+=rv;totalI+=ri;totalAg+=ragents.length;
+      var tSc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
       var card=document.createElement('div');
-      card.style.cssText='background:rgba(255,255,255,.05);border:1px solid '+r.color+'44;border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:background .15s';
-      card.onmouseover=function(){this.style.background='rgba(255,255,255,.08)';};
-      card.onmouseout=function(){this.style.background='rgba(255,255,255,.05)';};
-      card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
-        '<div><div style="font-size:14px;font-weight:700;color:'+r.color+'">'+rname+'</div>'+
-        '<div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">'+ragents.length+' commerciaux · '+r.teams.length+' équipes</div></div>'+
-        '<div style="font-size:22px;font-weight:800;color:'+r.color+'">'+rsc+'<span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.4)"> pts</span></div></div>'+
-        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center">'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;color:#4ade80">'+rv+'</div><div style="font-size:10px;color:rgba(255,255,255,.4)">Ventes</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;color:#f97316">'+ri+'</div><div style="font-size:10px;color:rgba(255,255,255,.4)">Instals</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px"><div style="font-size:16px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+ragents.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.4)">EOD ajd</div></div>'+
-        '</div>';
+      card.style.cssText='background:var(--b);border:1px solid '+r.color+'55;border-left:4px solid '+r.color+';border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;transition:opacity .15s';
+      card.innerHTML=
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
+        '<div><div style="font-size:15px;font-weight:700;color:'+r.color+'">'+rname+'</div>'+
+        '<div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px">'+ragents.length+' commerciaux · '+r.teams.length+' équipes</div></div>'+
+        '<div style="text-align:right"><div style="font-size:24px;font-weight:800;color:'+r.color+'">'+rsc+'</div><div style="font-size:10px;color:rgba(255,255,255,.35)">pts mois</div></div></div>'+
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;margin-bottom:10px">'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 4px"><div style="font-size:15px;font-weight:700;color:#4ade80">'+rv+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Ventes</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 4px"><div style="font-size:15px;font-weight:700;color:#f97316">'+ri+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Instals</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 4px"><div style="font-size:15px;font-weight:700;color:#60a5fa">'+rrdv+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">RDV</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 4px"><div style="font-size:15px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+ragents.length+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">EOD ajd</div></div>'+
+        '</div>'+
+        '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<div style="font-size:11px;color:rgba(255,255,255,.4)">No-show: '+rns+' · Score ajd: '+tSc+'</div>'+
+        '<div style="font-size:11px;color:'+r.color+'">Voir détail →</div></div>';
       card.onclick=(function(rn){return function(){HOS_DRILL=rn;renderHOS();};})(rname);
       cont.appendChild(card);
     });
-    // KPIs globaux
-    kpi.innerHTML='';
-    [['Score total',totalSc,'France'],['Ventes',totalV,'ce mois'],['Instals',totalI,'ce mois'],['Commerciaux',totalAg,'actifs']].forEach(function(item){
+
+  } else {
+    // Vue drillée — managers de la région
+    var r=HOS_REGIONS[HOS_DRILL];
+    var back=document.createElement('div');
+    back.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 0 12px;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px';
+    back.innerHTML='← Toutes les régions';
+    back.onclick=function(){HOS_DRILL=null;renderHOS();};
+    cont.appendChild(back);
+    var hdr=document.createElement('div');
+    hdr.style.cssText='font-size:16px;font-weight:700;color:'+r.color+';margin-bottom:14px';
+    hdr.textContent=HOS_DRILL;
+    cont.appendChild(hdr);
+    // KPIs région
+    var ragents2=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+    var rreps2=ragents2.flatMap(function(a){return getMonth(a.n,month);});
+    var rsc2=rreps2.reduce(function(s,x){return s+(x.score||0);},0);
+    var rv2=rreps2.reduce(function(s,x){return s+(x.total_vente||0);},0);
+    var ri2=rreps2.reduce(function(s,x){return s+(x.instal||0);},0);
+    var rrdv2=rreps2.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
+    var tday2=ragents2.map(function(a){return getToday(a.n);}).filter(Boolean);
+    [['Score',rsc2,HOS_DRILL],['Ventes',rv2,'ce mois'],['Instals',ri2,'déclarées'],['RDV',rrdv2,'IH+OG'],['EOD ajd',tday2.length+'/'+ragents2.length,'commerciaux']].forEach(function(item){
       var kc=document.createElement('div');kc.className='kc';
       kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv g">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
       kpi.appendChild(kc);
     });
-  } else {
-    // Vue région drillée
-    var r=HOS_REGIONS[HOS_DRILL];
-    // Bouton retour
-    var back=document.createElement('div');
-    back.style.cssText='display:flex;align-items:center;gap:8px;padding:10px 0;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;margin-bottom:8px';
-    back.innerHTML='← Toutes les régions';
-    back.onclick=function(){HOS_DRILL=null;renderHOS();};
-    cont.appendChild(back);
-    // Header région
-    var hdr=document.createElement('div');
-    hdr.style.cssText='font-size:16px;font-weight:700;color:'+r.color+';margin-bottom:12px';
-    hdr.textContent=HOS_DRILL;
-    cont.appendChild(hdr);
-    // Cards par manager
+    // Cards par manager/TM
     r.teams.forEach(function(tk){
       var mgr=MANAGERS[tk];if(!mgr)return;
       var agents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
@@ -652,36 +678,29 @@ function renderHOS(){
       var sc=reps.reduce(function(s,x){return s+(x.score||0);},0);
       var v=reps.reduce(function(s,x){return s+(x.total_vente||0);},0);
       var ins=reps.reduce(function(s,x){return s+(x.instal||0);},0);
+      var rdv=reps.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
       var tReps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
       var miss=agents.length-tReps.length;
+      var tSc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
       var card=document.createElement('div');
-      card.style.cssText='background:rgba(255,255,255,.05);border-left:3px solid '+r.color+';border-radius:10px;padding:12px 14px;margin-bottom:8px';
-      card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-        '<div><div style="font-size:13px;font-weight:600;color:#fff">'+mgr.label+'</div>'+
-        '<div style="font-size:11px;color:rgba(255,255,255,.4)">'+agents.length+' commerciaux</div></div>'+
-        '<div style="font-size:20px;font-weight:800;color:'+r.color+'">'+sc+'</div></div>'+
-        '<div style="display:flex;gap:12px;font-size:11px;color:rgba(255,255,255,.5)">'+
-        '<span>'+v+' ventes</span><span>'+ins+' instals</span>'+
-        '<span style="color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+agents.length+' EOD</span></div>'+
-        // Commerciaux
-        '<div style="margin-top:10px;display:flex;flex-wrap:wrap;gap:6px">'+
+      card.style.cssText='background:var(--b);border-left:3px solid '+r.color+';border-radius:10px;padding:14px;margin-bottom:8px';
+      card.innerHTML=
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<div><div style="font-size:13px;font-weight:700;color:#fff">'+mgr.label+'</div>'+
+        '<div style="font-size:11px;color:rgba(255,255,255,.35)">'+agents.length+' commerciaux</div></div>'+
+        '<div style="text-align:right"><div style="font-size:22px;font-weight:800;color:'+r.color+'">'+sc+'</div><div style="font-size:10px;color:rgba(255,255,255,.35)">pts</div></div></div>'+
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;margin-bottom:10px">'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:#4ade80">'+v+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Ventes</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:#f97316">'+ins+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Instals</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:#60a5fa">'+rdv+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">RDV</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+agents.length+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">EOD</div></div>'+
+        '</div>'+
+        '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
         agents.map(function(a){
           var rep=getToday(a.n);
-          return '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:4px 8px;font-size:11px;color:'+(rep?'#4ade80':'rgba(255,255,255,.35)')+'">'+a.n.split(' ')[0]+(rep?' '+rep.score+'pts':'')+'</div>';
+          return '<div style="background:rgba(255,255,255,.06);border-radius:6px;padding:3px 8px;font-size:10px;color:'+(rep?'#4ade80':'rgba(255,255,255,.3)')+'">'+a.n.split(' ')[0]+(rep?' '+rep.score+'pts':'')+'</div>';
         }).join('')+'</div>';
       cont.appendChild(card);
-    });
-    // KPIs région
-    var ragents=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
-    var rreps=ragents.flatMap(function(a){return getMonth(a.n,month);});
-    var rsc=rreps.reduce(function(s,x){return s+(x.score||0);},0);
-    var rv=rreps.reduce(function(s,x){return s+(x.total_vente||0);},0);
-    var ri=rreps.reduce(function(s,x){return s+(x.instal||0);},0);
-    kpi.innerHTML='';
-    [['Score',rsc,HOS_DRILL],['Ventes',rv,'ce mois'],['Instals',ri,'ce mois'],['Équipes',r.teams.length,'managers']].forEach(function(item){
-      var kc=document.createElement('div');kc.className='kc';
-      kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv g">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
-      kpi.appendChild(kc);
     });
   }
 }
