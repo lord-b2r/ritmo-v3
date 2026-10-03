@@ -775,7 +775,7 @@ function renderHOSToday(){
       var isOpen=openTeams[tk]||false;
 
       var wrap=document.createElement('div');
-      wrap.style.cssText='background:var(--b);border-left:3px solid '+r.color+';border-radius:10px;margin-bottom:6px;overflow:hidden';
+      wrap.style.cssText='background:rgba(255,255,255,.08);border-left:3px solid '+r.color+';border-radius:10px;margin-bottom:6px;overflow:hidden';
 
       // Header cliquable
       var hd=document.createElement('div');
@@ -794,8 +794,8 @@ function renderHOSToday(){
       body.style.cssText='display:'+(isOpen?'block':'none')+';padding:0 14px 10px';
       body.innerHTML=agents.map(function(a){
         var rep=getToday(a.n);
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">'+
-          '<div style="font-size:12px;color:'+(rep?'#fff':'rgba(255,255,255,.35)')+'">'+a.n.split(' ')[0]+' '+a.n.split(' ')[1]+'</div>'+
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)">'+
+          '<div style="font-size:12px;color:'+(rep?'rgba(255,255,255,.95)':'rgba(255,255,255,.3)')+'">'+a.n.split(' ')[0]+' '+a.n.split(' ')[1]+'</div>'+
           '<div style="font-size:12px;color:'+(rep?r.color:'rgba(255,255,255,.2)')+';font-weight:'+(rep?'700':'400')+'">'+
           (rep?rep.score+' pts · '+rep.total_vente+'v · '+rep.instal+'i':'—')+'</div></div>';
       }).join('');
