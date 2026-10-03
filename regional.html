@@ -248,7 +248,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
   <div class="slide-tabs">
     <div class="slide-tab on" id="t-today" onclick="sw('today')">Aujourd hui</div>
-    <div class="slide-tab" id="t-managers" onclick="sw('managers')">Managers</div>
+    <div class="slide-tab" id="t-managers" onclick="sw('managers')">RM</div>
     <div class="slide-tab" id="t-stats" onclick="sw('stats')">Stats</div>
     <div class="slide-tab" id="t-ventes" onclick="sw('ventes')">Ventes</div>
     <div class="slide-tab" id="t-mur" onclick="sw('mur')">Mur</div>
@@ -623,6 +623,8 @@ function renderHOSMgr(){
       var ri=rreps.reduce(function(s,x){return s+(x.instal||0);},0);
       var rrdv=rreps.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
       var rns=rreps.reduce(function(s,x){return s+(x.noshow||0);},0);
+      var rpos=rreps.reduce(function(s,x){return s+(x.total_pos||0);},0);
+      var rval=rreps.flatMap(function(x){return x.ventes_detail||[];}).filter(function(v){return v.instal_status==='validated';}).length;
       var tReps=ragents.map(function(a){return getToday(a.n);}).filter(Boolean);
       var miss=ragents.length-tReps.length;
       var tSc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
@@ -633,15 +635,19 @@ function renderHOSMgr(){
         '<div><div style="font-size:15px;font-weight:700;color:'+r.color+'">'+rname+'</div>'+
         '<div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px">'+ragents.length+' commerciaux · '+r.teams.length+' équipes</div></div>'+
         '<div style="text-align:right"><div style="font-size:24px;font-weight:800;color:'+r.color+'">'+rsc+'</div><div style="font-size:10px;color:rgba(255,255,255,.35)">pts mois</div></div></div>'+
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;margin-bottom:10px">'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 4px"><div style="font-size:15px;font-weight:700;color:#4ade80">'+rv+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Ventes</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 4px"><div style="font-size:15px;font-weight:700;color:#f97316">'+ri+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Instals</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 4px"><div style="font-size:15px;font-weight:700;color:#60a5fa">'+rrdv+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">RDV</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:8px 4px"><div style="font-size:15px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+ragents.length+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">EOD ajd</div></div>'+
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center;margin-bottom:6px">'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#4ade80">'+rv+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Ventes</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#f97316">'+ri+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Instals</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#60a5fa">'+rrdv+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">RDV OG</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+ragents.length+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">EOD</div></div>'+
         '</div>'+
-        '<div style="display:flex;justify-content:space-between;align-items:center">'+
-        '<div style="font-size:11px;color:rgba(255,255,255,.4)">No-show: '+rns+' · Score ajd: '+tSc+'</div>'+
-        '<div style="font-size:11px;color:'+r.color+'">Voir détail →</div></div>';
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center;margin-bottom:8px">'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#a78bfa">'+rns+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">No-show</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#fb923c">'+rpos+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">POS</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#34d399">'+rval+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Validées</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:'+r.color+'">'+tSc+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Score ajd</div></div>'+
+        '</div>'+
+        '<div style="text-align:right;font-size:11px;color:'+r.color+'">→ Détail</div>';
       card.onclick=(function(rn){return function(){HOS_DRILL=rn;renderHOSMgr();};})(rname);
       cont.appendChild(card);
     });
@@ -680,6 +686,10 @@ function renderHOSMgr(){
       var v=reps.reduce(function(s,x){return s+(x.total_vente||0);},0);
       var ins=reps.reduce(function(s,x){return s+(x.instal||0);},0);
       var rdv=reps.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
+      var rdvog=reps.reduce(function(s,x){return s+(x.rdv_og||0);},0);
+      var ns=reps.reduce(function(s,x){return s+(x.noshow||0);},0);
+      var pos=reps.reduce(function(s,x){return s+(x.total_pos||0);},0);
+      var val=reps.flatMap(function(x){return x.ventes_detail||[];}).filter(function(v){return v.instal_status==='validated';}).length;
       var tReps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
       var miss=agents.length-tReps.length;
       var tSc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
@@ -690,11 +700,17 @@ function renderHOSMgr(){
         '<div><div style="font-size:13px;font-weight:700;color:#fff">'+mgr.label+'</div>'+
         '<div style="font-size:11px;color:rgba(255,255,255,.35)">'+agents.length+' commerciaux</div></div>'+
         '<div style="text-align:right"><div style="font-size:22px;font-weight:800;color:'+r.color+'">'+sc+'</div><div style="font-size:10px;color:rgba(255,255,255,.35)">pts</div></div></div>'+
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;margin-bottom:10px">'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:#4ade80">'+v+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Ventes</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:#f97316">'+ins+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Instals</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:#60a5fa">'+rdv+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">RDV</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+agents.length+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">EOD</div></div>'+
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center;margin-bottom:5px">'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#4ade80">'+v+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Ventes</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#f97316">'+ins+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Instals</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#60a5fa">'+rdvog+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">RDV OG</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+agents.length+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">EOD</div></div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center;margin-bottom:8px">'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#a78bfa">'+ns+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">No-show</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#fb923c">'+pos+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">POS</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#34d399">'+val+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Validées</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:'+r.color+'">'+tSc+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Score ajd</div></div>'+
         '</div>'+
         '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
         agents.map(function(a){
