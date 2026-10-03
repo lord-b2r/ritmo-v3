@@ -754,15 +754,16 @@ function renderHOSToday(){
 
     // Bandeau région
     var sep=document.createElement('div');
-    sep.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px 4px;margin:10px 0 6px;border-bottom:1px solid '+r.color+'44';
-    sep.innerHTML='<div style="font-size:12px;font-weight:700;color:'+r.color+'">'+rname+'</div>'+
-      '<div style="display:flex;gap:10px;font-size:11px;color:rgba(255,255,255,.5)">'+
-      '<span style="color:#4ade80">'+rV+' v</span>'+
-      '<span style="color:#f97316">'+rI+' i</span>'+
-      '<span style="color:#fb923c">'+rPos+' POS</span>'+
-      '<span style="color:'+r.color+';font-weight:700">'+rSc+' pts</span>'+
-      '<span style="color:'+(rMiss>0?'#f87171':'#4ade80')+'">'+(rMiss>0?rMiss+' ❌':'✓')+'</span>'+
-      '</div>';
+    sep.style.cssText='background:'+r.color+';border-radius:12px;padding:12px 16px;margin:12px 0 8px';
+    sep.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center">'+
+      '<div><div style="font-size:14px;font-weight:800;color:#fff">'+rname+'</div>'+
+      '<div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px">'+(rMiss>0?rMiss+' manquante'+(rMiss>1?'s',''):'✓ Complet')+'</div></div>'+
+      '<div style="display:flex;gap:12px;text-align:center">'+
+      '<div><div style="font-size:18px;font-weight:800;color:#fff">'+rSc+'</div><div style="font-size:9px;color:rgba(255,255,255,.7)">pts</div></div>'+
+      '<div><div style="font-size:18px;font-weight:800;color:#fff">'+rV+'</div><div style="font-size:9px;color:rgba(255,255,255,.7)">ventes</div></div>'+
+      '<div><div style="font-size:18px;font-weight:800;color:#fff">'+rI+'</div><div style="font-size:9px;color:rgba(255,255,255,.7)">instals</div></div>'+
+      '<div><div style="font-size:18px;font-weight:800;color:#fff">'+rPos+'</div><div style="font-size:9px;color:rgba(255,255,255,.7)">POS</div></div>'+
+      '</div></div>';
     cont.appendChild(sep);
 
     // Cards managers dépliantes
