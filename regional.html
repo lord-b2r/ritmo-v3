@@ -1422,6 +1422,7 @@ function sw(t){
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
   if(t==='instals')loadInstalItems();
+  if(t==='managers'&&isHOS())renderHOSMgr();
 }
 
 function setTypeFilter(t){
