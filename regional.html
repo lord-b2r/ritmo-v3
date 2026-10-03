@@ -1154,6 +1154,7 @@ function renderStats(){
   // RDV IH vs OG par equipe
   var rdvEl=document.getElementById('rdv-stats');rdvEl.innerHTML='';
   myTeams.forEach(function(tk){
+    if(!MANAGERS[tk])return;
     var agents=TEAMS[tk]||[];
     var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
     var ih=reps.reduce(function(s,r){return s+(r.rdv_ih||0);},0);
