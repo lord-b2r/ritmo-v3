@@ -782,21 +782,21 @@ function renderHOSToday(){
       var hd=document.createElement('div');
       hd.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer';
       hd.innerHTML=
-        '<div><div style="font-size:13px;font-weight:600;color:#fff">'+mgr.label+'</div>'+
+        '<div><div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.95)">'+mgr.label+'</div>'+
         '<div style="font-size:11px;color:'+(miss>0?'#f87171':'#4ade80')+'">'+
         (miss>0?miss+' EOD manquante'+(miss>1?'s':''):'Complet')+
         '</div></div>'+
         '<div style="display:flex;align-items:center;gap:12px">'+
-        '<div style="font-size:20px;font-weight:800;color:'+r.color+'">'+sc+'<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,.4)"> pts</span></div>'+
-        '<div style="font-size:16px;color:rgba(255,255,255,.3)" class="hd-chevron-'+tk+'">▶</div></div>';
+        '<div style="font-size:20px;font-weight:800;color:'+r.color+'">'+sc+'<span style="font-size:10px;font-weight:400;color:rgba(255,255,255,.5)"> pts</span></div>'+
+        '<div style="font-size:16px;color:rgba(255,255,255,.5)" class="hd-chevron-'+tk+'">▶</div></div>';
 
       // Body
       var body=document.createElement('div');
-      body.style.cssText='display:'+(isOpen?'block':'none')+';padding:0 14px 10px';
+      body.style.cssText='display:'+(isOpen?'block':'none')+';padding:0 14px 10px;background:rgba(0,0,0,.15);border-top:1px solid rgba(255,255,255,.08)';
       body.innerHTML=agents.map(function(a){
         var rep=getToday(a.n);
         return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.08)">'+
-          '<div style="font-size:12px;color:'+(rep?'rgba(255,255,255,.95)':'rgba(255,255,255,.3)')+'">'+a.n.split(' ')[0]+' '+a.n.split(' ')[1]+'</div>'+
+          '<div style="font-size:12px;color:'+(rep?'#fff':'rgba(255,255,255,.3)')+'">'+a.n.split(' ')[0]+' '+a.n.split(' ')[1]+'</div>'+
           '<div style="font-size:12px;color:'+(rep?r.color:'rgba(255,255,255,.2)')+';font-weight:'+(rep?'700':'400')+'">'+
           (rep?rep.score+' pts · '+rep.total_vente+'v · '+rep.instal+'i':'—')+'</div></div>';
       }).join('');
