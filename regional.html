@@ -672,8 +672,17 @@ function renderHOSMgr(){
   var hosPct=hosTarget>0?Math.round(rTot.s/hosTarget*100):0;
   var hosPctCapped=Math.min(hosPct,150);
   var progDiv=document.createElement('div');progDiv.style.cssText='margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)';
-  progDiv.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:11px;color:rgba(255,255,255,.5)">Progression France</div><div style="font-size:11px;font-weight:700;color:'+(hosPct>=100?'#4ade80':hosPct>=50?'#fbbf24':'#f87171')+'">'+rTot.s+' / '+hosTarget+' pts ('+(hosPct>150?'150+':hosPct)+'%)</div></div>'+
-    '<div style="background:rgba(255,255,255,.18);border-radius:6px;height:10px;overflow:hidden"><div style="height:100%;border-radius:6px;background:linear-gradient(90deg,'+(hosPct>=100?'#4ade80,#E8FF3A':'#f87171,#fbbf24')+');width:'+hosPctCapped+'%"></div></div>';
+  var progLbl=document.createElement('div');
+  progLbl.style.cssText='display:flex;justify-content:space-between;margin-bottom:6px';
+  var pLblL=document.createElement('div');pLblL.style.cssText='font-size:11px;color:rgba(255,255,255,.5)';pLblL.textContent='Progression France';
+  var pLblR=document.createElement('div');pLblR.style.cssText='font-size:11px;font-weight:700;color:'+(hosPct>=100?'#4ade80':hosPct>=50?'#fbbf24':'#f87171');pLblR.textContent=rTot.s+'  /  '+hosTarget+'  pts  ('+(hosPct>150?'150+':hosPct)+'%)';
+  progLbl.appendChild(pLblL);progLbl.appendChild(pLblR);
+  var progTrack=document.createElement('div');
+  progTrack.style.cssText='background:rgba(255,255,255,.18);border-radius:6px;height:10px;overflow:hidden';
+  var progFill=document.createElement('div');
+  progFill.style.cssText='height:100%;border-radius:6px;background:linear-gradient(90deg,'+(hosPct>=100?'#4ade80,#E8FF3A':hosPct>=50?'#fbbf24,#f97316':'#f87171,#ef4444')+');width:'+hosPctCapped+'%';
+  progTrack.appendChild(progFill);
+  progDiv.appendChild(progLbl);progDiv.appendChild(progTrack);
   hero.appendChild(progDiv);
   ov.appendChild(hero);
 
@@ -1258,8 +1267,17 @@ function renderMgrView(){
   var rmPct=rmTarget>0?Math.round(rTot.s/rmTarget*100):0;
   var rmPctCapped=Math.min(rmPct,150);
   var progDiv=document.createElement('div');progDiv.style.cssText='margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)';
-  progDiv.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:11px;color:rgba(255,255,255,.5)">Progression région</div><div style="font-size:11px;font-weight:700;color:'+(rmPct>=100?'#4ade80':rmPct>=50?'#fbbf24':'#f87171')+'">'+rTot.s+' / '+rmTarget+' pts ('+(rmPct>150?'150+':rmPct)+'%)</div></div>'+
-    '<div style="background:rgba(255,255,255,.18);border-radius:6px;height:10px;overflow:hidden"><div style="height:100%;border-radius:6px;background:linear-gradient(90deg,'+(rmPct>=100?'#4ade80,#E8FF3A':'#f87171,#fbbf24')+';width:'+rmPctCapped+'%"></div></div>';
+  var progLbl=document.createElement('div');
+  progLbl.style.cssText='display:flex;justify-content:space-between;margin-bottom:6px';
+  var pLblL=document.createElement('div');pLblL.style.cssText='font-size:11px;color:rgba(255,255,255,.5)';pLblL.textContent='Progression région';
+  var pLblR=document.createElement('div');pLblR.style.cssText='font-size:11px;font-weight:700;color:'+(rmPct>=100?'#4ade80':rmPct>=50?'#fbbf24':'#f87171');pLblR.textContent=rTot.s+'  /  '+rmTarget+'  pts  ('+(rmPct>150?'150+':rmPct)+'%)';
+  progLbl.appendChild(pLblL);progLbl.appendChild(pLblR);
+  var progTrack=document.createElement('div');
+  progTrack.style.cssText='background:rgba(255,255,255,.18);border-radius:6px;height:10px;overflow:hidden';
+  var progFill=document.createElement('div');
+  progFill.style.cssText='height:100%;border-radius:6px;background:linear-gradient(90deg,'+(rmPct>=100?'#4ade80,#E8FF3A':rmPct>=50?'#fbbf24,#f97316':'#f87171,#ef4444')+');width:'+rmPctCapped+'%';
+  progTrack.appendChild(progFill);
+  progDiv.appendChild(progLbl);progDiv.appendChild(progTrack);
   hero.appendChild(progDiv);
   ov.appendChild(hero);
   var ovGrid=document.createElement('div');ovGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px';
