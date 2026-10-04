@@ -1219,7 +1219,15 @@ async function sendEOD(){
   const rdv_og_count=S.rdv_og.length;
   const notes_ih={};S.rdv_ih.forEach((r,i)=>{if(r.note)notes_ih[i+1]=r.note;});
   const notes_og={};S.rdv_og.forEach((r,i)=>{if(r.note)notes_og[i+1]=r.note;});
+  // Ventes normales
   const ventes_detail=S.ventes.map(v=>({nom:v.nom,tpv:v.tpv,taux:v.taux,type:v.ty||v.type,upfront:v.upfront,instal_status:v.instal_status||INSTAL_STATUS_CACHE[(v.nom||'').trim()]||'none'}));
+  // Ventes "Autre / Non listé" déclarées lors d'instals — ajoutées au pipe sans impacter score/total_vente
+  const autreVentes=S.instalList.filter(function(inst){return inst.autre&&inst.nom&&inst.nom.trim();}).map(function(inst){
+    return {nom:inst.nom.trim(),tpv:inst.autre_tpv||0,taux:inst.autre_taux||0,type:inst.autre_type||'POS',upfront:0,instal_status:'declared'};
+  });
+  autreVentes.forEach(function(av){
+    if(!ventes_detail.find(function(v){return v.nom===av.nom;}))ventes_detail.push(av);
+  });
   // Ajouter les RDV marques FU dans la liste FU
   S.rdv_ih.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV IH',cat:'rdv',type:'ih',note:r.note,ts:Date.now()});});
   S.rdv_og.filter(r=>r.fu&&r.note).forEach(r=>{fuList.push({id:Date.now()+'_'+Math.random(),nom:r.note.split(':')[0].trim()||'RDV OG',cat:'rdv',type:'og',note:r.note,ts:Date.now()});});
