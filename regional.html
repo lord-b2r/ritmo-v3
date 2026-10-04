@@ -665,7 +665,6 @@ function renderHOSMgr(){
       '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">RDV OG</div><div style="font-size:20px;font-weight:800;color:#fff">'+rTot.rdvOg+'</div></div>'+
       '<div style="background:rgba(248,113,113,.15);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(248,113,113,.7);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">No show</div><div style="font-size:20px;font-weight:800;color:#f87171">'+rTot.noshow+'</div></div>'+
     '</div>'+
-    '<div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#E8FF3A);width:'+Math.min(rPs*2,100)+'%"></div></div>'+
     '<div style="display:flex;justify-content:space-between;margin-top:4px"><div style="font-size:10px;color:rgba(255,255,255,.3)">'+rTot.pos+' POS / '+rTot.v+' ventes</div><div style="font-size:10px;color:rgba(255,255,255,.3)">'+Object.keys(HOS_REGIONS).length+' régions</div></div>';
   // Barre de progression score France
   var hosAllAgents=Object.values(HOS_REGIONS).flatMap(function(r){return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});});
@@ -1252,7 +1251,6 @@ function renderMgrView(){
     '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">RDV OG</div><div style="font-size:20px;font-weight:800;color:#fff">'+rTot.rdvOg+'</div></div>'+
     '<div style="background:rgba(248,113,113,.15);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(248,113,113,.7);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">No show</div><div style="font-size:20px;font-weight:800;color:#f87171">'+rTot.noshow+'</div></div>'+
     '</div>'+
-    '<div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#E8FF3A);width:'+Math.min(rPs*2,100)+'%"></div></div>'+
     '<div style="display:flex;justify-content:space-between;margin-top:4px"><div style="font-size:10px;color:rgba(255,255,255,.3)">'+rTot.pos+' POS / '+rTot.v+' ventes</div><div style="font-size:10px;color:rgba(255,255,255,.3)">'+MY_TEAMS.length+' equipe'+(MY_TEAMS.length>1?'s':'')+' - '+allRepsReg.length+' rapports</div></div>';
   // Barre de progression score région
   var rmAgents=MY_TEAMS.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
