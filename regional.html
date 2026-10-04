@@ -897,6 +897,7 @@ function renderHOSToday(){
   var kpi=document.getElementById('today-kpi');
   kpi.innerHTML='';
 
+  // KPIs France globaux
   var allAg=Object.values(HOS_REGIONS).flatMap(function(r){
     return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
   });
@@ -911,77 +912,86 @@ function renderHOSToday(){
   var tPos=tAll.reduce(function(s,x){return s+(x.total_pos||0);},0);
   var tPosShare=tV>0?Math.round(tPos/tV*100):0;
 
-  var eodRate=allAg.length>0?tAll.length/allAg.length:0;
-  var eodColor=eodRate>=0.9?'#4ade80':eodRate>=0.5?'#fbbf24':'#f87171';
-  var hosName=REGIONAL_MANAGERS['mathis']?REGIONAL_MANAGERS['mathis'].name:'Mathis JACA';
   [['EOD', tAll.length+'/'+allAg.length, tMiss>0?tMiss+' manq.':'Complet'],
-   ['Score France', tSc, hosName],
+   ['Score France', tSc, 'Mathis JACA'],
    ['Ventes', tV, ''],
    ['Instals', tI, ''],
    ['RDV', tIH+tOG, tIH+' IH / '+tOG+' OG'],
    ['No-show', tNS, ''],
    ['POS', tPos, tPosShare+'%'],
-   ['Actifs', tAll.length, allAg.length+' TM']
+   ['Actifs', tAll.length, allAg.length+' SM']
   ].forEach(function(item){
     var kc=document.createElement('div');kc.className='kc';
-
     kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv g">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
     kpi.appendChild(kc);
   });
 
+  // Par région — identique à Baptiste mais RM = TM, TMs = SMs
   Object.entries(HOS_REGIONS).forEach(function(entry){
     var rname=entry[0], r=entry[1];
-    var ragents=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
-    var rTday=ragents.map(function(a){return getToday(a.n);}).filter(Boolean);
-    var rMiss=ragents.length-rTday.length;
-    var rSc=rTday.reduce(function(s,x){return s+(x.score||0);},0);
-    var rV=rTday.reduce(function(s,x){return s+(x.total_vente||0);},0);
-    var rI=rTday.reduce(function(s,x){return s+(x.instal||0);},0);
-    var rPos=rTday.reduce(function(s,x){return s+(x.total_pos||0);},0);
-    var rIH=rTday.reduce(function(s,x){return s+(x.rdv_ih||0);},0);
-    var rOG=rTday.reduce(function(s,x){return s+(x.rdv_og||0);},0);
 
-    // Encadré région cliquable
-    var card=document.createElement('div');
-    card.style.cssText='background:var(--b);border:1px solid rgba(255,255,255,.12);border-left:4px solid '+r.color+';border-radius:12px;padding:12px 14px;margin:10px 0 4px;cursor:pointer';
-    card.innerHTML=
-      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
-        '<div>'+
-          '<div style="font-size:14px;font-weight:800;color:'+r.color+'">'+rname+'</div>'+
-          '<div style="font-size:10px;color:'+(rMiss>0?'var(--err)':'var(--g)')+';margin-top:2px">'+
-            (rMiss>0?rMiss+' EOD manquante'+(rMiss>1?'s':''):'✓ Toutes les EODs')+
-          '</div>'+
-        '</div>'+
-        '<div style="display:flex;align-items:center;gap:6px">'+
-          '<div style="font-size:24px;font-weight:900;color:'+(ragents.length>0?(rTday.length/ragents.length>=0.9?r.color:rTday.length/ragents.length>=0.5?'#fbbf24':'#f87171'):r.color)+'">'+rSc+'<span style="font-size:10px;font-weight:400;color:var(--g4);margin-left:2px">pts</span></div>'+
-          '<div id="rarr-'+rname+'" style="color:var(--g4);font-size:12px">▶</div>'+
-        '</div>'+
-      '</div>'+
-      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center">'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:#4ade80">'+rV+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">Ventes</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:#f97316">'+rI+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">Instals</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:#fb923c">'+rPos+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">POS</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:#60a5fa">'+rIH+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">RDV IH</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:#60a5fa">'+rOG+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">RDV OG</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:'+(ragents.length>0?(rTday.length/ragents.length>=0.9?'#4ade80':rTday.length/ragents.length>=0.5?'#fbbf24':'#f87171'):'#4ade80')+'">'+rTday.length+'/'+ragents.length+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">EOD</div></div>'+
-      '</div>';
+    // Header région — même style que team-hd mais pour la région
+    var rAgAll=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+    var rReps=rAgAll.map(function(a){return getToday(a.n);}).filter(Boolean);
+    var rSc=rReps.reduce(function(s,x){return s+(x.score||0);},0);
+    var rMiss=rAgAll.length-rReps.length;
+    var rTarget=rAgAll.length*2;
+    var rBlue=rSc>(rTarget+3);
 
-    // Détail équipes identique à renderToday
-    var detail=document.createElement('div');
-    detail.id='rdet-'+rname;
-    detail.style.display='none';
-    r.teams.forEach(function(tk){renderTeamBlock(tk, detail);});
+    var rHd=document.createElement('div');
+    rHd.style.cssText='background:var(--b);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin:12px 0 4px;border-left:4px solid '+r.color;
+    var rLf=document.createElement('div');
+    var rNm=document.createElement('div');rNm.style.cssText='font-size:13px;font-weight:700;color:rgba(255,255,255,.9)';rNm.textContent=rname;
+    var rSub=document.createElement('div');rSub.style.cssText='font-size:11px;color:var(--g4);margin-top:2px';
+    rSub.textContent=rReps.length+'/'+rAgAll.length+' SM EOD'+(rMiss>0?' - '+rMiss+' manquant'+(rMiss>1?'s':''):'');
+    rLf.appendChild(rNm);rLf.appendChild(rSub);
+    var rSc2=document.createElement('div');
+    rSc2.style.cssText='font-size:24px;font-weight:900;color:'+(rBlue?'#3b82f6':rSc>=rTarget?'#4ade80':rSc>=rAgAll.length*1.5?'#fb923c':'#f87171');
+    rSc2.textContent=rSc;
+    rHd.appendChild(rLf);rHd.appendChild(rSc2);
+    cont.appendChild(rHd);
 
-    card.onclick=(function(rn){return function(){
-      var det=document.getElementById('rdet-'+rn);
-      var arr=document.getElementById('rarr-'+rn);
-      var open=det&&det.style.display==='none';
-      if(det)det.style.display=open?'block':'none';
-      if(arr)arr.textContent=open?'▼':'▶';
-    };})(rname);
+    // Cards RM — identique aux cards TM de Baptiste
+    r.teams.forEach(function(tk){
+      var mgr=MANAGERS[tk]; if(!mgr)return;
+      var tAgents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
+      var tReps=tAgents.map(function(a){return getToday(a.n);}).filter(Boolean);
+      var tSc2=tReps.reduce(function(s,x){return s+(x.score||0);},0);
+      var tMissTeam=tAgents.length-tReps.length;
+      var teamObj=tAgents.length*2;
+      var teamBlue=tSc2>(teamObj+3);
 
-    cont.appendChild(card);
-    cont.appendChild(detail);
+      var hd=document.createElement('div');hd.className='team-hd '+tk;
+      var lf=document.createElement('div');
+      var tn=document.createElement('div');tn.className='team-nm';tn.textContent=mgr.label;
+      var ts=document.createElement('div');ts.style.cssText='font-size:11px;color:var(--g4);margin-top:2px';
+      ts.textContent=tReps.length+'/'+tAgents.length+' SM EOD'+(tMissTeam>0?' - '+tMissTeam+' manquant'+(tMissTeam>1?'s':''):'');
+      lf.appendChild(tn);lf.appendChild(ts);
+      var sc3=document.createElement('div');sc3.className='team-sc '+tk;
+      sc3.style.color=teamBlue?'#3b82f6':tSc2>=teamObj?'#4ade80':tSc2>=tAgents.length*1.5?'#fb923c':'#f87171';
+      sc3.textContent=tSc2;
+      hd.appendChild(lf);hd.appendChild(sc3);
+      cont.appendChild(hd);
+
+      // Liste des SMs (commerciaux) — identique à Baptiste
+      var wr=tAgents.filter(function(a){return getToday(a.n);});
+      var wrMiss=tAgents.filter(function(a){return !getToday(a.n);});
+      var agDiv=document.createElement('div');agDiv.className='agc';
+      var ghDiv=document.createElement('div');ghDiv.className='agh';
+      tAgents.forEach(function(a){
+        var rep=getToday(a.n);
+        var ag=document.createElement('div');ag.className='ag'+(rep?' s':'');
+        var dot=document.createElement('div');dot.className='ag-dot';
+        var nm=document.createElement('div');nm.className='ag-n';nm.textContent=a.n.split(' ')[0];
+        var sc4=document.createElement('div');sc4.className='ag-s';
+        sc4.textContent=rep?rep.score:'';
+        if(rep)sc4.style.color='var(--g)';
+        ag.appendChild(dot);ag.appendChild(nm);ag.appendChild(sc4);
+        ghDiv.appendChild(ag);
+      });
+      agDiv.appendChild(ghDiv);
+      cont.appendChild(agDiv);
+    });
   });
 }
 
