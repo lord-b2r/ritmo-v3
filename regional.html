@@ -744,21 +744,68 @@ function renderTeamBlock(tk, cont){
   hd.appendChild(lf);hd.appendChild(sc2);
   cont.appendChild(hd);
 
-  var agc=document.createElement('div');agc.className='agc ms';
-  var agh=document.createElement('div');agh.className='agh';
-  tVisibleAgents.forEach(function(a){
-    var rep=getToday(a.n);
-    var ag=document.createElement('div');ag.className='ag'+(rep?' s':'');
-    var dot=document.createElement('div');dot.className='ag-dot';
-    var nm=document.createElement('div');nm.className='ag-n';nm.textContent=a.n.split(' ')[0];
-    var sc3=document.createElement('div');sc3.className='ag-s';
-    sc3.textContent=rep?rep.score:'';
-    if(rep)sc3.style.color='var(--g)';
-    ag.appendChild(dot);ag.appendChild(nm);ag.appendChild(sc3);
-    agh.appendChild(ag);
-  });
-  agc.appendChild(agh);
-  cont.appendChild(agc);
+  tVisibleAgents.forEach(function(ag){
+      var rep=getToday(ag.n);
+      var card=document.createElement('div');card.className='agc'+(rep?'':' ms');
+      var gh=document.createElement('div');gh.className='agh';
+      if(rep){
+        var s=rep.score||0,cls=scC(s),tv2=rep.total_vente||0;
+        var mSc=getMonth(ag.n).reduce(function(x,r){return x+(r.score||0);},0);
+        var av=document.createElement('div');av.className='aga';av.textContent=ag.i;
+        var inf=document.createElement('div');inf.className='agi';
+        var nm=document.createElement('div');nm.className='agn';nm.textContent=ag.n;
+        var mt=document.createElement('div');mt.className='agm';mt.textContent=tv2+' vente'+(tv2!==1?'s':'')+' - '+(rep.instal||0)+' instal - IH: '+(rep.rdv_ih||0)+' OG: '+(rep.rdv_og||0)+(rep.noshow?' NS: '+rep.noshow:'')+' - mois: '+mSc+'pts';
+        inf.appendChild(nm);inf.appendChild(mt);
+        var right=document.createElement('div');right.style.cssText='display:flex;align-items:center;gap:8px';
+        var as=document.createElement('div');as.className='ags '+cls;as.textContent=s;
+        var ch=document.createElement('i');ch.className='ti ti-chevron-down chev';
+        var key=ag.n.replace(/[^a-z0-9]/gi,'_')+'_t';ch.id='ch-'+key;
+        right.appendChild(as);right.appendChild(ch);
+        gh.appendChild(av);gh.appendChild(inf);gh.appendChild(right);
+        gh.onclick=(function(k,r2){return function(){togAgent(k,r2);};})(key,rep);
+        var body=document.createElement('div');body.className='agb';body.id='bd-'+key;
+        var mg=document.createElement('div');mg.className='mgd';
+        var pos=rep.total_pos||0,posS=tv2>0?Math.round(pos/tv2*100):0;
+        [['RDV IH',rep.rdv_ih||0,false],['RDV OG',rep.rdv_og||0,false],['No show',rep.noshow||0,false],['Ventes',tv2,true],
+         ['IH',rep.vente_ih||0,false],['OG',rep.vente_og||0,false],['POS share',posS+'%',posS>=50],
+         ['AC',rep.ac||0,false],['INSTAL',rep.instal||0,true],['FU',rep.leads_fu||0,false]].forEach(function(c){
+          var mc=document.createElement('div');mc.className='mce';
+          var ml=document.createElement('div');ml.className='mcl';ml.textContent=c[0];
+          var mv=document.createElement('div');mv.className='mcv'+(c[2]?' g':'');mv.textContent=c[1];
+          mc.appendChild(ml);mc.appendChild(mv);mg.appendChild(mc);
+        });
+        body.appendChild(mg);
+        var ni=rep.notes_ih||{},no=rep.notes_og||{};
+        var hasN=Object.keys(ni).length||Object.keys(no).length;
+        if(hasN){var nd=document.createElement('div');nd.style.cssText='margin-top:10px;padding-top:10px;border-top:.5px solid var(--g2)';Object.entries(ni).forEach(function(e){if(e[1]){var ne=document.createElement('div');ne.className='ni';var nl=document.createElement('div');nl.className='nil';nl.textContent='RDV '+e[0]+' IH';var nt=document.createElement('div');nt.textContent=e[1];ne.appendChild(nl);ne.appendChild(nt);nd.appendChild(ne);}});Object.entries(no).forEach(function(e){if(e[1]){var ne=document.createElement('div');ne.className='ni';var nl=document.createElement('div');nl.className='nil';nl.textContent='RDV '+e[0]+' OG';var nt=document.createElement('div');nt.textContent=e[1];ne.appendChild(nl);ne.appendChild(nt);nd.appendChild(ne);}});body.appendChild(nd);}
+        (rep.ventes_detail||[]).filter(function(v){return v&&v.nom;}).forEach(function(v){
+          var tp=parseInt(v.tpv)||0,up=parseInt(v.upfront)||0,ty=v.type||'POS';
+          var vi=document.createElement('div');vi.className='vi';vi.style.marginTop='6px';
+          var vit=document.createElement('div');vit.className='vit';
+          var vin=document.createElement('span');vin.className='vin';vin.textContent=v.nom;
+          var vip=document.createElement('span');vip.className='pill '+(ty==='POS'?'ok':'bl');vip.textContent=ty;
+          vit.appendChild(vin);vit.appendChild(vip);
+          var vg=document.createElement('div');vg.className='vig';
+          [['TPV',tp?formatK(tp)+' EUR':'---'],['Taux',v.taux?v.taux+'%':'---'],['Upfront',up?formatK(up)+' EUR':'0']].forEach(function(c){var vc=document.createElement('div');vc.className='vc';var vcl=document.createElement('div');vcl.className='vcl';vcl.textContent=c[0];var vcv=document.createElement('div');vcv.className='vcv';vcv.textContent=c[1];vc.appendChild(vcl);vc.appendChild(vcv);vg.appendChild(vc);});
+          vi.appendChild(vit);vi.appendChild(vg);body.appendChild(vi);
+        });
+        var rch=document.createElement('div');rch.className='rch';
+        var ro=document.createElement('div');ro.className='rc '+(rep.outlook?'ok':'ko');ro.innerHTML=(rep.outlook?'<i class="ti ti-check" style="font-size:11px"></i>':'<i class="ti ti-x" style="font-size:11px"></i>')+' Outlook';
+        var rc=document.createElement('div');rc.className='rc '+(rep.crm?'ok':'ko');rc.innerHTML=(rep.crm?'<i class="ti ti-check" style="font-size:11px"></i>':'<i class="ti ti-x" style="font-size:11px"></i>')+' CRM';
+        rch.appendChild(ro);rch.appendChild(rc);body.appendChild(rch);
+        if(rep.mot_jour){var mj=document.createElement('div');mj.className='mj';mj.textContent='"'+rep.mot_jour+'"';body.appendChild(mj);}
+        card.appendChild(gh);card.appendChild(body);
+      } else {
+        var av2=document.createElement('div');av2.className='aga ms';av2.textContent=ag.i;
+        var inf2=document.createElement('div');inf2.className='agi';
+        var nm2=document.createElement('div');nm2.className='agn';nm2.textContent=ag.n;
+        var mt2=document.createElement('div');mt2.className='agm';mt2.style.color='var(--red)';mt2.textContent='EOD non envoyee';
+        inf2.appendChild(nm2);inf2.appendChild(mt2);
+        var sp=document.createElement('span');sp.className='pill er';sp.textContent='Manquant';
+        gh.appendChild(av2);gh.appendChild(inf2);gh.appendChild(sp);card.appendChild(gh);
+      }
+      cont.appendChild(card);
+    });
 }
 
 function renderHOSToday(){
