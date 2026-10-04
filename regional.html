@@ -273,6 +273,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- MANAGERS -->
     <div id="s-managers" class="scr">
+      <div id="hos-month-nav" style="display:none"></div>
       <div id="mgr-overview"></div>
       <div class="filter-row" id="mgr-filter"></div>
       <div id="mgr-content"></div>
@@ -590,7 +591,7 @@ var HOS_DRILL = null;
 function isHOS(){return ME==='mathis';}
 
 function renderHOSMgr(){
-  var month=now.toISOString().slice(0,7);
+  var month=hosMonthStr();
   var cont=document.getElementById('mgr-content');if(!cont)return;cont.innerHTML='';
   var kpiEl=document.getElementById('mgr-overview');if(kpiEl)kpiEl.innerHTML='';
   var kpi=document.createElement('div');kpi.className='kgrid';if(kpiEl)kpiEl.appendChild(kpi);
@@ -1631,7 +1632,7 @@ function sw(t){
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
   if(t==='instals')loadInstalItems();
-  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';renderHOSMgr();}else{var f=document.getElementById('mgr-filter');if(f)f.style.display='';renderMgrView();}}
+  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='block';renderHOSMonthNav();renderHOSMgr();}else{var f=document.getElementById('mgr-filter');if(f)f.style.display='';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='none';renderMgrView();}}
 }
 
 function setTypeFilter(t){
