@@ -528,12 +528,12 @@ function navDay(delta){
   if(ref>today)return;
   viewDate=ref;
   renderDateNav();
-  renderToday();
+  if(isHOS())renderHOSToday();else renderToday();
 }
 function resetDay(){
   viewDate=null;
   renderDateNav();
-  renderToday();
+  if(isHOS())renderHOSToday();else renderToday();
 }
 
 function toggleBurger(){
