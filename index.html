@@ -237,8 +237,8 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 .sgl{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
 .sgv{font-size:22px;font-weight:800;color:#fff}
 .sgv.g{color:#4ade80}
-.obj-progress{background:rgba(255,255,255,.1);border-radius:5px;height:8px;overflow:hidden;margin-top:10px}
-.obj-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,#4ade80,var(--acc))}
+.obj-progress{background:rgba(255,255,255,.18);border-radius:6px;height:10px;overflow:hidden;margin-top:10px}
+.obj-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#4ade80,#E8FF3A)}
 
 .view-toggle{display:flex;background:var(--g1);border-radius:var(--r);padding:3px;margin-bottom:14px}
 .vt{flex:1;padding:7px;text-align:center;font-size:12px;font-weight:700;color:var(--g4);border-radius:7px;cursor:pointer}
@@ -909,6 +909,7 @@ function updateObjBar(){
   const pct=target>0?Math.round(score/target*100):0;
   const fill=document.getElementById('obj-fill');
   fill.style.width=Math.min(pct,150)+'%';
+  fill.style.background=pct>=100?'linear-gradient(90deg,#4ade80,#E8FF3A)':pct>=50?'linear-gradient(90deg,#fbbf24,#f97316)':'linear-gradient(90deg,#f87171,#ef4444)';
   if(pct>=100)fill.className='obj-bar-fill over';else fill.className='obj-bar-fill';
   document.getElementById('obj-pct').textContent=pct+'%';
   const remaining=Math.max(0,target-score);
