@@ -804,47 +804,30 @@ function renderTeamBlock(tk, cont){
   var tSc=tReps.reduce(function(s,r){return s+(r.score||0);},0);
   var tV=tReps.reduce(function(s,r){return s+(r.total_vente||0);},0);
   var tI=tReps.reduce(function(s,r){return s+(r.instal||0);},0);
-  var tIH=tReps.reduce(function(s,r){return s+(r.rdv_ih||0);},0);
-  var tOG=tReps.reduce(function(s,r){return s+(r.rdv_og||0);},0);
   var tPos=tReps.reduce(function(s,r){return s+(r.total_pos||0);},0);
   var tPosShare=tV>0?Math.round(tPos/tV*100):0;
   var teamObj=tAgents.length*2;
   var teamBlue=tSc>(tAgents.length*2)+3;
   var scColor=teamBlue?'#3b82f6':tSc>=teamObj?'#4ade80':tSc>=tAgents.length*1.5?'#fbbf24':'#f87171';
-  var eodRate=tVisibleAgents.length>0?tReps.length/tVisibleAgents.length:0;
-  var eodColor=eodRate>=0.9?'#4ade80':eodRate>=0.5?'#fbbf24':'#f87171';
 
-  // Encadré TM avec stats + POS share
-  var wrap=document.createElement('div');
-  wrap.style.cssText='background:rgba(0,0,0,.07);border:1px solid rgba(255,255,255,.12);border-left:3px solid '+scColor+';border-radius:10px;margin-bottom:6px;overflow:hidden';
-
+  // Header simplifié — nom coloré + stats sobres + score
   var hd=document.createElement('div');
-  hd.style.cssText='padding:10px 14px';
-  hd.innerHTML=
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'+
-      '<div>'+
-        '<div class="team-nm">'+mgr.label+'</div>'+
-        '<div style="font-size:10px;margin-top:2px;color:'+eodColor+'">'+
-          (tMiss>0?tMiss+' manquante'+(tMiss>1?'s':''):'✓ Complet')+
-        '</div>'+
-      '</div>'+
-      '<div style="text-align:right">'+
-        '<div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:2px">(POS '+tPosShare+'%) '+tV+'v · '+tI+'i</div>'+
-        '<div style="font-size:22px;font-weight:900;color:'+scColor+';line-height:1">'+tSc+'<span style="font-size:10px;font-weight:400;color:var(--g4);margin-left:2px">pts</span></div>'+
-      '</div>'+
-    '</div>'+
-    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center">'+
-      '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#4ade80">'+tV+'</div><div style="font-size:9px;color:var(--g4)">Ventes</div></div>'+
-      '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#f97316">'+tI+'</div><div style="font-size:9px;color:var(--g4)">Instals</div></div>'+
-      '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#60a5fa">'+tIH+'+'+tOG+'</div><div style="font-size:9px;color:var(--g4)">RDV</div></div>'+
-      '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:'+eodColor+'">'+tReps.length+'/'+tVisibleAgents.length+'</div><div style="font-size:9px;color:var(--g4)">EOD</div></div>'+
-    '</div>';
-  wrap.appendChild(hd);
+  hd.className='team-hd '+tk;
+  hd.style.marginBottom='2px';
+  var lf=document.createElement('div');
+  var tnm=document.createElement('div');tnm.className='team-nm';tnm.textContent=mgr.label;
+  var tsub=document.createElement('div');
+  tsub.style.cssText='font-size:10px;color:rgba(255,255,255,.4);margin-top:2px';
+  tsub.textContent='(POS '+tPosShare+'%) '+tV+'v · '+tI+'i'+(tMiss>0?' · '+tMiss+' manq.':'');
+  lf.appendChild(tnm);lf.appendChild(tsub);
+  var sc2=document.createElement('div');sc2.className='team-sc '+tk;
+  sc2.style.color=scColor;sc2.textContent=tSc;
+  hd.appendChild(lf);hd.appendChild(sc2);
+  cont.appendChild(hd);
 
-  // Liste EOD directement visible — pas de clic nécessaire
+  // EODs directement visibles
   var body=document.createElement('div');
-  body.style.cssText='border-top:1px solid rgba(255,255,255,.08);padding:6px 14px 10px';
-
+  body.style.cssText='margin-bottom:8px';
   tVisibleAgents.forEach(function(a){
     var rep=getToday(a.n);
     var row=document.createElement('div');
@@ -873,9 +856,7 @@ function renderTeamBlock(tk, cont){
     row.appendChild(gh);
     body.appendChild(row);
   });
-
-  wrap.appendChild(body);
-  cont.appendChild(wrap);
+  cont.appendChild(body);
 }
 
 function renderHOSToday(){
