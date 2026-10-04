@@ -973,24 +973,7 @@ function renderHOSToday(){
       hd.appendChild(lf);hd.appendChild(sc3);
       cont.appendChild(hd);
 
-      // Liste des SMs (commerciaux) — identique à Baptiste
-      var wr=tAgents.filter(function(a){return getToday(a.n);});
-      var wrMiss=tAgents.filter(function(a){return !getToday(a.n);});
-      var agDiv=document.createElement('div');agDiv.className='agc';
-      var ghDiv=document.createElement('div');ghDiv.className='agh';
-      tAgents.forEach(function(a){
-        var rep=getToday(a.n);
-        var ag=document.createElement('div');ag.className='ag'+(rep?' s':'');
-        var dot=document.createElement('div');dot.className='ag-dot';
-        var nm=document.createElement('div');nm.className='ag-n';nm.textContent=a.n.split(' ')[0];
-        var sc4=document.createElement('div');sc4.className='ag-s';
-        sc4.textContent=rep?rep.score:'';
-        if(rep)sc4.style.color='var(--g)';
-        ag.appendChild(dot);ag.appendChild(nm);ag.appendChild(sc4);
-        ghDiv.appendChild(ag);
-      });
-      agDiv.appendChild(ghDiv);
-      cont.appendChild(agDiv);
+      renderTeamBlock(tk, cont);
     });
   });
 }
