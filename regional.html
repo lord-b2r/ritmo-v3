@@ -964,7 +964,9 @@ function renderHOSToday(){
     var rHd=document.createElement('div');
     rHd.style.cssText='background:var(--b);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin:12px 0 4px;border-left:4px solid '+r.color+';cursor:pointer';
     var rLf=document.createElement('div');
-    var rNm=document.createElement('div');rNm.style.cssText='font-size:13px;font-weight:700;color:rgba(255,255,255,.9)';rNm.textContent=rname;
+    var rmKey=r.rm;var rmInfo=REGIONAL_MANAGERS[rmKey];var rmFirst=rmInfo?rmInfo.name.split(' ')[0]:'';
+    var rNm=document.createElement('div');rNm.style.cssText='font-size:13px;font-weight:700;color:rgba(255,255,255,.9)';
+    rNm.innerHTML=rname+'<span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.5);margin-left:6px">'+rmFirst+'</span>';
     var rSub=document.createElement('div');rSub.style.cssText='font-size:11px;color:var(--g4);margin-top:2px';
     rSub.textContent=rReps.length+'/'+rAgAll.length+' SM EOD'+(rMiss>0?' - '+rMiss+' manquant'+(rMiss>1?'s':''):'');
     rLf.appendChild(rNm);rLf.appendChild(rSub);
