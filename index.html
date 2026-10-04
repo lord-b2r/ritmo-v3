@@ -1068,12 +1068,48 @@ function renderInstalForm(){
     };})(i);
     wrap.appendChild(lbl);wrap.appendChild(sel);
     if(inst.autre){
-      var txt=document.createElement('input');
-      txt.type='text';txt.placeholder='Nom du commerce...';
-      txt.style.cssText='width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:10px 12px;font-size:14px;color:var(--t)';
-      txt.value=inst.nom||'';
-      (function(idx){txt.oninput=function(){S.instalList[idx].nom=this.value;};})(i);
-      wrap.appendChild(txt);
+      // Mini formulaire vente complet pour "Autre / Non listé"
+      var autreFrm=document.createElement('div');
+      autreFrm.style.cssText='background:var(--g1);border:1px solid var(--g2);border-radius:10px;padding:12px;margin-top:6px;display:flex;flex-direction:column;gap:8px';
+      autreFrm.innerHTML='<div style="font-size:11px;color:var(--g4);margin-bottom:2px">Nouvelle vente — sera ajoutée au pipe sans compter dans les points</div>';
+
+      // Nom
+      var inNom=document.createElement('input');
+      inNom.type='text';inNom.placeholder='Nom du commerce *';
+      inNom.style.cssText='background:var(--b);border:1px solid var(--g2);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--t);width:100%';
+      inNom.value=inst.nom||'';
+      (function(idx){inNom.oninput=function(){S.instalList[idx].nom=this.value;S.instalList[idx].autre_nom=this.value;};})(i);
+
+      // TPV
+      var inTpv=document.createElement('input');
+      inTpv.type='number';inTpv.placeholder='TPV mensuel *';
+      inTpv.style.cssText='background:var(--b);border:1px solid var(--g2);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--t);width:100%';
+      inTpv.value=inst.autre_tpv||'';
+      (function(idx){inTpv.oninput=function(){S.instalList[idx].autre_tpv=this.value;};})(i);
+
+      // Taux
+      var inTaux=document.createElement('input');
+      inTaux.type='number';inTaux.placeholder='Taux (%)';inTaux.step='0.01';
+      inTaux.style.cssText='background:var(--b);border:1px solid var(--g2);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--t);width:100%';
+      inTaux.value=inst.autre_taux||'';
+      (function(idx){inTaux.oninput=function(){S.instalList[idx].autre_taux=this.value;};})(i);
+
+      // Type TPE/POS
+      var tyRow=document.createElement('div');tyRow.style.cssText='display:flex;gap:8px';
+      ['TPE','POS'].forEach(function(t){
+        var btn=document.createElement('button');
+        btn.type='button';btn.textContent=t;
+        btn.style.cssText='flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid var(--g2);background:'+(inst.autre_type===t?'var(--acc)':'var(--b)')+';color:'+(inst.autre_type===t?'#fff':'var(--g4)')+';cursor:pointer';
+        (function(idx,type,b){btn.onclick=function(){
+          S.instalList[idx].autre_type=type;
+          b.parentNode.querySelectorAll('button').forEach(function(x){x.style.background='var(--b)';x.style.color='var(--g4)';});
+          b.style.background='var(--acc)';b.style.color='#fff';
+        };})(i,t,btn);
+        tyRow.appendChild(btn);
+      });
+
+      autreFrm.appendChild(inNom);autreFrm.appendChild(inTpv);autreFrm.appendChild(inTaux);autreFrm.appendChild(tyRow);
+      wrap.appendChild(autreFrm);
     }
     container.appendChild(wrap);
   });
