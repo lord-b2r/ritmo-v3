@@ -590,6 +590,38 @@ var HOS_DRILL = null;
 
 function isHOS(){return ME==='mathis';}
 
+
+var viewMonth=null;
+
+function hosMonthStr(){
+  if(!viewMonth)return now.toISOString().slice(0,7);
+  return viewMonth;
+}
+function hosMonthLabel(){
+  var m=hosMonthStr();
+  var d=new Date(m+'-01');
+  return d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+}
+function navHOSMonth(delta){
+  var ref=viewMonth?new Date(viewMonth+'-01'):new Date(now.getFullYear(),now.getMonth(),1);
+  ref.setMonth(ref.getMonth()+delta);
+  var cur=new Date(now.getFullYear(),now.getMonth(),1);
+  if(ref>cur)return;
+  viewMonth=ref.getFullYear()+'-'+(String(ref.getMonth()+1).padStart(2,'0'));
+  renderHOSMonthNav();
+  renderHOSMgr();
+}
+function renderHOSMonthNav(){
+  var el=document.getElementById('hos-month-nav');if(!el)return;
+  var isNow=!viewMonth||viewMonth===now.toISOString().slice(0,7);
+  el.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 0 4px">'+
+    '<button onclick="navHOSMonth(-1)" style="background:none;border:none;color:var(--g4);font-size:22px;cursor:pointer;padding:4px 12px">‹</button>'+
+    '<div style="font-size:13px;font-weight:700;color:var(--t);text-transform:capitalize;min-width:140px;text-align:center">'+hosMonthLabel()+'</div>'+
+    '<button onclick="navHOSMonth(1)" '+(isNow?'disabled style="background:none;border:none;color:var(--g2);font-size:22px;padding:4px 12px"':'style="background:none;border:none;color:var(--g4);font-size:22px;cursor:pointer;padding:4px 12px"')+'>›</button>'+
+    '</div>';
+}
+
 function renderHOSMgr(){
   var month=hosMonthStr();
   var cont=document.getElementById('mgr-content');if(!cont)return;cont.innerHTML='';
