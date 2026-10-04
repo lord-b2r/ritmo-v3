@@ -859,6 +859,43 @@ function renderTeamBlock(tk, cont){
   cont.appendChild(body);
 }
 
+function renderTeamEODOnly(tk, cont){
+  var mgr=MANAGERS[tk];if(!mgr)return;
+  var tAgents=TEAMS[tk]||[];
+  var tVisibleAgents=tAgents.filter(function(a){return !a.hidden;});
+  var body=document.createElement('div');
+  body.style.cssText='margin-bottom:8px';
+  tVisibleAgents.forEach(function(a){
+    var rep=getToday(a.n);
+    var row=document.createElement('div');
+    row.className='agc'+(rep?'':' ms');
+    var gh=document.createElement('div');gh.className='agh';
+    if(rep){
+      var s=rep.score||0,tv2=rep.total_vente||0;
+      var mSc=getMonth(a.n).reduce(function(x,r){return x+(r.score||0);},0);
+      var av=document.createElement('div');av.className='aga';av.textContent=a.i||a.n[0];
+      var inf=document.createElement('div');inf.className='agi';
+      var nm=document.createElement('div');nm.className='agn';nm.textContent=a.n;
+      var mt=document.createElement('div');mt.className='agm';
+      mt.textContent=tv2+' vente'+(tv2!==1?'s':'')+' - '+(rep.instal||0)+' instal - IH: '+(rep.rdv_ih||0)+' OG: '+(rep.rdv_og||0)+(rep.noshow?' NS: '+rep.noshow:'')+' - mois: '+mSc+'pts';
+      inf.appendChild(nm);inf.appendChild(mt);
+      var cls=s>=4?'hi':s>=2?'ok':'lo';
+      var as=document.createElement('div');as.className='ags '+cls;as.textContent=s;
+      gh.appendChild(av);gh.appendChild(inf);gh.appendChild(as);
+    } else {
+      var av2=document.createElement('div');av2.className='aga';av2.textContent=a.i||a.n[0];
+      var inf2=document.createElement('div');inf2.className='agi';
+      var nm2=document.createElement('div');nm2.className='agn';nm2.textContent=a.n;
+      var mt2=document.createElement('div');mt2.className='agm';mt2.textContent='Pas encore envoyée';
+      inf2.appendChild(nm2);inf2.appendChild(mt2);
+      gh.appendChild(av2);gh.appendChild(inf2);
+    }
+    row.appendChild(gh);
+    body.appendChild(row);
+  });
+  cont.appendChild(body);
+}
+
 function renderHOSToday(){
   var cont=document.getElementById('teams-today');
   cont.innerHTML='';
@@ -941,7 +978,7 @@ function renderHOSToday(){
       hd.appendChild(lf);hd.appendChild(sc3);
       cont.appendChild(hd);
 
-      renderTeamBlock(tk, cont);
+      renderTeamEODOnly(tk, cont);
     });
   });
 }
