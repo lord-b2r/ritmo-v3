@@ -632,133 +632,105 @@ function renderHOSMgr(){
   var kpiEl=document.getElementById('mgr-overview');if(kpiEl)kpiEl.innerHTML='';
   var kpi=document.createElement('div');kpi.className='kgrid';if(kpiEl)kpiEl.appendChild(kpi);
 
-  if(!HOS_DRILL){
-    // KPIs France globaux
-    var allAgents=Object.values(HOS_REGIONS).flatMap(function(r){return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});});
-    var allReps=allAgents.flatMap(function(a){return getMonth(a.n,month);});
-    var gSc=allReps.reduce(function(s,x){return s+(x.score||0);},0);
-    var gV=allReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
-    var gI=allReps.reduce(function(s,x){return s+(x.instal||0);},0);
-    var gRdv=allReps.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
-    var gNs=allReps.reduce(function(s,x){return s+(x.noshow||0);},0);
-    var gTday=allAgents.map(function(a){return getToday(a.n);}).filter(Boolean).length;
-    var gPos=allReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
-    var gPosShare=gV>0?Math.round(gPos/gV*100):0;
-    [['Score France',gSc,'ce mois'],['Ventes',gV,'détaillées'],['Instals',gI,'déclarées'],['RDV total',gRdv,'IH + OG'],['No-show',gNs,''],['POS share',gPosShare+'%',gPos+' POS'],['EOD ajd',gTday+'/'+allAgents.length,'commerciaux'],['Actifs',allAgents.length,'commerciaux']].forEach(function(item){
-      var kc=document.createElement('div');kc.className='kc';
-      kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv g">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
-      kpi.appendChild(kc);
-    });
+  // Agréger toutes les données France
+  var allReps=Object.values(HOS_REGIONS).flatMap(function(r){
+    return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).flatMap(function(a){return getMonth(a.n,month);});});
+  });
+  var tot={s:allReps.reduce(function(x,r){return x+(r.score||0);},0),
+           v:allReps.reduce(function(x,r){return x+(r.total_vente||0);},0),
+           i:allReps.reduce(function(x,r){return x+(r.instal||0);},0),
+           pos:allReps.reduce(function(x,r){return x+(r.total_pos||0);},0),
+           rdvIh:allReps.reduce(function(x,r){return x+(r.rdv_ih||0);},0),
+           rdvOg:allReps.reduce(function(x,r){return x+(r.rdv_og||0);},0),
+           noshow:allReps.reduce(function(x,r){return x+(r.noshow||0);},0)};
+  var ps=tot.v>0?Math.round(tot.pos/tot.v*100):0;
+  var mn2=new Date(month+'-02').toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
 
-    // Cartes régions
-    Object.entries(HOS_REGIONS).forEach(function(entry){
-      var rname=entry[0],r=entry[1];
-      var ragents=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
-      var rreps=ragents.flatMap(function(a){return getMonth(a.n,month);});
-      var rsc=rreps.reduce(function(s,x){return s+(x.score||0);},0);
-      var rv=rreps.reduce(function(s,x){return s+(x.total_vente||0);},0);
-      var ri=rreps.reduce(function(s,x){return s+(x.instal||0);},0);
-      var rrdv=rreps.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
-      var rns=rreps.reduce(function(s,x){return s+(x.noshow||0);},0);
-      var rpos=rreps.reduce(function(s,x){return s+(x.total_pos||0);},0);
-      var rval=rreps.flatMap(function(x){return x.ventes_detail||[];}).filter(function(v){return v.instal_status==='validated';}).length;
-      var tReps=ragents.map(function(a){return getToday(a.n);}).filter(Boolean);
-      var miss=ragents.length-tReps.length;
-      var tSc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
-      var card=document.createElement('div');
-      card.style.cssText='background:var(--b);border:1px solid '+r.color+'55;border-left:4px solid '+r.color+';border-radius:14px;padding:16px;margin-bottom:10px;cursor:pointer;transition:opacity .15s';
-      card.innerHTML=
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
-        '<div><div style="font-size:15px;font-weight:700;color:'+r.color+'">'+rname+'</div>'+
-        '<div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px">'+ragents.length+' commerciaux · '+r.teams.length+' équipes</div></div>'+
-        '<div style="text-align:right"><div style="font-size:24px;font-weight:800;color:'+r.color+'">'+rsc+'</div><div style="font-size:10px;color:rgba(255,255,255,.35)">pts mois</div></div></div>'+
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center;margin-bottom:6px">'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#4ade80">'+rv+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Ventes</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#f97316">'+ri+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Instals</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#60a5fa">'+rrdv+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">RDV OG</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+ragents.length+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">EOD</div></div>'+
-        '</div>'+
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center;margin-bottom:8px">'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#a78bfa">'+rns+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">No-show</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#fb923c">'+rpos+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">POS</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:#34d399">'+rval+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Validées</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:14px;font-weight:700;color:'+r.color+'">'+tSc+'</div><div style="font-size:9px;color:rgba(255,255,255,.4)">Score ajd</div></div>'+
-        '</div>'+
-        '<div style="text-align:right;font-size:11px;color:'+r.color+'">→ Détail</div>';
-      card.onclick=(function(rn){return function(){HOS_DRILL=rn;renderHOSMgr();};})(rname);
-      cont.appendChild(card);
-    });
+  // Hero France
+  var hero=document.createElement('div');
+  hero.style.cssText='background:var(--b);border-radius:var(--rl);padding:16px;margin-bottom:12px';
+  hero.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">'+
+      '<div><div style="font-size:13px;font-weight:700;color:#fff">Score Field France</div>'+
+      '<div style="font-size:11px;color:rgba(255,255,255,.3)">'+mn2.charAt(0).toUpperCase()+mn2.slice(1)+'</div></div>'+
+      '<div style="text-align:right"><div style="font-size:48px;font-weight:900;letter-spacing:-2px;color:#4ade80;line-height:1">'+tot.s+'</div>'+
+      '<div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.6px">Score France</div></div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px">'+
+      '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Ventes</div><div style="font-size:20px;font-weight:800;color:#4ade80">'+tot.v+'</div></div>'+
+      '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Instals</div><div style="font-size:20px;font-weight:800;color:#4ade80">'+tot.i+'</div></div>'+
+      '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">POS share</div><div style="font-size:20px;font-weight:800;color:'+(ps>=50?'#4ade80':'#fff')+'">'+ps+'%</div></div>'+
+      '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">RDV IH</div><div style="font-size:20px;font-weight:800;color:#fff">'+tot.rdvIh+'</div></div>'+
+      '<div style="background:rgba(255,255,255,.07);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">RDV OG</div><div style="font-size:20px;font-weight:800;color:#fff">'+tot.rdvOg+'</div></div>'+
+      '<div style="background:rgba(248,113,113,.15);border-radius:8px;padding:9px"><div style="font-size:9px;color:rgba(248,113,113,.7);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">No show</div><div style="font-size:20px;font-weight:800;color:#f87171">'+tot.noshow+'</div></div>'+
+    '</div>'+
+    '<div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#E8FF3A);width:'+Math.min(ps*2,100)+'%"></div></div>'+
+    '<div style="display:flex;justify-content:space-between;margin-top:4px"><div style="font-size:10px;color:rgba(255,255,255,.3)">POS share objectif 50%</div><div style="font-size:10px;color:rgba(255,255,255,.3)">'+ps+'%</div></div>';
+  if(kpiEl)kpiEl.appendChild(hero);
 
-  } else {
-    // Vue drillée — managers de la région
-    var r=HOS_REGIONS[HOS_DRILL];
-    var back=document.createElement('div');
-    back.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 0 12px;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px';
-    back.innerHTML='← Toutes les régions';
-    back.onclick=function(){HOS_DRILL=null;renderHOSMgr();};
-    cont.appendChild(back);
-    var hdr=document.createElement('div');
-    hdr.style.cssText='font-size:16px;font-weight:700;color:'+r.color+';margin-bottom:14px';
-    hdr.textContent=HOS_DRILL;
-    cont.appendChild(hdr);
-    // KPIs région
-    var ragents2=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
-    var rreps2=ragents2.flatMap(function(a){return getMonth(a.n,month);});
-    var rsc2=rreps2.reduce(function(s,x){return s+(x.score||0);},0);
-    var rv2=rreps2.reduce(function(s,x){return s+(x.total_vente||0);},0);
-    var ri2=rreps2.reduce(function(s,x){return s+(x.instal||0);},0);
-    var rrdv2=rreps2.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
-    var tday2=ragents2.map(function(a){return getToday(a.n);}).filter(Boolean);
-    [['Score',rsc2,HOS_DRILL],['Ventes',rv2,'ce mois'],['Instals',ri2,'déclarées'],['RDV',rrdv2,'IH+OG'],['EOD ajd',tday2.length+'/'+ragents2.length,'commerciaux']].forEach(function(item){
-      var kc=document.createElement('div');kc.className='kc';
-      kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv g">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
-      kpi.appendChild(kc);
-    });
-    // Cards par manager/TM
+  // Cards région — même style que les cards TM de Baptiste
+  Object.entries(HOS_REGIONS).forEach(function(entry){
+    var rname=entry[0], r=entry[1];
+    var rReps=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).flatMap(function(a){return getMonth(a.n,month);});});
+    var rAgents=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+    var rs=rReps.reduce(function(x,r){return x+(r.score||0);},0);
+    var rv=rReps.reduce(function(x,r){return x+(r.total_vente||0);},0);
+    var ri=rReps.reduce(function(x,r){return x+(r.instal||0);},0);
+    var rpos=rReps.reduce(function(x,r){return x+(r.total_pos||0);},0);
+    var rih=rReps.reduce(function(x,r){return x+(r.rdv_ih||0);},0);
+    var rog=rReps.reduce(function(x,r){return x+(r.rdv_og||0);},0);
+    var rns=rReps.reduce(function(x,r){return x+(r.noshow||0);},0);
+    var rps=rv>0?Math.round(rpos/rv*100):0;
+
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--b);border-radius:var(--rl);padding:14px;border-left:3px solid '+r.color+';margin-bottom:8px;cursor:pointer';
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
+        '<div><div style="font-size:13px;font-weight:700;color:#fff">'+rname+'</div>'+
+        '<div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px">'+rAgents.length+' commerciaux · '+r.teams.length+' équipes</div></div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:28px;font-weight:900;letter-spacing:-1px;color:'+r.color+'">'+rs+'</div>'+
+          '<div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase">pts</div>'+
+        '</div>'+
+      '</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center">'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:#4ade80">'+rv+'</div><div style="font-size:9px;color:rgba(255,255,255,.3)">Ventes</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:#f97316">'+ri+'</div><div style="font-size:9px;color:rgba(255,255,255,.3)">Instals</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:#60a5fa">'+rih+'+'+rog+'</div><div style="font-size:9px;color:rgba(255,255,255,.3)">RDV</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:6px 2px"><div style="font-size:14px;font-weight:700;color:'+(rps>=50?'#4ade80':'#fbbf24')+'">'+rps+'%</div><div style="font-size:9px;color:rgba(255,255,255,.3)">POS</div></div>'+
+      '</div>';
+
+    // Détail équipes au clic
+    var detail=document.createElement('div');
+    detail.id='hmgr-det-'+rname;
+    detail.style.cssText='display:none;margin-top:10px;border-top:1px solid rgba(255,255,255,.08);padding-top:10px';
     r.teams.forEach(function(tk){
       var mgr=MANAGERS[tk];if(!mgr)return;
-      var agents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
-      var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
-      var sc=reps.reduce(function(s,x){return s+(x.score||0);},0);
-      var v=reps.reduce(function(s,x){return s+(x.total_vente||0);},0);
-      var ins=reps.reduce(function(s,x){return s+(x.instal||0);},0);
-      var rdv=reps.reduce(function(s,x){return s+(x.rdv_ih||0)+(x.rdv_og||0);},0);
-      var rdvog=reps.reduce(function(s,x){return s+(x.rdv_og||0);},0);
-      var ns=reps.reduce(function(s,x){return s+(x.noshow||0);},0);
-      var pos=reps.reduce(function(s,x){return s+(x.total_pos||0);},0);
-      var val=reps.flatMap(function(x){return x.ventes_detail||[];}).filter(function(v){return v.instal_status==='validated';}).length;
-      var tReps=agents.map(function(a){return getToday(a.n);}).filter(Boolean);
-      var miss=agents.length-tReps.length;
-      var tSc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
-      var card=document.createElement('div');
-      card.style.cssText='background:var(--b);border-left:3px solid '+r.color+';border-radius:10px;padding:14px;margin-bottom:8px';
-      card.innerHTML=
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">'+
-        '<div><div style="font-size:13px;font-weight:700;color:#fff">'+mgr.label+'</div>'+
-        '<div style="font-size:11px;color:rgba(255,255,255,.35)">'+agents.length+' commerciaux</div></div>'+
-        '<div style="text-align:right"><div style="font-size:22px;font-weight:800;color:'+r.color+'">'+sc+'</div><div style="font-size:10px;color:rgba(255,255,255,.35)">pts</div></div></div>'+
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center;margin-bottom:5px">'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#4ade80">'+v+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Ventes</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#f97316">'+ins+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Instals</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#60a5fa">'+rdvog+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">RDV OG</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:'+(miss>0?'#f87171':'#4ade80')+'">'+tReps.length+'/'+agents.length+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">EOD</div></div>'+
-        '</div>'+
-        '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center;margin-bottom:8px">'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#a78bfa">'+ns+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">No-show</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#fb923c">'+pos+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">POS</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#34d399">'+val+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Validées</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:'+r.color+'">'+tSc+'</div><div style="font-size:9px;color:rgba(255,255,255,.35)">Score ajd</div></div>'+
-        '</div>'+
-        '<div style="display:flex;flex-wrap:wrap;gap:5px">'+
-        agents.map(function(a){
-          var rep=getToday(a.n);
-          return '<div style="background:rgba(255,255,255,.06);border-radius:6px;padding:3px 8px;font-size:10px;color:'+(rep?'#4ade80':'rgba(255,255,255,.3)')+'">'+a.n.split(' ')[0]+(rep?' '+rep.score+'pts':'')+'</div>';
-        }).join('')+'</div>';
-      cont.appendChild(card);
+      var tReps=(TEAMS[tk]||[]).flatMap(function(a){return getMonth(a.n,month);});
+      var ts=tReps.reduce(function(x,r){return x+(r.score||0);},0);
+      var tv=tReps.reduce(function(x,r){return x+(r.total_vente||0);},0);
+      var ti=tReps.reduce(function(x,r){return x+(r.instal||0);},0);
+      var tih=tReps.reduce(function(x,r){return x+(r.rdv_ih||0);},0);
+      var tog=tReps.reduce(function(x,r){return x+(r.rdv_og||0);},0);
+      var tns=tReps.reduce(function(x,r){return x+(r.noshow||0);},0);
+      var tps=(TEAMS[tk]||[]).length;
+      var row=document.createElement('div');
+      row.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)';
+      row.innerHTML=
+        '<div><div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.9)">'+mgr.label+'</div>'+
+        '<div style="font-size:10px;color:rgba(255,255,255,.35);margin-top:1px">'+tv+'v · '+ti+'i · '+tih+'+'+tog+' rdv · NS:'+tns+'</div></div>'+
+        '<div style="font-size:18px;font-weight:800;color:'+r.color+'">'+ts+'<span style="font-size:9px;font-weight:400;color:rgba(255,255,255,.3);margin-left:2px">pts</span></div>';
+      detail.appendChild(row);
     });
-  }
-}
 
+    card.onclick=(function(rn){return function(){
+      var det=document.getElementById('hmgr-det-'+rn);
+      if(det)det.style.display=det.style.display==='none'?'block':'none';
+    };})(rname);
+    card.appendChild(detail);
+    cont.appendChild(card);
+  });
+}
 function renderTeamBlock(tk, cont){
   var mgr=MANAGERS[tk];if(!mgr)return;
   var tAgents=TEAMS[tk]||[];
