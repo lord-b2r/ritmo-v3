@@ -813,16 +813,25 @@ function renderTeamBlock(tk, cont){
   // Header cliquable
   var hd=document.createElement('div');
   hd.className='team-hd '+tk;
-  hd.style.cssText='background:var(--b);cursor:pointer;margin-bottom:2px';
+  hd.style.cssText='cursor:pointer;margin-bottom:2px';
   var lf=document.createElement('div');
   var tnm=document.createElement('div');tnm.className='team-nm';tnm.textContent=mgr.label;
   var tsub=document.createElement('div');
-  tsub.style.cssText='font-size:10px;color:rgba(255,255,255,.4);margin-top:2px';
-  tsub.textContent='(POS '+tPosShare+'%) '+tV+'v · '+tI+'i'+(tMiss>0?' · '+tMiss+' manq.':'');
+  tsub.style.cssText='font-size:10px;color:rgba(255,255,255,.5);margin-top:2px';
+  tsub.textContent=tReps.length+'/'+tVisibleAgents.length+' SM EOD'+(tMiss>0?' - '+tMiss+' manquant'+(tMiss>1?'s':''):'');
   lf.appendChild(tnm);lf.appendChild(tsub);
+  var rRt=document.createElement('div');rRt.style.cssText='display:flex;align-items:center;gap:8px';
+  var rStats=document.createElement('div');rStats.style.cssText='text-align:right';
+  var rStatTop=document.createElement('div');rStatTop.style.cssText='font-size:10px;color:rgba(255,255,255,.4);margin-bottom:2px';
+  rStatTop.textContent='(POS '+tPosShare+'%) '+tV+'v · '+tI+'i';
   var sc2=document.createElement('div');sc2.className='team-sc '+tk;
-  sc2.style.color=scColor;sc2.textContent=tSc;
-  hd.appendChild(lf);hd.appendChild(sc2);
+  sc2.style.cssText='font-size:22px;font-weight:900;color:'+scColor+';line-height:1';sc2.textContent=tSc;
+  rStats.appendChild(rStatTop);rStats.appendChild(sc2);
+  var rArr=document.createElement('div');rArr.style.cssText='color:rgba(255,255,255,.4);font-size:14px';rArr.textContent='▶';
+  rRt.appendChild(rStats);rRt.appendChild(rArr);
+  hd.appendChild(lf);hd.appendChild(rRt);
+  // Mettre à jour la flèche au clic
+  hd._arr=rArr;
   cont.appendChild(hd);
 
   // EODs cachées par défaut
