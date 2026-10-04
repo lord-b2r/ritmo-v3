@@ -840,8 +840,8 @@ function renderHOSToday(){
    ['Actifs', tAll.length, allAg.length+' TM']
   ].forEach(function(item){
     var kc=document.createElement('div');kc.className='kc';
-    var kv_color=item[0]==='EOD'?eodColor:'';var kv_style=kv_color?'style="color:'+kv_color+'"':'class="kv g"';
-    kc.innerHTML='<div class="kl">'+item[0]+'</div><div '+(item[0]==='EOD'?'class="kv" style="color:'+eodColor+'"':'class="kv g"')+'>''+item[1]+'</div><div class="ks">'+item[2]+'</div>';
+
+    kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv" style="color:'+(item[0]==='EOD'?eodColor:'var(--g)')+'">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
     kpi.appendChild(kc);
   });
 
