@@ -1373,6 +1373,7 @@ function renderStats(){
   // FU stats
   var fuEl=document.getElementById('fu-stats');fuEl.innerHTML='';
   myTeams.forEach(function(tk){
+    if(!MANAGERS[tk])return;
     var agents=TEAMS[tk]||[];
     var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
     var fu=reps.reduce(function(s,r){return s+(r.leads_fu||0);},0);
