@@ -667,7 +667,25 @@ function renderHOSMgr(){
     '</div>'+
     '<div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#E8FF3A);width:'+Math.min(rPs*2,100)+'%"></div></div>'+
     '<div style="display:flex;justify-content:space-between;margin-top:4px"><div style="font-size:10px;color:rgba(255,255,255,.3)">'+rTot.pos+' POS / '+rTot.v+' ventes</div><div style="font-size:10px;color:rgba(255,255,255,.3)">'+Object.keys(HOS_REGIONS).length+' régions</div></div>';
+  // Barre de progression score France
+  var hosAllAgents=Object.values(HOS_REGIONS).flatMap(function(r){return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});});
+  var hosTarget=hosAllAgents.length*20;
+  var hosPct=hosTarget>0?Math.round(rTot.s/hosTarget*100):0;
+  var hosPctCapped=Math.min(hosPct,150);
+  var progDiv=document.createElement('div');progDiv.style.cssText='margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)';
+  progDiv.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:11px;color:rgba(255,255,255,.5)">Progression France</div><div style="font-size:11px;font-weight:700;color:'+(hosPct>=100?'#4ade80':hosPct>=50?'#fbbf24':'#f87171')+'">'+rTot.s+' / '+hosTarget+' pts ('+(hosPct>150?'150+':hosPct)+'%)</div></div>'+
+    '<div style="background:rgba(255,255,255,.1);border-radius:5px;height:8px;overflow:hidden"><div style="height:100%;border-radius:5px;background:linear-gradient(90deg,'+(hosPct>=100?'#4ade80,#E8FF3A':'#f87171,#fbbf24')+');width:'+hosPctCapped+'%"></div></div>';
+  hero.appendChild(progDiv);
   ov.appendChild(hero);
+
+  // Filtre région cliquable — comme buildMgrFilter pour les TMs
+  var fEl=document.getElementById('mgr-filter');fEl.style.display='flex';fEl.innerHTML='';
+  Object.keys(HOS_REGIONS).forEach(function(rn){
+    var b=document.createElement('button');b.className='fb'+(rn===hosRegionDrill?' on':'');
+    b.textContent=rn;
+    b.onclick=(function(n){return function(){hosRegionDrill=n;renderHOSMgr();};})(rn);
+    fEl.appendChild(b);
+  });
 
   // Grid des régions — identique aux cards TM de Baptiste
   var ovGrid=document.createElement('div');ovGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px';
@@ -887,8 +905,9 @@ function renderHOSToday(){
 
   var eodRate=allAg.length>0?tAll.length/allAg.length:0;
   var eodColor=eodRate>=0.9?'#4ade80':eodRate>=0.5?'#fbbf24':'#f87171';
+  var hosName=REGIONAL_MANAGERS['mathis']?REGIONAL_MANAGERS['mathis'].name:'Mathis JACA';
   [['EOD', tAll.length+'/'+allAg.length, tMiss>0?tMiss+' manq.':'Complet'],
-   ['Score', tSc, 'France'],
+   ['Score France', tSc, hosName],
    ['Ventes', tV, ''],
    ['Instals', tI, ''],
    ['RDV', tIH+tOG, tIH+' IH / '+tOG+' OG'],
@@ -1235,6 +1254,15 @@ function renderMgrView(){
     '</div>'+
     '<div style="background:rgba(255,255,255,.1);border-radius:4px;height:6px;overflow:hidden"><div style="height:100%;border-radius:4px;background:linear-gradient(90deg,#4ade80,#E8FF3A);width:'+Math.min(rPs*2,100)+'%"></div></div>'+
     '<div style="display:flex;justify-content:space-between;margin-top:4px"><div style="font-size:10px;color:rgba(255,255,255,.3)">'+rTot.pos+' POS / '+rTot.v+' ventes</div><div style="font-size:10px;color:rgba(255,255,255,.3)">'+MY_TEAMS.length+' equipe'+(MY_TEAMS.length>1?'s':'')+' - '+allRepsReg.length+' rapports</div></div>';
+  // Barre de progression score région
+  var rmAgents=MY_TEAMS.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+  var rmTarget=rmAgents.length*20;
+  var rmPct=rmTarget>0?Math.round(rTot.s/rmTarget*100):0;
+  var rmPctCapped=Math.min(rmPct,150);
+  var progDiv=document.createElement('div');progDiv.style.cssText='margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)';
+  progDiv.innerHTML='<div style="display:flex;justify-content:space-between;margin-bottom:6px"><div style="font-size:11px;color:rgba(255,255,255,.5)">Progression région</div><div style="font-size:11px;font-weight:700;color:'+(rmPct>=100?'#4ade80':rmPct>=50?'#fbbf24':'#f87171')+'">'+rTot.s+' / '+rmTarget+' pts ('+(rmPct>150?'150+':rmPct)+'%)</div></div>'+
+    '<div style="background:rgba(255,255,255,.1);border-radius:5px;height:8px;overflow:hidden"><div style="height:100%;border-radius:5px;background:linear-gradient(90deg,'+(rmPct>=100?'#4ade80,#E8FF3A':'#f87171,#fbbf24')+';width:'+rmPctCapped+'%"></div></div>';
+  hero.appendChild(progDiv);
   ov.appendChild(hero);
   var ovGrid=document.createElement('div');ovGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px';
   MY_TEAMS.forEach(function(tk){
