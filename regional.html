@@ -879,7 +879,7 @@ function renderHOSToday(){
         '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:#fb923c">'+rPos+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">POS</div></div>'+
         '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:#60a5fa">'+rIH+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">RDV IH</div></div>'+
         '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:#60a5fa">'+rOG+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">RDV OG</div></div>'+
-        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:var(--f)">'+rTday.length+'/'+ragents.length+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">EOD</div></div>'+
+        '<div style="background:rgba(255,255,255,.05);border-radius:8px;padding:7px 4px"><div style="font-size:15px;font-weight:700;color:'+(ragents.length>0?(rTday.length/ragents.length>=0.9?'#4ade80':rTday.length/ragents.length>=0.5?'#fbbf24':'#f87171'):'#4ade80')+'">'+rTday.length+'/'+ragents.length+'</div><div style="font-size:9px;color:var(--g4);text-transform:uppercase;letter-spacing:.5px">EOD</div></div>'+
       '</div>';
 
     // Détail équipes identique à renderToday
