@@ -607,7 +607,9 @@ function navHOSMonth(delta){
   ref.setMonth(ref.getMonth()+delta);
   var cur=new Date(now.getFullYear(),now.getMonth(),1);
   if(ref>cur)return;
-  viewMonth=ref.getFullYear()+'-'+(String(ref.getMonth()+1).padStart(2,'0'));
+  var newM=ref.getFullYear()+'-'+(String(ref.getMonth()+1).padStart(2,'0'));
+  var curM=now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
+  viewMonth=newM===curM?null:newM;
   renderHOSMonthNav();
   renderHOSMgr();
 }
