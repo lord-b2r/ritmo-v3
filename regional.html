@@ -810,10 +810,10 @@ function renderTeamBlock(tk, cont){
   var teamBlue=tSc>(tAgents.length*2)+3;
   var scColor=teamBlue?'#3b82f6':tSc>=teamObj?'#4ade80':tSc>=tAgents.length*1.5?'#fbbf24':'#f87171';
 
-  // Header simplifié — nom coloré + stats sobres + score
+  // Header cliquable
   var hd=document.createElement('div');
   hd.className='team-hd '+tk;
-  hd.style.marginBottom='2px';
+  hd.style.cssText=hd.style.cssText+'cursor:pointer;margin-bottom:2px';
   var lf=document.createElement('div');
   var tnm=document.createElement('div');tnm.className='team-nm';tnm.textContent=mgr.label;
   var tsub=document.createElement('div');
@@ -825,9 +825,11 @@ function renderTeamBlock(tk, cont){
   hd.appendChild(lf);hd.appendChild(sc2);
   cont.appendChild(hd);
 
-  // EODs directement visibles
+  // EODs cachées par défaut
   var body=document.createElement('div');
-  body.style.cssText='margin-bottom:8px';
+  body.id='rtb-body-'+tk;
+  body.style.display='none';
+  body.style.marginBottom='8px';
   tVisibleAgents.forEach(function(a){
     var rep=getToday(a.n);
     var row=document.createElement('div');
@@ -857,6 +859,11 @@ function renderTeamBlock(tk, cont){
     body.appendChild(row);
   });
   cont.appendChild(body);
+
+  hd.onclick=(function(t){return function(){
+    var b=document.getElementById('rtb-body-'+t);
+    if(b)b.style.display=b.style.display==='none'?'block':'none';
+  };})(tk);
 }
 
 function renderTeamEODOnly(tk, cont){
