@@ -1102,7 +1102,7 @@ function renderInstalForm(){
         btn.style.cssText='flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid var(--g2);background:'+(inst.autre_type===t?'var(--acc)':'var(--g1)')+';color:'+(inst.autre_type===t?'#fff':'var(--t)')+';cursor:pointer';
         (function(idx,type,b){btn.onclick=function(){
           S.instalList[idx].autre_type=type;
-          b.parentNode.querySelectorAll('button').forEach(function(x){x.style.background='var(--b)';x.style.color='var(--g4)';});
+          b.parentNode.querySelectorAll('button').forEach(function(x){x.style.background='var(--g1)';x.style.color='var(--t)';});
           b.style.background='var(--acc)';b.style.color='#fff';
         };})(i,t,btn);
         tyRow.appendChild(btn);
