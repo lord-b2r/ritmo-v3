@@ -1076,21 +1076,21 @@ function renderInstalForm(){
       // Nom
       var inNom=document.createElement('input');
       inNom.type='text';inNom.placeholder='Nom du commerce *';
-      inNom.style.cssText='background:var(--b);border:1px solid var(--g2);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--t);width:100%';
+      inNom.style.cssText='background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--t);width:100%';
       inNom.value=inst.nom||'';
       (function(idx){inNom.oninput=function(){S.instalList[idx].nom=this.value;S.instalList[idx].autre_nom=this.value;};})(i);
 
       // TPV
       var inTpv=document.createElement('input');
       inTpv.type='number';inTpv.placeholder='TPV mensuel *';
-      inTpv.style.cssText='background:var(--b);border:1px solid var(--g2);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--t);width:100%';
+      inTpv.style.cssText='background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--t);width:100%';
       inTpv.value=inst.autre_tpv||'';
       (function(idx){inTpv.oninput=function(){S.instalList[idx].autre_tpv=this.value;};})(i);
 
       // Taux
       var inTaux=document.createElement('input');
       inTaux.type='number';inTaux.placeholder='Taux (%)';inTaux.step='0.01';
-      inTaux.style.cssText='background:var(--b);border:1px solid var(--g2);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--t);width:100%';
+      inTaux.style.cssText='background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:9px 12px;font-size:14px;color:var(--t);width:100%';
       inTaux.value=inst.autre_taux||'';
       (function(idx){inTaux.oninput=function(){S.instalList[idx].autre_taux=this.value;};})(i);
 
