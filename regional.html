@@ -814,9 +814,9 @@ function renderTeamBlock(tk, cont){
   var eodRate=tVisibleAgents.length>0?tReps.length/tVisibleAgents.length:0;
   var eodColor=eodRate>=0.9?'#4ade80':eodRate>=0.5?'#fbbf24':'#f87171';
 
-  // Encadré TM cliquable
+  // Encadré TM avec stats + POS share
   var wrap=document.createElement('div');
-  wrap.style.cssText='background:rgba(0,0,0,.07);border:1px solid rgba(255,255,255,.12);border-left:3px solid '+scColor+';border-radius:10px;margin-bottom:6px;overflow:hidden;cursor:pointer';
+  wrap.style.cssText='background:rgba(0,0,0,.07);border:1px solid rgba(255,255,255,.12);border-left:3px solid '+scColor+';border-radius:10px;margin-bottom:6px;overflow:hidden';
 
   var hd=document.createElement('div');
   hd.style.cssText='padding:10px 14px';
@@ -828,12 +828,9 @@ function renderTeamBlock(tk, cont){
           (tMiss>0?tMiss+' manquante'+(tMiss>1?'s':''):'✓ Complet')+
         '</div>'+
       '</div>'+
-      '<div style="display:flex;align-items:center;gap:10px">'+
-        '<div style="text-align:right">'+
-          '<div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:2px">(POS '+tPosShare+'%) '+tV+'v · '+tI+'i</div>'+
-          '<div style="font-size:22px;font-weight:900;color:'+scColor+';line-height:1">'+tSc+'<span style="font-size:10px;font-weight:400;color:var(--g4);margin-left:2px">pts</span></div>'+
-        '</div>'+
-        '<div id="tarr-'+tk+'" style="color:var(--g4);font-size:11px">▶</div>'+
+      '<div style="text-align:right">'+
+        '<div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:2px">(POS '+tPosShare+'%) '+tV+'v · '+tI+'i</div>'+
+        '<div style="font-size:22px;font-weight:900;color:'+scColor+';line-height:1">'+tSc+'<span style="font-size:10px;font-weight:400;color:var(--g4);margin-left:2px">pts</span></div>'+
       '</div>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;text-align:center">'+
@@ -842,13 +839,11 @@ function renderTeamBlock(tk, cont){
       '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:#60a5fa">'+tIH+'+'+tOG+'</div><div style="font-size:9px;color:var(--g4)">RDV</div></div>'+
       '<div style="background:rgba(255,255,255,.05);border-radius:6px;padding:5px 2px"><div style="font-size:13px;font-weight:700;color:'+eodColor+'">'+tReps.length+'/'+tVisibleAgents.length+'</div><div style="font-size:9px;color:var(--g4)">EOD</div></div>'+
     '</div>';
+  wrap.appendChild(hd);
 
-  // Détail EOD commerciaux — caché par défaut
+  // Liste EOD directement visible — pas de clic nécessaire
   var body=document.createElement('div');
-  body.id='tbody-'+tk;
-  body.style.cssText='display:none;border-top:1px solid rgba(255,255,255,.08)';
-  var bodyInner=document.createElement('div');
-  bodyInner.style.cssText='padding:6px 14px 10px';
+  body.style.cssText='border-top:1px solid rgba(255,255,255,.08);padding:6px 14px 10px';
 
   tVisibleAgents.forEach(function(a){
     var rep=getToday(a.n);
@@ -876,20 +871,9 @@ function renderTeamBlock(tk, cont){
       gh.appendChild(av2);gh.appendChild(inf2);
     }
     row.appendChild(gh);
-    bodyInner.appendChild(row);
+    body.appendChild(row);
   });
 
-  body.appendChild(bodyInner);
-
-  hd.onclick=(function(t){return function(){
-    var b=document.getElementById('tbody-'+t);
-    var ar=document.getElementById('tarr-'+t);
-    var open=b&&b.style.display==='none';
-    if(b)b.style.display=open?'block':'none';
-    if(ar)ar.textContent=open?'▼':'▶';
-  };})(tk);
-
-  wrap.appendChild(hd);
   wrap.appendChild(body);
   cont.appendChild(wrap);
 }
