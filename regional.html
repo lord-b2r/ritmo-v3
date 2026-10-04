@@ -828,6 +828,8 @@ function renderHOSToday(){
   var tPos=tAll.reduce(function(s,x){return s+(x.total_pos||0);},0);
   var tPosShare=tV>0?Math.round(tPos/tV*100):0;
 
+  var eodRate=allAg.length>0?tAll.length/allAg.length:0;
+  var eodColor=eodRate>=0.9?'#4ade80':eodRate>=0.5?'#fbbf24':'#f87171';
   [['EOD', tAll.length+'/'+allAg.length, tMiss>0?tMiss+' manq.':'Complet'],
    ['Score', tSc, 'France'],
    ['Ventes', tV, ''],
@@ -838,7 +840,8 @@ function renderHOSToday(){
    ['Actifs', tAll.length, allAg.length+' TM']
   ].forEach(function(item){
     var kc=document.createElement('div');kc.className='kc';
-    kc.innerHTML='<div class="kl">'+item[0]+'</div><div class="kv '+(tMiss>0&&item[0]==='EOD'?'err':'g')+'">'+item[1]+'</div><div class="ks">'+item[2]+'</div>';
+    var kv_color=item[0]==='EOD'?eodColor:'';var kv_style=kv_color?'style="color:'+kv_color+'"':'class="kv g"';
+    kc.innerHTML='<div class="kl">'+item[0]+'</div><div '+(item[0]==='EOD'?'class="kv" style="color:'+eodColor+'"':'class="kv g"')+'>''+item[1]+'</div><div class="ks">'+item[2]+'</div>';
     kpi.appendChild(kc);
   });
 
@@ -866,7 +869,7 @@ function renderHOSToday(){
           '</div>'+
         '</div>'+
         '<div style="display:flex;align-items:center;gap:6px">'+
-          '<div style="font-size:24px;font-weight:900;color:'+r.color+'">'+rSc+'<span style="font-size:10px;font-weight:400;color:var(--g4);margin-left:2px">pts</span></div>'+
+          '<div style="font-size:24px;font-weight:900;color:'+(ragents.length>0?(rTday.length/ragents.length>=0.9?r.color:rTday.length/ragents.length>=0.5?'#fbbf24':'#f87171'):r.color)+'">'+rSc+'<span style="font-size:10px;font-weight:400;color:var(--g4);margin-left:2px">pts</span></div>'+
           '<div id="rarr-'+rname+'" style="color:var(--g4);font-size:12px">▶</div>'+
         '</div>'+
       '</div>'+
