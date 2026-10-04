@@ -668,7 +668,7 @@ function renderHOSMgr(){
     '<div style="display:flex;justify-content:space-between;margin-top:4px"><div style="font-size:10px;color:rgba(255,255,255,.3)">'+rTot.pos+' POS / '+rTot.v+' ventes</div><div style="font-size:10px;color:rgba(255,255,255,.3)">'+Object.keys(HOS_REGIONS).length+' régions</div></div>';
   // Barre de progression score France
   var hosAllAgents=Object.values(HOS_REGIONS).flatMap(function(r){return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});});
-  var hosTarget=hosAllAgents.length*20;
+  var hosTarget=hosAllAgents.length*40;
   var hosPct=hosTarget>0?Math.round(rTot.s/hosTarget*100):0;
   var hosPctCapped=Math.min(hosPct,150);
   var progDiv=document.createElement('div');progDiv.style.cssText='margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)';
@@ -1254,7 +1254,7 @@ function renderMgrView(){
     '<div style="display:flex;justify-content:space-between;margin-top:4px"><div style="font-size:10px;color:rgba(255,255,255,.3)">'+rTot.pos+' POS / '+rTot.v+' ventes</div><div style="font-size:10px;color:rgba(255,255,255,.3)">'+MY_TEAMS.length+' equipe'+(MY_TEAMS.length>1?'s':'')+' - '+allRepsReg.length+' rapports</div></div>';
   // Barre de progression score région
   var rmAgents=MY_TEAMS.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
-  var rmTarget=rmAgents.length*20;
+  var rmTarget=rmAgents.length*40;
   var rmPct=rmTarget>0?Math.round(rTot.s/rmTarget*100):0;
   var rmPctCapped=Math.min(rmPct,150);
   var progDiv=document.createElement('div');progDiv.style.cssText='margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)';
