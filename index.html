@@ -1099,7 +1099,7 @@ function renderInstalForm(){
       ['TPE','POS'].forEach(function(t){
         var btn=document.createElement('button');
         btn.type='button';btn.textContent=t;
-        btn.style.cssText='flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid var(--g2);background:'+(inst.autre_type===t?'var(--acc)':'var(--b)')+';color:'+(inst.autre_type===t?'#fff':'var(--g4)')+';cursor:pointer';
+        btn.style.cssText='flex:1;padding:8px;border-radius:8px;font-size:13px;font-weight:600;border:1px solid var(--g2);background:'+(inst.autre_type===t?'var(--acc)':'var(--g1)')+';color:'+(inst.autre_type===t?'#fff':'var(--t)')+';cursor:pointer';
         (function(idx,type,b){btn.onclick=function(){
           S.instalList[idx].autre_type=type;
           b.parentNode.querySelectorAll('button').forEach(function(x){x.style.background='var(--b)';x.style.color='var(--g4)';});
