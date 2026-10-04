@@ -603,12 +603,14 @@ function hosMonthLabel(){
   return d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
 }
 function navHOSMonth(delta){
-  var ref=viewMonth?new Date(viewMonth+'-01'):new Date(now.getFullYear(),now.getMonth(),1);
-  ref.setMonth(ref.getMonth()+delta);
-  var cur=new Date(now.getFullYear(),now.getMonth(),1);
-  if(ref>cur)return;
-  var newM=ref.getFullYear()+'-'+(String(ref.getMonth()+1).padStart(2,'0'));
   var curM=now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
+  var baseM=viewMonth||curM;
+  var y=parseInt(baseM.slice(0,4)),m=parseInt(baseM.slice(5,7));
+  m+=delta;
+  if(m>12){m-=12;y++;}
+  if(m<1){m+=12;y--;}
+  var newM=y+'-'+(String(m).padStart(2,'0'));
+  if(newM>curM)return;
   viewMonth=newM===curM?null:newM;
   renderHOSMonthNav();
   renderHOSMgr();
