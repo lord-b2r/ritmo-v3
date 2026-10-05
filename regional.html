@@ -1639,15 +1639,28 @@ function renderMur(){
   var fb=document.getElementById('mur-filter-bar');
   if(fb){
     fb.innerHTML='';
-    var filters=isHOS()?
-      [['region','Ma région'],['france','Tout Ritmo']]:
-      [['region','Mon équipe'],['ritmo','Tout Ritmo']];
-    filters.forEach(function(f){
-      var b=document.createElement('button');b.className='fb'+(murFilter===f[0]?' on':'');
-      b.textContent=f[1];
-      b.onclick=(function(fv){return function(){window.murFilter=fv;renderMur();};})(f[0]);
-      fb.appendChild(b);
-    });
+    if(isHOS()){
+      // Tout Ritmo
+      var bFr=document.createElement('button');bFr.className='fb'+(murFilter==='france'?' on':'');
+      bFr.textContent='Tout Ritmo';
+      bFr.onclick=function(){window.murFilter='france';window.murRegion=null;renderMur();};
+      fb.appendChild(bFr);
+      // Une par région
+      Object.entries(HOS_REGIONS).forEach(function(e){
+        var rn=e[0],rc=e[1].color;
+        var b=document.createElement('button');b.className='fb'+(murFilter==='region'&&window.murRegion===rn?' on':'');
+        b.textContent=rn;
+        b.onclick=(function(n){return function(){window.murFilter='region';window.murRegion=n;renderMur();};})(rn);
+        fb.appendChild(b);
+      });
+    } else {
+      [['region','Mon équipe'],['ritmo','Tout Ritmo']].forEach(function(f){
+        var b=document.createElement('button');b.className='fb'+(murFilter===f[0]?' on':'');
+        b.textContent=f[1];
+        b.onclick=(function(fv){return function(){window.murFilter=fv;renderMur();};})(f[0]);
+        fb.appendChild(b);
+      });
+    }
   }
   if(!mots.length){list.innerHTML='<div class="empty">Aucune bonne nouvelle ce mois-ci</div>';return;}
   var reactions=getMurReactions();
