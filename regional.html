@@ -1184,11 +1184,9 @@ function renderHOSToday(){
     rHd.style.cssText='background:var(--b);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin:12px 0 4px;border-left:4px solid '+r.color+';cursor:pointer';
     var rLf=document.createElement('div');
     var rmKey=r.rm;var rmInfo=REGIONAL_MANAGERS[rmKey];
-    var rmFullName=rmInfo?rmInfo.name:'';
-    var CITIES={'nacim':'Paris','baptiste':'Marseille','louis':'Lille','mohamed':'Bordeaux','romane':'Rennes'};
-    var rmCity=CITIES[rmKey]||'';
-    var rNm=document.createElement('div');rNm.style.cssText='font-size:13px;font-weight:700;color:rgba(255,255,255,.9)';
-    rNm.innerHTML=rname+'<span style="font-size:11px;font-weight:400;color:rgba(255,255,255,.5);margin-left:6px">'+rmFullName+(rmCity?' · '+rmCity:'')+'</span>';
+    var rmFirst=rmInfo?rmInfo.name.split(' ')[0]:'';
+    var rNm=document.createElement('div');rNm.style.cssText='font-size:13px;font-weight:700;color:#fff';
+    rNm.innerHTML=rmFirst+' <span style="color:rgba(255,255,255,.6);font-weight:400">'+rname+'</span>';
     var rSub=document.createElement('div');rSub.style.cssText='font-size:11px;color:var(--g4);margin-top:2px';
     rSub.textContent=rReps.length+'/'+rAgAll.length+' SM EOD'+(rMiss>0?' - '+rMiss+' manquant'+(rMiss>1?'s':''):'');
     rLf.appendChild(rNm);rLf.appendChild(rSub);
