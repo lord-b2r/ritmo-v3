@@ -275,9 +275,14 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <div id="s-managers" class="scr">
       <div id="hos-month-nav" style="display:none"></div>
       <div id="rm-month-nav" style="display:none"></div>
+      <div id="rm-view-tabs" style="display:none;margin-bottom:14px" class="slide-tabs">
+        <div class="slide-tab on" id="rmt-moi" onclick="rmView('moi')">Moi</div>
+        <div class="slide-tab" id="rmt-france" onclick="rmView('france')">Team France</div>
+      </div>
       <div id="mgr-overview"></div>
       <div class="filter-row" id="mgr-filter"></div>
       <div id="mgr-content"></div>
+      <div id="rm-france-view" style="display:none"></div>
     </div>
 
     <!-- STATS -->
@@ -1292,6 +1297,107 @@ function renderRMMonthNav(){
     '</div>';
 }
 
+
+var rmViewCur='moi';
+function rmView(v){
+  rmViewCur=v;
+  document.getElementById('rmt-moi').className='slide-tab'+(v==='moi'?' on':'');
+  document.getElementById('rmt-france').className='slide-tab'+(v==='france'?' on':'');
+  var moi=document.getElementById('mgr-overview');
+  var filter=document.getElementById('mgr-filter');
+  var cont=document.getElementById('mgr-content');
+  var france=document.getElementById('rm-france-view');
+  if(v==='moi'){
+    if(moi)moi.style.display='';
+    if(filter)filter.style.display='';
+    if(cont)cont.style.display='';
+    if(france)france.style.display='none';
+    renderMgrView();
+  } else {
+    if(moi)moi.style.display='none';
+    if(filter)filter.style.display='none';
+    if(cont)cont.style.display='none';
+    if(france){france.style.display='block';renderRMFrance();}
+  }
+}
+
+function renderRMFrance(){
+  var cont=document.getElementById('rm-france-view');
+  cont.innerHTML='';
+  var month=rmMonthStr();
+  // Même vue que HOS mais sans le hero France
+  // Cards régions cliquables → drill TMs
+  Object.entries(HOS_REGIONS).forEach(function(entry){
+    var rname=entry[0], r=entry[1];
+    var rAgAll=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+    var rReps=rAgAll.flatMap(function(a){return getMonthSrc(a.n,month);});
+    var rSc=rReps.reduce(function(s,x){return s+(x.score||0);},0);
+    var rV=rReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+    var rI=rReps.reduce(function(s,x){return s+(x.instal||0);},0);
+    var rPos=rReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
+    var rPosShare=rV>0?Math.round(rPos/rV*100):0;
+    var rTarget=rAgAll.length*40;
+    var rPct=rTarget>0?Math.round(rSc/rTarget*100):0;
+    var rScColor=rPct>=100?'#4ade80':rPct>=50?'#fbbf24':'#f87171';
+    var isMine=MY_TEAMS.some(function(tk){return r.teams.indexOf(tk)>=0;});
+
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--w);border-radius:var(--rl);padding:12px 14px;margin-bottom:8px;cursor:pointer;border:1px solid '+(isMine?r.color:'var(--g2)')+';border-left:3px solid '+r.color;
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<div>'+
+          '<div style="font-size:13px;font-weight:700;color:var(--t)">'+rname+'</div>'+
+          '<div style="font-size:10px;color:var(--g4);margin-top:2px">(POS '+rPosShare+'%) '+rV+'v · '+rI+'i</div>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:22px;font-weight:900;color:'+rScColor+';line-height:1">'+rSc+'</div>'+
+          '<div style="font-size:9px;color:var(--g4)">'+rPct+'% obj</div>'+
+        '</div>'+
+      '</div>';
+
+    // Drill : afficher les TMs de la région
+    var drill=document.createElement('div');
+    drill.style.display='none';
+    drill.style.marginTop='8px';
+    r.teams.forEach(function(tk){
+      var mgr=MANAGERS[tk];if(!mgr)return;
+      var tAgents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
+      var tReps=tAgents.flatMap(function(a){return getMonthSrc(a.n,month);});
+      var tSc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
+      var tV=tReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+      var tI=tReps.reduce(function(s,x){return s+(x.instal||0);},0);
+      var tPos=tReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
+      var tPosShare=tV>0?Math.round(tPos/tV*100):0;
+      var tObj=tAgents.length*40;
+      var tPct=tObj>0?Math.round(tSc/tObj*100):0;
+      var tScColor=tPct>=100?'#4ade80':tPct>=50?'#fbbf24':'#f87171';
+      var tm=document.createElement('div');
+      tm.style.cssText='background:var(--g1);border-radius:8px;padding:8px 12px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center';
+      tm.innerHTML=
+        '<div>'+
+          '<div style="font-size:12px;font-weight:700;color:var(--t)">'+mgr.label+'</div>'+
+          '<div style="font-size:10px;color:var(--g4)">(POS '+tPosShare+'%) '+tV+'v · '+tI+'i</div>'+
+        '</div>'+
+        '<div style="font-size:18px;font-weight:900;color:'+tScColor+'">'+tSc+'</div>';
+      drill.appendChild(tm);
+    });
+    card.appendChild(drill);
+
+    card.onclick=function(){
+      var open=drill.style.display==='none';
+      drill.style.display=open?'block':'none';
+    };
+    cont.appendChild(card);
+  });
+}
+
+function getMonthSrc(agent,month){
+  var m=month||now.toISOString().slice(0,7);
+  return REPORTS.filter(function(r){
+    return r.agent===agent&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===m;
+  });
+}
+
 function renderMgrView(){
   var month=viewMonthRM||now.toISOString().slice(0,7);
   // -- Vue d ensemble des managers --
@@ -1821,7 +1927,7 @@ function sw(t){
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
   if(t==='instals')loadInstalItems();
-  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='block';var mn2=document.getElementById('rm-month-nav');if(mn2)mn2.style.display='none';renderHOSMonthNav();renderHOSMgr();}else{var f=document.getElementById('mgr-filter');if(f)f.style.display='';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='none';var mn2=document.getElementById('rm-month-nav');if(mn2){mn2.style.display='block';renderRMMonthNav();}renderMgrView();}}
+  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='block';var mn2=document.getElementById('rm-month-nav');if(mn2)mn2.style.display='none';var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='none';renderHOSMonthNav();renderHOSMgr();}else{var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='flex';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='none';var mn2=document.getElementById('rm-month-nav');if(mn2){mn2.style.display='block';renderRMMonthNav();}rmViewCur='moi';rmView('moi');}}
 }
 
 function setTypeFilter(t){
