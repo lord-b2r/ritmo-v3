@@ -238,9 +238,16 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <!-- MOIS -->
     <div id="s-month" class="scr">
       <div id="mgr-month-nav"></div>
-      <div id="month-hero"></div>
-      <div class="sec-lbl">Classement mensuel</div>
-      <div class="rk" id="ranking"></div>
+      <div class="slide-tabs" style="margin-bottom:14px">
+        <div class="slide-tab on" id="mt-moi" onclick="monthView('moi')">Moi</div>
+        <div class="slide-tab" id="mt-eq" onclick="monthView('eq')">Equipe</div>
+      </div>
+      <div id="mt-moi-view">
+        <div id="month-hero"></div>
+        <div class="sec-lbl">Classement mensuel</div>
+        <div class="rk" id="ranking"></div>
+      </div>
+      <div id="mt-eq-view" style="display:none"></div>
     </div>
 
     <!-- VENTES + FU -->
@@ -329,6 +336,19 @@ var TEAMS = {
   zinedine: [{n:'Antonin RAUCH',i:'AR'},{n:'Garance WOJCIK',i:'GW'},{n:'Husein GUN',i:'HG'},{n:'Mathieu BLEUET',i:'MB'},{n:'Maxime MARTIN',i:'MM'}],
   alex_g: [{n:'Corentin EUSTACHE',i:'CE'},{n:'Anthony DOUARCHE',i:'AD'},{n:'Axel GUILLEVIC',i:'AX'},{n:'Floryan LEMOINE',i:'FL',hidden:true},{n:'Leo PEYRARD',i:'LP'},{n:'Esteban DUVERNAY',i:'ED'},{n:'Frederic COELHO',i:'FC'},{n:'Ijlal AGGA',i:'IA'},{n:'Remi ZAMPINI',i:'RZ'},{n:'Gauthier SOYER',i:'GS'}]
 };
+var HOS_REGIONS = {
+  'IDF':        {rm:'nacim',    color:'#10b981', teams:['camille']},
+  'Sud-Est':    {rm:'baptiste', color:'#3b82f6', teams:['jean','romeo','quentin','idris','arsena','axel_l','alex_g']},
+  'Sud-Ouest':  {rm:'mohamed',  color:'#f59e0b', teams:['cem','benjamin','salim']},
+  'Nord':       {rm:'louis',    color:'#ef4444', teams:['louis_p','julien_r','guillaume']},
+  'Nord-Ouest': {rm:'romane',   color:'#ec4899', teams:['maeline','zinedine']}
+};
+
+function getMyRegion(){
+  var entry=Object.entries(HOS_REGIONS).find(function(e){return e[1].teams.indexOf(TEAM)>=0;});
+  return entry?{name:entry[0],data:entry[1]}:null;
+}
+
 
 var TEAM_LABELS = {jean:'Equipe Jean',romeo:'Equipe Romeo',quentin:'Equipe Quentin',cem:'Equipe Cem',idris:'Equipe Idris',arsena:'Equipe Arsena',axel_l:'Equipe Axel L.',julien_r:'Equipe Julien R.',benjamin:'Equipe Benjamin',salim:'Equipe Salim',zinedine:'Equipe Zinedine',alex_g:'Equipe Alex G.'};
 var ALL_AGENTS = Object.values(TEAMS).flat().filter(function(a,i,arr){return arr.findIndex(function(x){return x.n===a.n;})===i;});
@@ -708,6 +728,99 @@ function renderMgrMonthNav(){
     '</div>';
 }
 
+
+var monthViewCur='moi';
+function monthView(v){
+  monthViewCur=v;
+  document.getElementById('mt-moi').className='slide-tab'+(v==='moi'?' on':'');
+  document.getElementById('mt-eq').className='slide-tab'+(v==='eq'?' on':'');
+  document.getElementById('mt-moi-view').style.display=v==='moi'?'block':'none';
+  document.getElementById('mt-eq-view').style.display=v==='eq'?'block':'none';
+  if(v==='eq')renderMonthEquipe();
+}
+
+function renderMonthEquipe(){
+  var cont=document.getElementById('mt-eq-view');
+  cont.innerHTML='';
+  var month=mgrMonthStr();
+  var myRegion=getMyRegion();
+  if(!myRegion){cont.innerHTML='<div class="empty">Region introuvable</div>';return;}
+  var regionTeams=myRegion.data.teams;
+  var selectedTeam=cont._selectedTeam||null;
+
+  if(selectedTeam){
+    // Vue détail d'une équipe
+    var backBtn=document.createElement('button');
+    backBtn.style.cssText='background:none;border:none;color:var(--g4);font-size:13px;cursor:pointer;padding:0;margin-bottom:12px;display:flex;align-items:center;gap:4px';
+    backBtn.innerHTML='&#8249; Retour';
+    backBtn.onclick=function(){cont._selectedTeam=null;renderMonthEquipe();};
+    cont.appendChild(backBtn);
+    renderTeamDetail(selectedTeam, month, cont);
+    return;
+  }
+
+  // Cards équipes de la région (sans hero total)
+  regionTeams.forEach(function(tk){
+    var mgr=MANAGERS[tk];if(!mgr)return;
+    var agents=TEAMS[tk]||[];
+    var visAgents=agents.filter(function(a){return !a.hidden;});
+    var reps=visAgents.map(function(a){
+      return getMonth(a.n,month);
+    }).flat();
+    var sc=reps.reduce(function(s,r){return s+(r.score||0);},0);
+    var v=reps.reduce(function(s,r){return s+(r.total_vente||0);},0);
+    var ins=reps.reduce(function(s,r){return s+(r.instal||0);},0);
+    var pos=reps.reduce(function(s,r){return s+(r.total_pos||0);},0);
+    var posShare=v>0?Math.round(pos/v*100):0;
+    var obj=visAgents.length*40;
+    var pct=obj>0?Math.round(sc/obj*100):0;
+    var scColor=pct>=100?'#4ade80':pct>=50?'#fbbf24':'#f87171';
+    var isSelf=tk===TEAM;
+
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--w);border-radius:var(--rl);padding:12px 14px;margin-bottom:8px;cursor:pointer;border:1px solid '+(isSelf?'rgba(59,130,246,.4)':'var(--g2)');
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:center">'+
+        '<div>'+
+          '<div style="font-size:13px;font-weight:700;color:var(--t)">'+(isSelf?'<span style="color:#3b82f6">&#9679;</span> ':'')+mgr.label+'</div>'+
+          '<div style="font-size:10px;color:var(--g4);margin-top:2px">(POS '+posShare+'%) '+v+'v · '+ins+'i</div>'+
+        '</div>'+
+        '<div style="text-align:right">'+
+          '<div style="font-size:22px;font-weight:900;color:'+scColor+';line-height:1">'+sc+'</div>'+
+          '<div style="font-size:9px;color:var(--g4)">'+pct+'% obj</div>'+
+        '</div>'+
+      '</div>';
+    card.onclick=(function(t){return function(){cont._selectedTeam=t;renderMonthEquipe();};})(tk);
+    cont.appendChild(card);
+  });
+}
+
+function renderTeamDetail(tk, month, cont){
+  var mgr=MANAGERS[tk];if(!mgr)return;
+  var agents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
+  var title=document.createElement('div');
+  title.style.cssText='font-size:15px;font-weight:800;margin-bottom:12px;color:var(--t)';
+  title.textContent=mgr.label;
+  cont.appendChild(title);
+  var sorted=agents.map(function(a){
+    var r=getMonth(a.n,month);
+    var sc=r.reduce(function(s,x){return s+(x.score||0);},0);
+    var v=r.reduce(function(s,x){return s+(x.total_vente||0);},0);
+    var ins=r.reduce(function(s,x){return s+(x.instal||0);},0);
+    return {n:a.n,i:a.i,sc:sc,v:v,ins:ins};
+  }).sort(function(a,b){return b.sc-a.sc;});
+  sorted.forEach(function(ag,idx){
+    var row=document.createElement('div');
+    row.className='rk-row';
+    var scColor=ag.sc>=40?'#4ade80':ag.sc>=20?'#fbbf24':'#f87171';
+    row.innerHTML=
+      '<div class="rk-pos">'+(idx+1)+'</div>'+
+      '<div class="rk-av">'+ag.i+'</div>'+
+      '<div class="rk-nm">'+ag.n+'</div>'+
+      '<div class="rk-sc" style="color:'+scColor+'">'+ag.sc+'</div>';
+    cont.appendChild(row);
+  });
+}
 function renderMonth(){
   renderMgrMonthNav();
   var agents=getTeamAgents('own',true);
