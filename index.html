@@ -1449,6 +1449,7 @@ function stView(v){
   stView_cur=v;
   document.getElementById('st-moi').style.display=v==='moi'?'block':'none';
   document.getElementById('st-eq').style.display=v==='eq'?'block':'none';
+  if(v==='eq')renderTMMonthNav();
   document.getElementById('vt-moi').className='vt'+(v==='moi'?' on':'');
   document.getElementById('vt-eq').className='vt'+(v==='eq'?' on':'');
   if(v==='moi')renderStMoi();else renderStEq();
@@ -1992,7 +1993,7 @@ function sw(t){
     document.getElementById('t-'+s).className='tab'+(t===s?' on':'');
   });
   if(t==='mur'){loadReports().then(renderMur);}
-  if(t==='st'){loadReports().then(()=>{buildWeek();stView(stView_cur);});}
+  if(t==='st'){loadReports().then(()=>{buildWeek();renderTMMonthNav();stView(stView_cur);});}
   if(t==='vt'){loadReports().then(renderVentes);}
   if(t==='fu'){renderFu();}
 }
