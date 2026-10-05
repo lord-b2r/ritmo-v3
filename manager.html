@@ -713,7 +713,7 @@ function renderMonth(){
   var agents=getTeamAgents('own',true);
   var month=mgrMonthStr();
   var stats=agents.map(function(ag){
-    var r=getMonth(ag.n);
+    var r=getMonth(ag.n,month);
     // Regularite : jours ouvrés du mois - EODs manquantes
     var d=now.getDate();
     var workedDays=Math.ceil(d*WORK_DAYS_PER_MONTH/30);
