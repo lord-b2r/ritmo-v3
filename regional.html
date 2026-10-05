@@ -328,7 +328,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <!-- MUR -->
     <div id="s-mur" class="scr">
       <div style="font-size:18px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px">Bonnes nouvelles</div>
-      <div style="font-size:13px;color:var(--g4);margin-bottom:14px">Toutes les equipes - ce mois-ci</div>
+      <div id="mur-filter-bar" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap"></div>
       <div id="mur-list"></div>
     </div>
 
@@ -1615,9 +1615,40 @@ function renderVentes(){
 function renderMur(){
   var list=document.getElementById('mur-list');list.innerHTML='';
   var month=now.toISOString().slice(0,7);
-  var mots=REPORTS.filter(function(r){
+  var murFilter=window.murFilter||'region';
+  var allMots=REPORTS.filter(function(r){
     return r.mot_jour&&r.mot_jour.trim()&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month;
   });
+  var myAgents=getMyAgents(true).map(function(a){return a.n;});
+  var hosAgents=Object.values(HOS_REGIONS||{}).flatMap(function(r){return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).map(function(a){return a.n;});});});
+  var mots=allMots.filter(function(r){
+    if(isHOS()){
+      if(murFilter==='france')return true;
+      if(murFilter==='region'&&window.murRegion){
+        var rTeams=(HOS_REGIONS[window.murRegion]||{}).teams||[];
+        var rAg=rTeams.flatMap(function(tk){return (TEAMS[tk]||[]).map(function(a){return a.n;});});
+        return rAg.indexOf(r.agent)>=0;
+      }
+      return hosAgents.indexOf(r.agent)>=0;
+    } else {
+      if(murFilter==='ritmo')return true;
+      return myAgents.indexOf(r.agent)>=0;
+    }
+  });
+  // Construire les boutons filtre
+  var fb=document.getElementById('mur-filter-bar');
+  if(fb){
+    fb.innerHTML='';
+    var filters=isHOS()?
+      [['region','Ma région'],['france','Tout Ritmo']]:
+      [['region','Mon équipe'],['ritmo','Tout Ritmo']];
+    filters.forEach(function(f){
+      var b=document.createElement('button');b.className='fb'+(murFilter===f[0]?' on':'');
+      b.textContent=f[1];
+      b.onclick=(function(fv){return function(){window.murFilter=fv;renderMur();};})(f[0]);
+      fb.appendChild(b);
+    });
+  }
   if(!mots.length){list.innerHTML='<div class="empty">Aucune bonne nouvelle ce mois-ci</div>';return;}
   var reactions=getMurReactions();
   mots.slice(0,60).forEach(function(r){
