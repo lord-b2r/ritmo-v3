@@ -493,7 +493,6 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <!-- MUR -->
     <div id="s-mur" class="scr">
       <div style="font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:4px">Mur des bonnes nouvelles</div>
-      <div id="mur-filter-bar" style="display:flex;gap:6px;margin-bottom:12px"></div>
       <div id="mur-list"></div>
 
     </div>
@@ -1393,20 +1392,7 @@ function renderFu(){
 function renderMur(){
   const list=document.getElementById('mur-list');list.innerHTML='';
   const month=now.toISOString().slice(0,7);
-  const murFilter=window.tmMurFilter||'team';
-  const myTeamAgents=(TEAMS[MY_TEAM]||[]).map(a=>a.n);
-  const allMots=allReports.filter(r=>r.mot_jour&&r.mot_jour.trim()&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month);
-  const mots=allMots.filter(r=>murFilter==='ritmo'?true:myTeamAgents.includes(r.agent)||r.agent===ME);
-  // Boutons filtre
-  const fb=document.getElementById('mur-filter-bar');
-  if(fb){
-    fb.innerHTML='';
-    [['team','Mon équipe'],['ritmo','Tout Ritmo']].forEach(([fv,fl])=>{
-      const b=document.createElement('button');b.className='fb'+(murFilter===fv?' on':'');
-      b.textContent=fl;b.onclick=()=>{window.tmMurFilter=fv;renderMur();};
-      fb.appendChild(b);
-    });
-  }
+  const mots=allReports.filter(r=>r.mot_jour&&r.mot_jour.trim()&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month);
   if(!mots.length){list.innerHTML='<div class="empty">Aucune bonne nouvelle ce mois-ci<br>Sois le premier !</div>';return;}
   const reactions=getMurReactions();
   mots.slice(0,40).forEach(r=>{
