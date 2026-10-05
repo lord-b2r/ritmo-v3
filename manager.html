@@ -954,7 +954,7 @@ function renderTeamDetail(tk, month, cont){
 }
 function renderMonth(){
   renderMgrMonthNav();
-  var agents=getTeamAgents('own',true);
+  var agents=getTeamAgents('own',false);
   var month=mgrMonthStr();
   var stats=agents.map(function(ag){
     var r=getMonth(ag.n,month);
