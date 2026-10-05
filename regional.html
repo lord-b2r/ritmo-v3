@@ -274,6 +274,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <!-- MANAGERS -->
     <div id="s-managers" class="scr">
       <div id="hos-month-nav" style="display:none"></div>
+      <div id="rm-month-nav" style="display:none"></div>
       <div id="mgr-overview"></div>
       <div class="filter-row" id="mgr-filter"></div>
       <div id="mgr-content"></div>
@@ -1256,8 +1257,43 @@ function togAgent(key,rep){
   if(c)c.style.transform=op?'':'rotate(180deg)';
 }
 
+
+var viewMonthRM=null;
+
+function rmMonthStr(){return viewMonthRM||now.toISOString().slice(0,7);}
+function rmMonthLabel(){
+  var m=rmMonthStr();
+  var d=new Date(m+'-01');
+  return d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+}
+function navRMMonth(delta){
+  var curM=now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
+  var baseM=viewMonthRM||curM;
+  var y=parseInt(baseM.slice(0,4)),m=parseInt(baseM.slice(5,7));
+  m+=delta;
+  if(m>12){m-=12;y++;}
+  if(m<1){m+=12;y--;}
+  var newM=y+'-'+(String(m).padStart(2,'0'));
+  if(newM>curM)return;
+  viewMonthRM=newM===curM?null:newM;
+  renderRMMonthNav();
+  renderMgrView();
+}
+function renderRMMonthNav(){
+  var el=document.getElementById('rm-month-nav');if(!el)return;
+  if(isHOS()){el.style.display='none';return;}
+  el.style.display='block';
+  var isNow=!viewMonthRM||viewMonthRM===now.toISOString().slice(0,7);
+  el.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:10px 0 4px">'+
+    '<button onclick="navRMMonth(-1)" style="background:none;border:none;color:var(--g4);font-size:22px;cursor:pointer;padding:4px 12px">‹</button>'+
+    '<div style="font-size:13px;font-weight:700;color:var(--t);text-transform:capitalize;min-width:140px;text-align:center">'+rmMonthLabel()+'</div>'+
+    '<button onclick="navRMMonth(1)" '+(isNow?'disabled style="background:none;border:none;color:var(--g2);font-size:22px;padding:4px 12px"':'style="background:none;border:none;color:var(--g4);font-size:22px;cursor:pointer;padding:4px 12px"')+'>›</button>'+
+    '</div>';
+}
+
 function renderMgrView(){
-  var month=now.toISOString().slice(0,7);
+  var month=viewMonthRM||now.toISOString().slice(0,7);
   // -- Vue d ensemble des managers --
   var ov=document.getElementById('mgr-overview');ov.innerHTML='';
   // Hero region totaux
@@ -1741,7 +1777,7 @@ function sw(t){
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
   if(t==='instals')loadInstalItems();
-  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='block';renderHOSMonthNav();renderHOSMgr();}else{var f=document.getElementById('mgr-filter');if(f)f.style.display='';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='none';renderMgrView();}}
+  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='block';var mn2=document.getElementById('rm-month-nav');if(mn2)mn2.style.display='none';renderHOSMonthNav();renderHOSMgr();}else{var f=document.getElementById('mgr-filter');if(f)f.style.display='';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='none';var mn2=document.getElementById('rm-month-nav');if(mn2){mn2.style.display='block';renderRMMonthNav();}renderMgrView();}}
 }
 
 function setTypeFilter(t){
