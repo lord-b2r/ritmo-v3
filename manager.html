@@ -749,9 +749,9 @@ function renderMonthEquipe(){
   var selectedTeam=cont._selectedTeam||null;
 
   if(selectedTeam){
-    // Vue détail d'une équipe
+    // Vue détail équipe (classement TM) — identique à Baptiste
     var backBtn=document.createElement('button');
-    backBtn.style.cssText='background:none;border:none;color:var(--g4);font-size:13px;cursor:pointer;padding:0;margin-bottom:12px;display:flex;align-items:center;gap:4px';
+    backBtn.style.cssText='background:none;border:none;color:var(--g4);font-size:13px;cursor:pointer;padding:0;margin-bottom:14px;display:flex;align-items:center;gap:4px';
     backBtn.innerHTML='&#8249; Retour';
     backBtn.onclick=function(){cont._selectedTeam=null;renderMonthEquipe();};
     cont.appendChild(backBtn);
@@ -759,40 +759,41 @@ function renderMonthEquipe(){
     return;
   }
 
-  // Cards équipes de la région (sans hero total)
+  // 1. Cards stats des équipes (grille 2 colonnes, style Baptiste)
+  var ovGrid=document.createElement('div');
+  ovGrid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px';
+
   regionTeams.forEach(function(tk){
     var mgr=MANAGERS[tk];if(!mgr)return;
-    var agents=TEAMS[tk]||[];
-    var visAgents=agents.filter(function(a){return !a.hidden;});
-    var reps=visAgents.map(function(a){
-      return getMonth(a.n,month);
-    }).flat();
-    var sc=reps.reduce(function(s,r){return s+(r.score||0);},0);
-    var v=reps.reduce(function(s,r){return s+(r.total_vente||0);},0);
-    var ins=reps.reduce(function(s,r){return s+(r.instal||0);},0);
-    var pos=reps.reduce(function(s,r){return s+(r.total_pos||0);},0);
-    var posShare=v>0?Math.round(pos/v*100):0;
-    var obj=visAgents.length*40;
-    var pct=obj>0?Math.round(sc/obj*100):0;
-    var scColor=pct>=100?'#4ade80':pct>=50?'#fbbf24':'#f87171';
+    var agents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
+    var reps=agents.flatMap(function(a){return getMonth(a.n,month);});
+    var s=reps.reduce(function(x,r){return x+(r.score||0);},0);
+    var v=reps.reduce(function(x,r){return x+(r.total_vente||0);},0);
+    var ins=reps.reduce(function(x,r){return x+(r.instal||0);},0);
+    var pos=reps.reduce(function(x,r){return x+(r.total_pos||0);},0);
+    var ps=v>0?Math.round(pos/v*100):0;
     var isSelf=tk===TEAM;
+    // Couleur de l'équipe
+    var tColor=myRegion.data.color;
+    var TCOLORS={jean:'#3b82f6',romeo:'#ec4899',quentin:'#10b981',idris:'#8b5cf6',arsena:'#ef4444',axel_l:'#84cc16',alex_g:'#06b6d4',cem:'#f59e0b',benjamin:'#f97316',salim:'#a78bfa',camille:'#8b5cf6',guillaume:'#14b8a6',maeline:'#f43f5e',zinedine:'#6366f1',louis_p:'#ef4444',julien_r:'#f59e0b'};
+    var col=TCOLORS[tk]||tColor;
 
     var card=document.createElement('div');
-    card.style.cssText='background:var(--w);border-radius:var(--rl);padding:12px 14px;margin-bottom:8px;cursor:pointer;border:1px solid '+(isSelf?'rgba(59,130,246,.4)':'var(--g2)');
+    card.style.cssText='background:var(--b);border-radius:var(--rl);padding:14px;border-left:3px solid '+col+(isSelf?';outline:1px solid '+col:'');
     card.innerHTML=
-      '<div style="display:flex;justify-content:space-between;align-items:center">'+
-        '<div>'+
-          '<div style="font-size:13px;font-weight:700;color:var(--t)">'+(isSelf?'<span style="color:#3b82f6">&#9679;</span> ':'')+mgr.label+'</div>'+
-          '<div style="font-size:10px;color:var(--g4);margin-top:2px">(POS '+posShare+'%) '+v+'v · '+ins+'i</div>'+
-        '</div>'+
-        '<div style="text-align:right">'+
-          '<div style="font-size:22px;font-weight:900;color:'+scColor+';line-height:1">'+sc+'</div>'+
-          '<div style="font-size:9px;color:var(--g4)">'+pct+'% obj</div>'+
-        '</div>'+
+      '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">'+mgr.label+'</div>'+
+      '<div style="font-size:36px;font-weight:900;letter-spacing:-1.5px;color:'+col+';line-height:1;margin-bottom:8px">'+s+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Ventes</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+v+'</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Instals</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+ins+'</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">POS %</div><div style="font-size:14px;font-weight:700;color:'+(ps>=50?'#4ade80':'#fff')+'">'+ps+'%</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Score</div><div style="font-size:14px;font-weight:700;color:#fff">'+s+'</div></div>'+
       '</div>';
+    card.style.cursor='pointer';
     card.onclick=(function(t){return function(){cont._selectedTeam=t;renderMonthEquipe();};})(tk);
-    cont.appendChild(card);
+    ovGrid.appendChild(card);
   });
+  cont.appendChild(ovGrid);
 }
 
 function renderTeamDetail(tk, month, cont){
