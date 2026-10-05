@@ -654,9 +654,11 @@ function hosView(v){
   if(v==='moi'){
     if(ov)ov.style.display='';if(mc)mc.style.display='';
     if(hw)hw.style.display='none';
+    var mf=document.getElementById('mgr-filter');if(mf)mf.style.display='none';
     renderHOSMgr();
   } else {
     if(ov)ov.style.display='none';if(mc)mc.style.display='none';
+    var mf=document.getElementById('mgr-filter');if(mf)mf.style.display='none';
     if(hw){hw.style.display='block';renderHOSWorld();}
   }
 }
