@@ -533,6 +533,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
           <div class="vt on" id="vt-eq-team" onclick="eqView('team')">Mon equipe</div>
           <div class="vt" id="vt-eq-all" onclick="eqView('all')">Tous Ritmo</div>
         </div>
+        <div id="tm-month-nav"></div>
         <div class="sec-lbl" style="margin-top:0" id="eq-lbl"></div>
         <div id="rank-list"></div>
         <div class="sec-lbl">Aujourd hui</div>
@@ -1440,7 +1441,7 @@ function renderMur(){
 
 // -- STATS --
 function getMonthReps(agent,month){
-  const m=month||now.toISOString().slice(0,7);
+  const m=month||tmMonthStr();
   const src=eqViewCur==='all'?allReportsGlobal:allReports;
   return src.filter(r=>r.agent===agent&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===m);
 }
@@ -1507,8 +1508,42 @@ function renderStMoi(){
   });
 }
 function selStAgent(a){stAgent=a;renderStMoi();}
+
+var viewMonthTM=null;
+function tmMonthStr(){return viewMonthTM||now.toISOString().slice(0,7);}
+function tmMonthLabel(){
+  var m=tmMonthStr();
+  var d=new Date(m+'-01');
+  return d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+}
+function navTMMonth(delta){
+  var curM=now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
+  var baseM=viewMonthTM||curM;
+  var y=parseInt(baseM.slice(0,4)),mo=parseInt(baseM.slice(5,7));
+  mo+=delta;
+  if(mo>12){mo-=12;y++;}
+  if(mo<1){mo+=12;y--;}
+  var newM=y+'-'+(String(mo).padStart(2,'0'));
+  if(newM>curM)return;
+  viewMonthTM=newM===curM?null:newM;
+  renderTMMonthNav();
+  renderStEq();
+}
+function renderTMMonthNav(){
+  var el=document.getElementById('tm-month-nav');if(!el)return;
+  var isNow=!viewMonthTM||viewMonthTM===now.toISOString().slice(0,7);
+  el.innerHTML=
+    '<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 0">'+
+    '<button onclick="navTMMonth(-1)" style="background:none;border:none;color:var(--g4);font-size:22px;cursor:pointer;padding:4px 12px">‹</button>'+
+    '<div style="font-size:13px;font-weight:700;color:var(--t);text-transform:capitalize;min-width:140px;text-align:center">'+tmMonthLabel()+'</div>'+
+    '<button onclick="navTMMonth(1)" '+(isNow?'disabled style="background:none;border:none;color:var(--g2);font-size:22px;padding:4px 12px"':'style="background:none;border:none;color:var(--g4);font-size:22px;cursor:pointer;padding:4px 12px"')+'>›</button>'+
+    '</div>';
+}
+
 function renderStEq(){
-  const mn=now.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  renderTMMonthNav();
+  const tmM=tmMonthStr();
+  const mn=new Date(tmM+'-02').toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
   document.getElementById('eq-lbl').textContent=mn.charAt(0).toUpperCase()+mn.slice(1)+' - classement';
   const isAll=eqViewCur==='all';
   const agents=isAll?AGENTS_FLAT.filter((a,i,arr)=>arr.findIndex(x=>x.n===a.n)===i):(TEAMS[MY_TEAM]?TEAMS[MY_TEAM].agents.filter((a,i,arr)=>arr.findIndex(x=>x.n===a.n)===i):[]);
