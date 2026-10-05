@@ -279,10 +279,17 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
         <div class="slide-tab on" id="rmt-moi" onclick="rmView('moi')" style="flex:1;text-align:center">Moi</div>
         <div class="slide-tab" id="rmt-france" onclick="rmView('france')" style="flex:1;text-align:center">Team France</div>
       </div>
+      <div id="hos-view-tabs" style="display:none;margin-bottom:14px;margin-left:0;margin-right:0" class="slide-tabs">
+        <div class="slide-tab on" id="hosvt-moi" onclick="hosView('moi')" style="flex:1;text-align:center">Moi</div>
+        <div class="slide-tab" id="hosvt-france" onclick="hosView('france')" style="flex:1;text-align:center">🇫🇷 France</div>
+        <div class="slide-tab" id="hosvt-world" onclick="hosView('world')" style="flex:1;text-align:center">🌍 Worldwide</div>
+      </div>
       <div id="mgr-overview"></div>
       <div class="filter-row" id="mgr-filter"></div>
       <div id="mgr-content"></div>
       <div id="rm-france-view" style="display:none"></div>
+      <div id="hos-france-view" style="display:none"></div>
+      <div id="hos-world-view" style="display:none"></div>
     </div>
 
     <!-- STATS -->
@@ -633,6 +640,217 @@ function renderHOSMonthNav(){
 }
 
 var hosRegionDrill=null;
+
+
+var hosViewCur='moi';
+function hosView(v){
+  hosViewCur=v;
+  ['moi','france','world'].forEach(function(t){
+    var btn=document.getElementById('hosvt-'+t);
+    if(btn)btn.className='slide-tab'+(v===t?' on':'');
+  });
+  var ov=document.getElementById('mgr-overview');
+  var mc=document.getElementById('mgr-content');
+  var hf=document.getElementById('hos-france-view');
+  var hw=document.getElementById('hos-world-view');
+  if(v==='moi'){
+    if(ov)ov.style.display='';if(mc)mc.style.display='';
+    if(hf)hf.style.display='none';if(hw)hw.style.display='none';
+    renderHOSMgr();
+  } else if(v==='france'){
+    if(ov)ov.style.display='none';if(mc)mc.style.display='none';
+    if(hf){hf.style.display='block';renderHOSFrance();}
+    if(hw)hw.style.display='none';
+  } else {
+    if(ov)ov.style.display='none';if(mc)mc.style.display='none';
+    if(hf)hf.style.display='none';
+    if(hw){hw.style.display='block';renderHOSWorld();}
+  }
+}
+
+function renderHOSFrance(){
+  var cont=document.getElementById('hos-france-view');
+  cont.innerHTML='';
+  var month=hosMonthStr();
+  var selectedRegion=cont._selectedRegion||null;
+  var regionNames=Object.keys(HOS_REGIONS);
+  if(!selectedRegion){selectedRegion=regionNames[0];cont._selectedRegion=selectedRegion;}
+
+  // Grille cards régions
+  var grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px';
+  Object.entries(HOS_REGIONS).forEach(function(entry){
+    var rname=entry[0],r=entry[1];
+    var rAgAll=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+    var rReps=rAgAll.flatMap(function(a){return getMonth(a.n,month);});
+    var rSc=rReps.reduce(function(s,x){return s+(x.score||0);},0);
+    var rV=rReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+    var rI=rReps.reduce(function(s,x){return s+(x.instal||0);},0);
+    var rPos=rReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
+    var rPosShare=rV>0?Math.round(rPos/rV*100):0;
+    var rTarget=rAgAll.length*40;
+    var rPct=rTarget>0?Math.round(rSc/rTarget*100):0;
+    var card=document.createElement('div');
+    card.id='hos-reg-card-'+rname;
+    card.style.cssText='background:var(--b);border-radius:var(--rl);padding:14px;border-left:3px solid '+r.color+';cursor:pointer';
+    card.innerHTML=
+      '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">'+rname+'</div>'+
+      '<div style="font-size:36px;font-weight:900;letter-spacing:-1.5px;color:'+r.color+';line-height:1;margin-bottom:8px">'+rSc+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Ventes</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+rV+'</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Instals</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+rI+'</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">POS %</div><div style="font-size:14px;font-weight:700;color:'+(rPosShare>=50?'#4ade80':'#fff')+'">'+rPosShare+'%</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Score</div><div style="font-size:14px;font-weight:700;color:#fff">'+rSc+'</div></div>'+
+      '</div>';
+    card.onclick=(function(rn,col){return function(){
+      cont._selectedRegion=rn;
+      regionNames.forEach(function(n){
+        var b=document.getElementById('hos-reg-btn-'+n);var rc=HOS_REGIONS[n].color;
+        if(b){b.style.background=n===rn?rc:'var(--g1)';b.style.color=n===rn?'#000':'var(--g4)';b.style.fontWeight=n===rn?'700':'500';}
+      });
+      var old=document.getElementById('hos-reg-drill');if(old)old.remove();
+      renderHOSRegionDrill(rn,month,drillZone,col);
+    };})(rname,r.color);
+    grid.appendChild(card);
+  });
+  cont.appendChild(grid);
+
+  // Prénoms RMs
+  var nameBar=document.createElement('div');nameBar.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px';
+  Object.entries(HOS_REGIONS).forEach(function(entry){
+    var rname=entry[0],r=entry[1];
+    var isSelected=rname===selectedRegion;
+    var rmInfo=REGIONAL_MANAGERS[r.rm];
+    var label=rmInfo?rmInfo.name.split(' ')[0]:rname;
+    var btn=document.createElement('button');btn.id='hos-reg-btn-'+rname;
+    btn.style.cssText='background:'+(isSelected?r.color:'var(--g1)')+';color:'+(isSelected?'#000':'var(--g4)')+';border:none;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:'+(isSelected?'700':'500')+';cursor:pointer';
+    btn.textContent=label;
+    btn.onclick=(function(rn,col){return function(){
+      cont._selectedRegion=rn;
+      Object.keys(HOS_REGIONS).forEach(function(n){
+        var b=document.getElementById('hos-reg-btn-'+n);var rc=HOS_REGIONS[n].color;
+        if(b){b.style.background=n===rn?rc:'var(--g1)';b.style.color=n===rn?'#000':'var(--g4)';b.style.fontWeight=n===rn?'700':'500';}
+      });
+      var old=document.getElementById('hos-reg-drill');if(old)old.remove();
+      renderHOSRegionDrill(rn,month,drillZone,col);
+    };})(rname,r.color);
+    nameBar.appendChild(btn);
+  });
+  cont.appendChild(nameBar);
+
+  var drillZone=document.createElement('div');drillZone.id='hos-drill-zone';cont.appendChild(drillZone);
+  renderHOSRegionDrill(selectedRegion,month,drillZone,HOS_REGIONS[selectedRegion].color);
+}
+
+function renderHOSRegionDrill(rname, month, cont, col){
+  var drill=document.createElement('div');drill.id='hos-reg-drill';
+  var r=HOS_REGIONS[rname];
+  var rmInfo=REGIONAL_MANAGERS[r.rm];
+  var rAgAll=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
+  var rReps=rAgAll.flatMap(function(a){return getMonth(a.n,month);});
+  var rSc=rReps.reduce(function(s,x){return s+(x.score||0);},0);
+  var rV=rReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+  var rI=rReps.reduce(function(s,x){return s+(x.instal||0);},0);
+  var rPos=rReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
+  var rIh=rReps.reduce(function(s,x){return s+(x.rdv_ih||0);},0);
+  var rOg=rReps.reduce(function(s,x){return s+(x.rdv_og||0);},0);
+  var rNs=rReps.reduce(function(s,x){return s+(x.noshow||0);},0);
+  var rPs=rV>0?Math.round(rPos/rV*100):0;
+  var rTarget=rAgAll.length*40;var rPct=rTarget>0?Math.round(rSc/rTarget*100):0;
+  var mn=new Date(month+'-02').toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  var hero=document.createElement('div');hero.style.cssText='background:var(--b);border-radius:var(--rl);padding:16px;margin-bottom:14px';
+  var heroTop=document.createElement('div');heroTop.style.cssText='display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px';
+  var hl=document.createElement('div');hl.innerHTML='<div style="font-size:13px;font-weight:700;color:#fff">'+(rmInfo?rmInfo.name:rname)+'</div><div style="font-size:11px;color:rgba(255,255,255,.3)">'+mn.charAt(0).toUpperCase()+mn.slice(1)+'</div>';
+  var hr=document.createElement('div');hr.style.textAlign='right';hr.innerHTML='<div style="font-size:48px;font-weight:900;letter-spacing:-2px;color:'+col+';line-height:1">'+rSc+'</div><div style="font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.6px">Score région</div>';
+  heroTop.appendChild(hl);heroTop.appendChild(hr);
+  var hg=document.createElement('div');hg.style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px';
+  [['Ventes',rV,true],['Instals',rI,true],['POS share',rPs+'%',rPs>=50],['RDV IH',rIh,false],['RDV OG',rOg,false],['No show',rNs,'red']].forEach(function(c){
+    var mc=document.createElement('div');mc.style.cssText='background:'+(c[2]==='red'?'rgba(248,113,113,.12)':'rgba(255,255,255,.07)')+';border-radius:8px;padding:9px';
+    mc.innerHTML='<div style="font-size:9px;color:'+(c[2]==='red'?'rgba(248,113,113,.7)':'rgba(255,255,255,.3)')+';text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">'+c[0]+'</div><div style="font-size:20px;font-weight:800;color:'+(c[2]==='red'?'#f87171':c[2]?'#4ade80':'#fff')+'">'+c[1]+'</div>';
+    hg.appendChild(mc);
+  });
+  var pDiv=document.createElement('div');pDiv.style.cssText='margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08)';
+  var pLbl=document.createElement('div');pLbl.style.cssText='display:flex;justify-content:space-between;margin-bottom:6px';
+  var pL=document.createElement('div');pL.style.cssText='font-size:11px;color:rgba(255,255,255,.5)';pL.textContent='Progression région';
+  var pR=document.createElement('div');pR.style.cssText='font-size:11px;font-weight:700;color:'+(rPct>=100?'#4ade80':rPct>=50?'#fbbf24':'#f87171');pR.textContent=rSc+' / '+rTarget+' pts ('+rPct+'%)';
+  pLbl.appendChild(pL);pLbl.appendChild(pR);
+  var pTrack=document.createElement('div');pTrack.style.cssText='background:rgba(255,255,255,.18);border-radius:6px;height:10px;overflow:hidden';
+  var pFill=document.createElement('div');pFill.style.cssText='height:100%;border-radius:6px;background:linear-gradient(90deg,'+(rPct>=100?'#4ade80,#E8FF3A':rPct>=50?'#fbbf24,#f97316':'#f87171,#ef4444')+');width:'+Math.min(rPct,150)+'%';
+  pTrack.appendChild(pFill);pDiv.appendChild(pLbl);pDiv.appendChild(pTrack);
+  hero.appendChild(heroTop);hero.appendChild(hg);hero.appendChild(pDiv);
+  drill.appendChild(hero);
+  // Classement TMs
+  var lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent='Managers - '+mn.charAt(0).toUpperCase()+mn.slice(1);drill.appendChild(lbl);
+  var rk=document.createElement('div');rk.className='rk';
+  var tmStats=r.teams.map(function(tk){
+    var mgr=MANAGERS[tk];
+    var tAg=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
+    var tReps=tAg.flatMap(function(a){return getMonth(a.n,month);});
+    var tSc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
+    var tV=tReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+    var tI=tReps.reduce(function(s,x){return s+(x.instal||0);},0);
+    var tPos=tReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
+    var tPs=tV>0?Math.round(tPos/tV*100):0;
+    return{tk:tk,label:mgr?mgr.label:tk,sc:tSc,v:tV,ins:tI,ps:tPs};
+  }).sort(function(a,b){return b.sc-a.sc;});
+  var mx=Math.max(tmStats[0]?tmStats[0].sc:1,1);
+  tmStats.forEach(function(tm,i){
+    var cls=tm.sc===0?'lo':tm.sc<20?'ok':'hi';
+    var row=document.createElement('div');row.className='rr';
+    var rn=document.createElement('div');rn.className='rn'+(i===0?' gd':'');rn.textContent=i+1;
+    var ra=document.createElement('div');ra.className='ra';ra.textContent=(MANAGERS[tm.tk]||{}).initials||tm.tk.slice(0,2).toUpperCase();
+    var rf=document.createElement('div');rf.className='rf2';
+    var rnm=document.createElement('div');rnm.className='rnm';rnm.textContent=tm.label;
+    var rsb=document.createElement('div');rsb.className='rsb';rsb.textContent=tm.v+' V - '+tm.ins+' I - POS '+tm.ps+'%';
+    var rbb=document.createElement('div');rbb.className='rbb';
+    var rbf=document.createElement('div');rbf.className='rbf';rbf.style.cssText='height:100%;border-radius:3px;background:'+col+';width:'+Math.round(tm.sc/mx*100)+'%';
+    rbb.appendChild(rbf);rf.appendChild(rnm);rf.appendChild(rsb);rf.appendChild(rbb);
+    var rs=document.createElement('div');rs.className='rs '+cls;rs.textContent=tm.sc;
+    row.appendChild(rn);row.appendChild(ra);row.appendChild(rf);row.appendChild(rs);rk.appendChild(row);
+  });
+  drill.appendChild(rk);cont.appendChild(drill);
+}
+
+function renderHOSWorld(){
+  var cont=document.getElementById('hos-world-view');cont.innerHTML='';
+  var month=hosMonthStr();
+  var allAg=Object.values(HOS_REGIONS).flatMap(function(r){return r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});});
+  var allReps=allAg.flatMap(function(a){return getMonth(a.n,month);});
+  var frSc=allReps.reduce(function(s,x){return s+(x.score||0);},0);
+  var frV=allReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
+  var frI=allReps.reduce(function(s,x){return s+(x.instal||0);},0);
+  var frPos=allReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
+  var frPs=frV>0?Math.round(frPos/frV*100):0;
+  var frTarget=allAg.length*40;var frPct=frTarget>0?Math.round(frSc/frTarget*100):0;
+
+  var COUNTRIES=[
+    {flag:'🇫🇷',name:'France',sc:frSc,v:frV,ins:frI,ps:frPs,pct:frPct,color:'#3b82f6',real:true},
+    {flag:'🇮🇹',name:'Italie',sc:0,v:0,ins:0,ps:0,pct:0,color:'#10b981'},
+    {flag:'🇩🇪',name:'Allemagne',sc:0,v:0,ins:0,ps:0,pct:0,color:'#f59e0b'},
+    {flag:'🇬🇧',name:'UK',sc:0,v:0,ins:0,ps:0,pct:0,color:'#ef4444'},
+    {flag:'🇳🇱',name:'Pays-Bas',sc:0,v:0,ins:0,ps:0,pct:0,color:'#f97316'},
+    {flag:'🇫🇮',name:'Finlande',sc:0,v:0,ins:0,ps:0,pct:0,color:'#8b5cf6'},
+    {flag:'🇩🇰',name:'Danemark',sc:0,v:0,ins:0,ps:0,pct:0,color:'#ec4899'},
+    {flag:'🇺🇸',name:'USA',sc:0,v:0,ins:0,ps:0,pct:0,color:'#06b6d4'}
+  ].sort(function(a,b){return b.sc-a.sc;});
+
+  var grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px';
+  COUNTRIES.forEach(function(c){
+    var card=document.createElement('div');
+    card.style.cssText='background:var(--b);border-radius:var(--rl);padding:14px;border-left:3px solid '+c.color;
+    card.innerHTML=
+      '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">'+c.flag+' '+c.name+'</div>'+
+      '<div style="font-size:36px;font-weight:900;letter-spacing:-1.5px;color:'+c.color+';line-height:1;margin-bottom:8px">'+c.sc+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Ventes</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+c.v+'</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Instals</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+c.ins+'</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">POS %</div><div style="font-size:14px;font-weight:700;color:'+(c.ps>=50?'#4ade80':'#fff')+'">'+c.ps+'%</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Score</div><div style="font-size:14px;font-weight:700;color:#fff">'+c.sc+'</div></div>'+
+      '</div>';
+    grid.appendChild(card);
+  });
+  cont.appendChild(grid);
+}
 
 function renderHOSMgr(){
   var month=hosMonthStr();
@@ -2029,7 +2247,7 @@ function sw(t){
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
   if(t==='instals')loadInstalItems();
-  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='block';var mn2=document.getElementById('rm-month-nav');if(mn2)mn2.style.display='none';var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='none';renderHOSMonthNav();renderHOSMgr();}else{var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='flex';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='none';var mn2=document.getElementById('rm-month-nav');if(mn2){mn2.style.display='block';renderRMMonthNav();}rmViewCur='moi';rmView('moi');}}
+  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='block';var mn2=document.getElementById('rm-month-nav');if(mn2)mn2.style.display='none';var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='none';var ht=document.getElementById('hos-view-tabs');if(ht)ht.style.display='flex';renderHOSMonthNav();hosViewCur='moi';hosView('moi');}else{var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='flex';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='none';var mn2=document.getElementById('rm-month-nav');if(mn2){mn2.style.display='block';renderRMMonthNav();}rmViewCur='moi';rmView('moi');}}
 }
 
 function setTypeFilter(t){
