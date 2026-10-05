@@ -280,8 +280,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
         <div class="slide-tab" id="rmt-france" onclick="rmView('france')" style="flex:1;text-align:center">Team France</div>
       </div>
       <div id="hos-view-tabs" style="display:none;margin-bottom:14px;margin-left:0;margin-right:0" class="slide-tabs">
-        <div class="slide-tab on" id="hosvt-moi" onclick="hosView('moi')" style="flex:1;text-align:center">Moi</div>
-        <div class="slide-tab" id="hosvt-france" onclick="hosView('france')" style="flex:1;text-align:center">🇫🇷 France</div>
+        <div class="slide-tab on" id="hosvt-moi" onclick="hosView('moi')" style="flex:1;text-align:center">🇫🇷 Moi</div>
         <div class="slide-tab" id="hosvt-world" onclick="hosView('world')" style="flex:1;text-align:center">🌍 Worldwide</div>
       </div>
       <div id="mgr-overview"></div>
@@ -645,25 +644,19 @@ var hosRegionDrill=null;
 var hosViewCur='moi';
 function hosView(v){
   hosViewCur=v;
-  ['moi','france','world'].forEach(function(t){
+  ['moi','world'].forEach(function(t){
     var btn=document.getElementById('hosvt-'+t);
     if(btn)btn.className='slide-tab'+(v===t?' on':'');
   });
   var ov=document.getElementById('mgr-overview');
   var mc=document.getElementById('mgr-content');
-  var hf=document.getElementById('hos-france-view');
   var hw=document.getElementById('hos-world-view');
   if(v==='moi'){
     if(ov)ov.style.display='';if(mc)mc.style.display='';
-    if(hf)hf.style.display='none';if(hw)hw.style.display='none';
-    renderHOSMgr();
-  } else if(v==='france'){
-    if(ov)ov.style.display='none';if(mc)mc.style.display='none';
-    if(hf){hf.style.display='block';renderHOSFrance();}
     if(hw)hw.style.display='none';
+    renderHOSMgr();
   } else {
     if(ov)ov.style.display='none';if(mc)mc.style.display='none';
-    if(hf)hf.style.display='none';
     if(hw){hw.style.display='block';renderHOSWorld();}
   }
 }
@@ -839,7 +832,7 @@ function renderHOSWorld(){
     var card=document.createElement('div');
     card.style.cssText='background:var(--b);border-radius:var(--rl);padding:14px;border-left:3px solid '+c.color;
     card.innerHTML=
-      '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">'+c.flag+' '+c.name+'</div>'+
+      '<div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:6px">'+c.flag+' '+c.name+'</div>'+
       '<div style="font-size:36px;font-weight:900;letter-spacing:-1.5px;color:'+c.color+';line-height:1;margin-bottom:8px">'+c.sc+'</div>'+
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'+
         '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Ventes</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+c.v+'</div></div>'+
