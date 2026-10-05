@@ -275,7 +275,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <div id="s-managers" class="scr">
       <div id="hos-month-nav" style="display:none"></div>
       <div id="rm-month-nav" style="display:none"></div>
-      <div id="rm-view-tabs" style="display:none;margin-bottom:14px" class="slide-tabs">
+      <div id="rm-view-tabs" style="display:none;margin-bottom:14px;justify-content:center" class="slide-tabs">
         <div class="slide-tab on" id="rmt-moi" onclick="rmView('moi')">Moi</div>
         <div class="slide-tab" id="rmt-france" onclick="rmView('france')">Team France</div>
       </div>
@@ -1325,8 +1325,9 @@ function renderRMFrance(){
   var cont=document.getElementById('rm-france-view');
   cont.innerHTML='';
   var month=rmMonthStr();
-  // Même vue que HOS mais sans le hero France
-  // Cards régions cliquables → drill TMs
+  // Grille régions identique à renderHOSMgr sans le hero France
+  var grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px';
   Object.entries(HOS_REGIONS).forEach(function(entry){
     var rname=entry[0], r=entry[1];
     var rAgAll=r.teams.flatMap(function(tk){return (TEAMS[tk]||[]).filter(function(a){return !a.hidden;});});
@@ -1342,53 +1343,50 @@ function renderRMFrance(){
     var isMine=MY_TEAMS.some(function(tk){return r.teams.indexOf(tk)>=0;});
 
     var card=document.createElement('div');
-    card.style.cssText='background:var(--w);border-radius:var(--rl);padding:12px 14px;margin-bottom:8px;cursor:pointer;border:1px solid '+(isMine?r.color:'var(--g2)')+';border-left:3px solid '+r.color;
+    card.style.cssText='background:var(--b);border-radius:var(--rl);padding:14px;border-left:3px solid '+r.color+(isMine?';outline:1px solid '+r.color:'');
     card.innerHTML=
-      '<div style="display:flex;justify-content:space-between;align-items:center">'+
-        '<div>'+
-          '<div style="font-size:13px;font-weight:700;color:var(--t)">'+rname+'</div>'+
-          '<div style="font-size:10px;color:var(--g4);margin-top:2px">(POS '+rPosShare+'%) '+rV+'v · '+rI+'i</div>'+
-        '</div>'+
-        '<div style="text-align:right">'+
-          '<div style="font-size:22px;font-weight:900;color:'+rScColor+';line-height:1">'+rSc+'</div>'+
-          '<div style="font-size:9px;color:var(--g4)">'+rPct+'% obj</div>'+
-        '</div>'+
+      '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">'+rname+'</div>'+
+      '<div style="font-size:36px;font-weight:900;letter-spacing:-1.5px;color:'+r.color+';line-height:1;margin-bottom:8px">'+rSc+'</div>'+
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Ventes</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+rV+'</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Instals</div><div style="font-size:14px;font-weight:700;color:#4ade80">'+rI+'</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">POS %</div><div style="font-size:14px;font-weight:700;color:'+(rPosShare>=50?'#4ade80':'#fff')+'">'+rPosShare+'%</div></div>'+
+        '<div style="background:rgba(255,255,255,.07);border-radius:6px;padding:5px 7px"><div style="font-size:8px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.4px">Score</div><div style="font-size:14px;font-weight:700;color:#fff">'+rSc+'</div></div>'+
       '</div>';
+    card.style.cursor='pointer';
 
-    // Drill : afficher les TMs de la région
+    // Drill TMs
     var drill=document.createElement('div');
-    drill.style.display='none';
-    drill.style.marginTop='8px';
+    drill.style.cssText='display:none;margin-top:10px;border-top:1px solid rgba(255,255,255,.08);padding-top:10px';
     r.teams.forEach(function(tk){
       var mgr=MANAGERS[tk];if(!mgr)return;
-      var tAgents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
-      var tReps=tAgents.flatMap(function(a){return getMonthSrc(a.n,month);});
+      var tAg=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
+      var tReps=tAg.flatMap(function(a){return getMonthSrc(a.n,month);});
       var tSc=tReps.reduce(function(s,x){return s+(x.score||0);},0);
       var tV=tReps.reduce(function(s,x){return s+(x.total_vente||0);},0);
       var tI=tReps.reduce(function(s,x){return s+(x.instal||0);},0);
       var tPos=tReps.reduce(function(s,x){return s+(x.total_pos||0);},0);
-      var tPosShare=tV>0?Math.round(tPos/tV*100):0;
-      var tObj=tAgents.length*40;
-      var tPct=tObj>0?Math.round(tSc/tObj*100):0;
-      var tScColor=tPct>=100?'#4ade80':tPct>=50?'#fbbf24':'#f87171';
+      var tPs=tV>0?Math.round(tPos/tV*100):0;
+      var tObj=tAg.length*40;var tPct=tObj>0?Math.round(tSc/tObj*100):0;
+      var tColor=tPct>=100?'#4ade80':tPct>=50?'#fbbf24':'#f87171';
       var tm=document.createElement('div');
-      tm.style.cssText='background:var(--g1);border-radius:8px;padding:8px 12px;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center';
+      tm.style.cssText='display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05)';
       tm.innerHTML=
         '<div>'+
-          '<div style="font-size:12px;font-weight:700;color:var(--t)">'+mgr.label+'</div>'+
-          '<div style="font-size:10px;color:var(--g4)">(POS '+tPosShare+'%) '+tV+'v · '+tI+'i</div>'+
+          '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.8)">'+mgr.label+'</div>'+
+          '<div style="font-size:10px;color:rgba(255,255,255,.4)">(POS '+tPs+'%) '+tV+'v · '+tI+'i</div>'+
         '</div>'+
-        '<div style="font-size:18px;font-weight:900;color:'+tScColor+'">'+tSc+'</div>';
+        '<div style="font-size:20px;font-weight:900;color:'+tColor+'">'+tSc+'</div>';
       drill.appendChild(tm);
     });
     card.appendChild(drill);
-
     card.onclick=function(){
       var open=drill.style.display==='none';
       drill.style.display=open?'block':'none';
     };
-    cont.appendChild(card);
+    grid.appendChild(card);
   });
+  cont.appendChild(grid);
 }
 
 function getMonthSrc(agent,month){
