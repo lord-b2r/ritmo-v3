@@ -2242,7 +2242,7 @@ function sw(t){
   if(t==='ventes')renderVentes();
   if(t==='mur')renderMur();
   if(t==='instals')loadInstalItems();
-  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='block';var mn2=document.getElementById('rm-month-nav');if(mn2)mn2.style.display='none';var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='none';var ht=document.getElementById('hos-view-tabs');if(ht)ht.style.display='flex';renderHOSMonthNav();hosViewCur='moi';hosView('moi');}else{var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='flex';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='none';var mn2=document.getElementById('rm-month-nav');if(mn2){mn2.style.display='block';renderRMMonthNav();}rmViewCur='moi';rmView('moi');}}
+  if(t==='managers'){if(isHOS()){var f=document.getElementById('mgr-filter');if(f)f.style.display='none';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='block';var mn2=document.getElementById('rm-month-nav');if(mn2)mn2.style.display='none';var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='none';var ht=document.getElementById('hos-view-tabs');if(ht)ht.style.display='none';renderHOSMonthNav();hosViewCur='moi';hosView('moi');}else{var rt=document.getElementById('rm-view-tabs');if(rt)rt.style.display='flex';var mn=document.getElementById('hos-month-nav');if(mn)mn.style.display='none';var mn2=document.getElementById('rm-month-nav');if(mn2){mn2.style.display='block';renderRMMonthNav();}rmViewCur='moi';rmView('moi');}}
 }
 
 function setTypeFilter(t){
