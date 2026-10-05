@@ -765,7 +765,7 @@ function renderMonthEquipe(){
     var isSelected=tk===selectedTeam;
     var card=document.createElement('div');
     card.id='eq-card-'+tk;
-    card.style.cssText='background:var(--b);border-radius:var(--rl);padding:14px;border-left:3px solid '+col+';cursor:pointer;transition:opacity .15s;'+(isSelected?'outline:2px solid '+col:'opacity:.6');
+    card.style.cssText='background:var(--b);border-radius:var(--rl);padding:14px;border-left:3px solid '+col+';cursor:pointer';
     card.innerHTML=
       '<div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px">'+mgr.label+'</div>'+
       '<div style="font-size:36px;font-weight:900;letter-spacing:-1.5px;color:'+col+';line-height:1;margin-bottom:8px">'+s+'</div>'+
@@ -778,11 +778,6 @@ function renderMonthEquipe(){
     card.onclick=(function(t,c){return function(){
       cont._selectedTeam=t;
       // Mettre à jour les styles des cards
-      regionTeams.forEach(function(otk){
-        var oc=document.getElementById('eq-card-'+otk);
-        var ocol=TCOLORS[otk]||myRegion.data.color;
-        if(oc){oc.style.opacity=otk===t?'1':'0.6';oc.style.outline=otk===t?'2px solid '+ocol:'none';}
-      });
       // Mettre à jour le drill
       var old=document.getElementById('eq-drill');if(old)old.remove();
       renderTeamDrillBelow(t,month,drillZone,c);
@@ -806,10 +801,8 @@ function renderMonthEquipe(){
       cont._selectedTeam=t;
       // Mettre à jour cards
       regionTeams.forEach(function(otk){
-        var oc=document.getElementById('eq-card-'+otk);
-        var ocol=TCOLORS[otk]||myRegion.data.color;
-        if(oc){oc.style.opacity=otk===t?'1':'0.6';oc.style.outline=otk===t?'2px solid '+ocol:'none';}
         var ob=document.getElementById('eq-btn-'+otk);
+        var ocol=TCOLORS[otk]||myRegion.data.color;
         if(ob){ob.style.background=otk===t?ocol:'var(--g1)';ob.style.color=otk===t?'#000':'var(--g4)';ob.style.fontWeight=otk===t?'700':'500';}
       });
       var old=document.getElementById('eq-drill');if(old)old.remove();
