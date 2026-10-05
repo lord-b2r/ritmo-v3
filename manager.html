@@ -792,6 +792,7 @@ function renderMonthEquipe(){
 function renderTeamDrillBelow(tk, month, cont, col){
   var drill=document.createElement('div');
   drill.id='drill-'+tk;
+  drill.style.marginBottom='16px';
   var mgr=MANAGERS[tk];
   var agents=(TEAMS[tk]||[]).filter(function(a){return !a.hidden;});
   var stats=agents.map(function(a){
@@ -802,16 +803,57 @@ function renderTeamDrillBelow(tk, month, cont, col){
     var pos=r.reduce(function(s,x){return s+(x.total_pos||0);},0);
     var rdvIh=r.reduce(function(s,x){return s+(x.rdv_ih||0);},0);
     var rdvOg=r.reduce(function(s,x){return s+(x.rdv_og||0);},0);
-    return{n:a.n,i:a.i,sc:sc,v:v,ins:ins,pos:pos,rdvIh:rdvIh,rdvOg:rdvOg};
-  }).sort(function(a,b){return b.sc-a.sc;});
-  var mx=Math.max(stats[0]?stats[0].sc:1,1);
-  var lbl=document.createElement('div');lbl.className='sec-lbl';lbl.textContent=mgr?mgr.label:'';
+    var ns=r.reduce(function(s,x){return s+(x.noshow||0);},0);
+    return{n:a.n,i:a.i,sc:sc,v:v,ins:ins,pos:pos,rdvIh:rdvIh,rdvOg:rdvOg,ns:ns};
+  });
+  var ts=stats.reduce(function(s,a){return s+a.sc;},0);
+  var tv=stats.reduce(function(s,a){return s+a.v;},0);
+  var ti=stats.reduce(function(s,a){return s+a.ins;},0);
+  var tp=stats.reduce(function(s,a){return s+a.pos;},0);
+  var tIh=stats.reduce(function(s,a){return s+a.rdvIh;},0);
+  var tOg=stats.reduce(function(s,a){return s+a.rdvOg;},0);
+  var tNs=stats.reduce(function(s,a){return s+a.ns;},0);
+  var pp=tv>0?Math.round(tp/tv*100):0;
+  var objTotal=OBJ_POINTS*agents.length;
+  var objPct=objTotal>0?Math.round(ts/objTotal*100):0;
+  var mn=new Date(month+'-02').toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+
+  // Hero identique à l'onglet Moi
+  var hero=document.createElement('div');hero.className='mh';
+  var top=document.createElement('div');top.className='mh-top';
+  var hl=document.createElement('div');
+  hl.innerHTML='<div class="mh-tl">'+(mgr?mgr.label:'')+'</div><div class="mh-ts">'+mn.charAt(0).toUpperCase()+mn.slice(1)+'</div>';
+  var hr=document.createElement('div');hr.style.textAlign='right';
+  hr.innerHTML='<div class="mh-score">'+ts+'</div><div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:2px">/ '+objTotal+' pts objectif</div>';
+  top.appendChild(hl);top.appendChild(hr);
+  var mg=document.createElement('div');mg.className='mh-grid';
+  [['Ventes',tv,true],['Instals',ti,true],['POS share',pp+'%',pp>=50],['RDV IH',tIh,false],['RDV OG',tOg,false],['No show',tNs,false]].forEach(function(c){
+    var mc=document.createElement('div');mc.className='mhc';
+    mc.innerHTML='<div class="mhl">'+c[0]+'</div><div class="mhv'+(c[2]?' g':'')+'">'+c[1]+'</div>';
+    mg.appendChild(mc);
+  });
+  var barWrap=document.createElement('div');
+  barWrap.innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'+
+      '<span style="font-size:10px;color:rgba(255,255,255,.35)">Progression objectif equipe</span>'+
+      '<span style="font-size:11px;font-weight:700;color:'+(objPct>=100?'#4ade80':objPct>=70?'#fb923c':'#f87171')+'">'+objPct+'%</span></div>'+
+    '<div class="bb"><div class="bf" style="width:'+Math.min(objPct,100)+'%;background:'+(objPct>=100?'#4ade80':objPct>=70?'#fb923c':'#f87171')+'"></div></div>'+
+    '<div style="display:flex;justify-content:space-between;margin-top:4px">'+
+      '<span style="font-size:10px;color:rgba(255,255,255,.25)">'+ts+' pts atteints</span>'+
+      '<span style="font-size:10px;color:rgba(255,255,255,.25)">Objectif : '+objTotal+' pts ('+agents.length+' x '+OBJ_POINTS+'pts)</span></div>';
+  hero.appendChild(top);hero.appendChild(mg);hero.appendChild(barWrap);
+  drill.appendChild(hero);
+
+  // Liste prénoms cliquables
+  var lbl=document.createElement('div');lbl.className='sec-lbl';lbl.style.marginTop='12px';lbl.textContent='Classement - '+mn.charAt(0).toUpperCase()+mn.slice(1);
   drill.appendChild(lbl);
+  var sorted=stats.slice().sort(function(a,b){return b.sc-a.sc;});
+  var mx=Math.max(sorted[0]?sorted[0].sc:1,1);
   var rk=document.createElement('div');rk.className='rk';
-  stats.forEach(function(a,i){
+  sorted.forEach(function(a,i){
     var cls=a.sc===0?'lo':a.sc<=3?'ok':'hi';
     var posShare=a.v>0?Math.round(a.pos/a.v*100):0;
-    var row=document.createElement('div');row.className='rr';
+    var row=document.createElement('div');row.className='rr';row.style.cursor='pointer';
     var rn=document.createElement('div');rn.className='rn'+(i===0?' gd':'');rn.textContent=i+1;
     var ra=document.createElement('div');ra.className='ra';ra.textContent=a.i;
     var rf=document.createElement('div');rf.className='rf2';
@@ -819,15 +861,34 @@ function renderTeamDrillBelow(tk, month, cont, col){
     var rsb=document.createElement('div');rsb.className='rsb';rsb.textContent=a.v+' V - '+a.ins+' I - '+a.rdvIh+' IH - '+a.rdvOg+' OG - POS '+posShare+'%';
     var rbb=document.createElement('div');rbb.className='rbb';
     var rbf=document.createElement('div');rbf.className='rbf';rbf.style.cssText='height:100%;border-radius:3px;background:'+col+';width:'+Math.round(a.sc/mx*100)+'%';
-    rbb.appendChild(rbf);
-    rf.appendChild(rnm);rf.appendChild(rsb);rf.appendChild(rbb);
+    rbb.appendChild(rbf);rf.appendChild(rnm);rf.appendChild(rsb);rf.appendChild(rbb);
     var rs=document.createElement('div');rs.className='rs '+cls;rs.textContent=a.sc;
     row.appendChild(rn);row.appendChild(ra);row.appendChild(rf);row.appendChild(rs);
+    // Clic prénom → détail individuel
+    row.onclick=(function(name){return function(){
+      var existing=document.getElementById('agent-detail-'+name.replace(/ /g,'_'));
+      if(existing){existing.remove();return;}
+      var detail=document.createElement('div');detail.id='agent-detail-'+name.replace(/ /g,'_');
+      detail.style.cssText='background:var(--g1);border-radius:8px;padding:10px 12px;margin:4px 0 8px';
+      var agReps=getMonth(name,month);
+      agReps.sort(function(a,b){return b.timestamp-a.timestamp;});
+      if(!agReps.length){detail.innerHTML='<div style="font-size:12px;color:var(--g4)">Aucun rapport ce mois-ci</div>';row.after(detail);return;}
+      agReps.forEach(function(rep){
+        var d=document.createElement('div');d.style.cssText='padding:6px 0;border-bottom:1px solid var(--g2);font-size:11px;color:var(--t)';
+        var date=new Date(rep.timestamp).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+        var posS=rep.total_vente>0?Math.round((rep.total_pos||0)/rep.total_vente*100):0;
+        d.innerHTML='<div style="font-weight:700;margin-bottom:2px">'+date+' — '+rep.score+' pts</div>'+
+          '<div style="color:var(--g4)">'+rep.total_vente+'v · '+(rep.instal||0)+'i · IH:'+(rep.rdv_ih||0)+' OG:'+(rep.rdv_og||0)+' · POS '+posS+'%'+(rep.noshow?' · NS:'+rep.noshow:'')+'</div>';
+        detail.appendChild(d);
+      });
+      row.after(detail);
+    };})(a.n);
     rk.appendChild(row);
   });
   drill.appendChild(rk);
   cont.appendChild(drill);
 }
+
 
 function renderTeamDetail(tk, month, cont){
   var mgr=MANAGERS[tk];if(!mgr)return;
