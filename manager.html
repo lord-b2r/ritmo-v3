@@ -237,6 +237,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
 
     <!-- MOIS -->
     <div id="s-month" class="scr">
+      <div id="mgr-month-nav"></div>
       <div id="month-hero"></div>
       <div class="sec-lbl">Classement mensuel</div>
       <div class="rk" id="ranking"></div>
@@ -270,6 +271,7 @@ body{display:flex;flex-direction:column;max-width:430px;margin:0 auto}
     <div id="s-mur" class="scr">
       <div style="font-size:18px;font-weight:800;letter-spacing:-.3px;margin-bottom:4px">Bonnes nouvelles</div>
       <div style="font-size:13px;color:var(--g4);margin-bottom:16px">Ce que les equipes partagent ce mois-ci</div>
+      <div id="mur-filter-bar" style="display:flex;gap:6px;margin-bottom:12px"></div>
       <div id="mur-list"></div>
     </div>
 
@@ -679,9 +681,37 @@ function togAgent(key,rep){
   if(c)c.style.transform=op?'':'rotate(180deg)';
 }
 
+
+var viewMonthMgr=null;
+function mgrMonthStr(){return viewMonthMgr||now.toISOString().slice(0,7);}
+function mgrMonthLabel(){
+  var m=mgrMonthStr();var d=new Date(m+'-01');
+  return d.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+}
+function navMgrMonth(delta){
+  var curM=now.getFullYear()+'-'+(String(now.getMonth()+1).padStart(2,'0'));
+  var baseM=viewMonthMgr||curM;
+  var y=parseInt(baseM.slice(0,4)),mo=parseInt(baseM.slice(5,7));
+  mo+=delta;if(mo>12){mo-=12;y++;}if(mo<1){mo+=12;y--;}
+  var newM=y+'-'+(String(mo).padStart(2,'0'));
+  if(newM>curM)return;
+  viewMonthMgr=newM===curM?null:newM;
+  renderMgrMonthNav();renderMonth();
+}
+function renderMgrMonthNav(){
+  var el=document.getElementById('mgr-month-nav');if(!el)return;
+  var isNow=!viewMonthMgr||viewMonthMgr===now.toISOString().slice(0,7);
+  el.innerHTML='<div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 0">'+
+    '<button onclick="navMgrMonth(-1)" style="background:none;border:none;color:var(--g4);font-size:22px;cursor:pointer;padding:4px 12px">&#8249;</button>'+
+    '<div style="font-size:13px;font-weight:700;color:var(--t);text-transform:capitalize;min-width:140px;text-align:center">'+mgrMonthLabel()+'</div>'+
+    '<button onclick="navMgrMonth(1)" '+(isNow?'disabled style="background:none;border:none;color:var(--g2);font-size:22px;padding:4px 12px"':'style="background:none;border:none;color:var(--g4);font-size:22px;cursor:pointer;padding:4px 12px"')+'>&#8250;</button>'+
+    '</div>';
+}
+
 function renderMonth(){
+  renderMgrMonthNav();
   var agents=getTeamAgents('own',true);
-  var month=now.toISOString().slice(0,7);
+  var month=mgrMonthStr();
   var stats=agents.map(function(ag){
     var r=getMonth(ag.n);
     // Regularite : jours ouvrés du mois - EODs manquantes
@@ -845,10 +875,21 @@ function renderVentes(){
 function renderMur(){
   var list=document.getElementById('mur-list');list.innerHTML='';
   var month=now.toISOString().slice(0,7);
-  var agents=getTeamAgents('own');
-  var mots=REPORTS.filter(function(r){
+  var murFilter=window.mgrMurFilter||'team';
+  var myAgentNames=getTeamAgents('own').map(function(a){return a.n;});
+  var allMots=REPORTS.filter(function(r){
     return r.mot_jour&&r.mot_jour.trim()&&r.timestamp&&new Date(r.timestamp).toISOString().slice(0,7)===month;
   });
+  var mots=allMots.filter(function(r){return murFilter==='ritmo'?true:myAgentNames.indexOf(r.agent)>=0;});
+  // Boutons filtre
+  var fb=document.getElementById('mur-filter-bar');
+  if(fb){fb.innerHTML='';
+    [['team','Mon equipe'],['ritmo','Tout Ritmo']].forEach(function(f){
+      var b=document.createElement('button');b.className='fb'+(murFilter===f[0]?' on':'');
+      b.textContent=f[1];b.onclick=(function(fv){return function(){window.mgrMurFilter=fv;renderMur();};})(f[0]);
+      fb.appendChild(b);
+    });
+  }
   if(!mots.length){list.innerHTML='<div class="empty">Aucune bonne nouvelle ce mois-ci</div>';return;}
   var reactions=getMurReactions();
   mots.slice(0,40).forEach(function(r){
